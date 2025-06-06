@@ -31,6 +31,7 @@ class HomeScreen extends StatelessWidget {
               IconButton(onPressed: (){}, icon: Image.asset('assets/images/canara.jpeg',height: 200,width: 200,)),
               IconButton(onPressed: (){}, icon: Image.asset('assets/images/idbi.jpeg',height: 200,width: 200,)),
               IconButton(onPressed: (){}, icon: Image.asset('assets/images/lic.jpeg',height: 200,width: 200,)),
+
                         ],
           );
         }), separatorBuilder: ((context, index) {

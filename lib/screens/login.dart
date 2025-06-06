@@ -174,11 +174,7 @@ class LoginScreen extends StatelessWidget {
       });
 
 
-      // Show Text to the side of Login button
-
-      // For this, see video part 12 beginning
-
-      //See other of error checking if needed. Continuation of the above
+      
     }
   }
 }
