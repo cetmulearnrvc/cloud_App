@@ -57,6 +57,8 @@ Future<void> UserLoggedIn() async{
 
   if(userValue == true)
   {
+    // build(context);
+    // await Future.delayed(const Duration(seconds: 3));
     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (ctx){
       return HomeScreen();
     }));

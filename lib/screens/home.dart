@@ -56,6 +56,8 @@ class HomeScreen extends StatelessWidget {
                                 fontWeight: FontWeight.bold, fontSize: 25),
                           ),
                           DropdownButtonFormField(
+                            decoration: InputDecoration(border: OutlineInputBorder()),
+                            autofocus: true,
                               hint: Text('Select a Bank'),
                               items: banks.map((e) {
                                 return DropdownMenuItem(
