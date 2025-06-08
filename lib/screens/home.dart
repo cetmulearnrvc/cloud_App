@@ -5,8 +5,28 @@ import 'package:login_screen/screens/form.dart';
 
 // ignore_for_file: prefer_const_constructors
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  HomeScreen({super.key});
 
+   final List<Map<String, dynamic>> banks = [
+    {
+      'name': 'Canara Bank',
+      'icon': 'assets/images/canara.jpeg',
+    },
+    {
+      'name': 'IDBI Bank',
+      'icon': 'assets/images/idbi.jpeg',
+    },
+    {
+      'name': 'LIC',
+      'icon': 'assets/images/lic.jpeg',
+    },
+    {
+      'name': 'Federal Bank',
+      'icon': 'assets/images/federal.jpeg',
+    },
+  ];
+
+  Map<String, dynamic>? selectedData;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,50 +46,80 @@ class HomeScreen extends StatelessWidget {
           child: Center(
               child: ListView.separated(
                   itemBuilder: ((context, index) {
-                    return Column(
-                      children: [
-                        Text(
-                          'Select Bank',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 25),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (ctx) => FormScreen(),
-                            ));
-                          },
-                          icon: Image.asset(
-                            'assets/images/canara.jpeg',
-                            height: 200,
-                            width: 200,
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Select Bank',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 25),
                           ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (ctx) => FormScreen(),
-                            ));
-                          },
-                          icon: Image.asset(
-                            'assets/images/idbi.jpeg',
-                            height: 200,
-                            width: 200,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (ctx) => FormScreen(),
-                            ));
-                          },
-                          icon: Image.asset(
-                            'assets/images/lic.jpeg',
-                            height: 200,
-                            width: 200,
-                          ),
-                        ),
-                      ],
+                          DropdownButtonFormField(
+                              hint: Text('Select a Bank'),
+                              items: banks.map((e) {
+                                return DropdownMenuItem(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(e['name']),
+                                      Image.asset(
+                                        e['icon'],
+                                      height: 50,
+                                      width: 50,)
+                                    ],
+                                  ),
+                                  value: e,
+                                );
+                              }).toList(),
+                              // onTap: ()  {
+                              //   print(selectedData);
+                              // },
+                              onChanged: (value) {
+                                selectedData=value;
+                                print(selectedData);
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (ctx) => FormScreen()));
+                              }),
+                          // IconButton(
+                          //   onPressed: () {
+                          //     Navigator.of(context).push(MaterialPageRoute(
+                          //       builder: (ctx) => FormScreen(),
+                          //     ));
+                          //   },
+                          //   icon: Image.asset(
+                          //     'assets/images/canara.jpeg',
+                          //     height: 200,
+                          //     width: 200,
+                          //   ),
+                          // ),
+                          // IconButton(
+                          //   onPressed: () {
+                          //     Navigator.of(context).push(MaterialPageRoute(
+                          //       builder: (ctx) => FormScreen(),
+                          //     ));
+                          //   },
+                          //   icon: Image.asset(
+                          //     'assets/images/idbi.jpeg',
+                          //     height: 200,
+                          //     width: 200,
+                          //   ),
+                          // ),
+                          // IconButton(
+                          //   onPressed: () {
+                          //     Navigator.of(context).push(MaterialPageRoute(
+                          //       builder: (ctx) => FormScreen(),
+                          //     ));
+                          //   },
+                          //   icon: Image.asset(
+                          //     'assets/images/lic.jpeg',
+                          //     height: 200,
+                          //     width: 200,
+                          //   ),
+                          // ),
+                        ],
+                      ),
                     );
                   }),
                   separatorBuilder: ((context, index) {
