@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:login_screen/main.dart';
 import 'package:login_screen/screens/home.dart';
@@ -46,7 +44,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> goToLogin() async{
 
-  await Future.delayed(Duration(seconds: 3));
+  await Future.delayed(const Duration(seconds: 3));
   Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
     return LoginScreen();
   }));
@@ -54,13 +52,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
 Future<void> UserLoggedIn() async{
 
-  final _sharedPrefs= await SharedPreferences.getInstance();
-  final _userValue = _sharedPrefs.getBool(key_value);
+  final sharedPrefs= await SharedPreferences.getInstance();
+  final userValue = sharedPrefs.getBool(key_value);
 
-  if(_userValue == true)
+  if(userValue == true)
   {
     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (ctx){
-      return HomeScreen();
+      return const HomeScreen();
     }));
   }
 
