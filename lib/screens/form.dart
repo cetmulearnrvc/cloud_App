@@ -13,6 +13,14 @@ class _FormScreenState extends State<FormScreen> {
   final TextEditingController _latController = TextEditingController();
   final TextEditingController _lonController = TextEditingController();
 
+  final TextEditingController length = TextEditingController();
+  final TextEditingController width = TextEditingController();
+   final TextEditingController area = TextEditingController();
+
+  int _getArea(int length, int width){
+    return length*width;
+  }
+
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -90,6 +98,7 @@ class _FormScreenState extends State<FormScreen> {
                     child: const Text('Get Location'),
                   ),
                   const SizedBox(height: 30),
+
                   const Text(
                     "Plot dimensions",
                     style: TextStyle(
@@ -125,6 +134,81 @@ class _FormScreenState extends State<FormScreen> {
                       hintText: 'Wast Dimension',
                     ),
                   ),
+                  const SizedBox(height: 30),
+
+                  const Text(
+                    "Building dimensions",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Length',
+                    ),
+                    controller: length, 
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Width',
+                    ),
+                    controller: width,
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Area',
+                    ),
+                    controller: area,
+
+                  ),
+                  const SizedBox(height: 20,),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      int l = int.parse(length.text);
+                      int w = int.parse(width.text);
+                      area.text = _getArea(l, w).toString();
+                    },
+                    child: const Text("Area"),
+                  ),
+
+                  const SizedBox(height: 30),
+                  const Text(
+                    "Building Information",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Land Owner Name',
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Land Value As Per Client',
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Year of Construction',
+                    ),
+                  ),
+
                   const SizedBox(height: 30),
                   ElevatedButton(
                     onPressed: () {
