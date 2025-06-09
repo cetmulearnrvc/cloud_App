@@ -68,6 +68,11 @@ class _FormScreenState extends State<FormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(onPressed: (){
+          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (ctx){
+            return HomeScreen();
+          }));
+        }, icon: Icon(Icons.arrow_back)),
         title: const Text('Form Screen', style: TextStyle(color: Color.fromARGB(255, 255, 255, 255))),
         backgroundColor: const Color.fromARGB(255, 6, 37, 140),
       ),
@@ -214,7 +219,7 @@ class _FormScreenState extends State<FormScreen> {
                     onPressed: () {
                       Navigator.of(context)
                           .push(MaterialPageRoute(builder: (ctx) {
-                        return const HomeScreen();
+                        return HomeScreen();
                       }));
                     },
                     child: const Text('Submit'),
