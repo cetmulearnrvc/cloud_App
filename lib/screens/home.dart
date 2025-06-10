@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:login_screen/screens/splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:login_screen/screens/form.dart';
+import 'package:login_screen/screens/location.dart';
 
 // ignore_for_file: prefer_const_constructors
 class HomeScreen extends StatelessWidget {
@@ -61,6 +61,7 @@ class HomeScreen extends StatelessWidget {
                               hint: Text('Select a Bank'),
                               items: banks.map((e) {
                                 return DropdownMenuItem(
+                                  value: e,
                                   child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -72,7 +73,6 @@ class HomeScreen extends StatelessWidget {
                                       width: 50,)
                                     ],
                                   ),
-                                  value: e,
                                 );
                               }).toList(),
                               // onTap: ()  {
@@ -80,9 +80,9 @@ class HomeScreen extends StatelessWidget {
                               // },
                               onChanged: (value) {
                                 selectedData=value;
-                                print(selectedData);
+                                //print(selectedData);
                                 Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (ctx) => FormScreen()));
+                                    builder: (ctx) => LocationScreen()));
                               }),
                           // IconButton(
                           //   onPressed: () {
