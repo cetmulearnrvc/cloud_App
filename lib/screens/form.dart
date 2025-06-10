@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+//import 'package:geolocator/geolocator.dart';
+import 'package:login_screen/screens/location.dart';
 import 'package:login_screen/screens/home.dart';
 
 class FormScreen extends StatefulWidget {
@@ -10,50 +11,13 @@ class FormScreen extends StatefulWidget {
 }
 
 class _FormScreenState extends State<FormScreen> {
-  final TextEditingController _latController = TextEditingController();
-  final TextEditingController _lonController = TextEditingController();
 
-  Future<void> _getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      await Geolocator.openLocationSettings();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enable location services")),
-      );
-      return;
-    }
+  final TextEditingController length = TextEditingController();
+  final TextEditingController width = TextEditingController();
+   final TextEditingController area = TextEditingController();
 
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Location permission denied")),
-        );
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Location permission permanently denied")),
-      );
-      return;
-    }
-
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-
-      setState(() {
-        _latController.text = position.latitude.toString();
-        _lonController.text = position.longitude.toString();
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error getting location: $e")),
-      );
-    }
+  int _getArea(int length, int width){
+    return length*width;
   }
 
   @override
@@ -62,9 +26,10 @@ class _FormScreenState extends State<FormScreen> {
       appBar: AppBar(
         leading: IconButton(onPressed: (){
           Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (ctx){
-            return HomeScreen();
+            return const LocationScreen();
           }));
-        }, icon: Icon(Icons.arrow_back)),
+        }, icon: const Icon(Icons.arrow_back),
+        color: Colors.white,),
         title: const Text('Form Screen', style: TextStyle(color: Color.fromARGB(255, 255, 255, 255))),
         backgroundColor: const Color.fromARGB(255, 6, 37, 140),
       ),
@@ -74,27 +39,8 @@ class _FormScreenState extends State<FormScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  TextFormField(
-                    controller: _latController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Latitude',
-                    ),
-                  ),
                   const SizedBox(height: 30),
-                  TextFormField(
-                    controller: _lonController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Longitude',
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  ElevatedButton(
-                    onPressed: _getCurrentLocation,
-                    child: const Text('Get Location'),
-                  ),
-                  const SizedBox(height: 30),
+
                   const Text(
                     "Plot dimensions",
                     style: TextStyle(
@@ -131,6 +77,92 @@ class _FormScreenState extends State<FormScreen> {
                     ),
                   ),
                   const SizedBox(height: 30),
+
+                  const Text(
+                    "Building dimensions",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Length',
+                    ),
+                    controller: length, 
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Width',
+                    ),
+                    controller: width,
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Area',
+                    ),
+                    controller: area,
+
+                  ),
+                  const SizedBox(height: 20,),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      int l = int.parse(length.text);
+                      int w = int.parse(width.text);
+                      area.text = _getArea(l, w).toString();
+                    },
+                    style: const ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(Colors.white),
+                        side: WidgetStatePropertyAll(
+                          BorderSide(color: Colors.black),
+                        ),
+                        minimumSize: WidgetStatePropertyAll(Size(100, 50)),
+                        shape: WidgetStatePropertyAll(
+                          RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+                        ),
+                    ),
+                    
+                    child: const Text("Get Area", style: TextStyle(fontSize: 16, color: Colors.black),),
+                  ),
+
+                  const SizedBox(height: 30),
+                  const Text(
+                    "Building Information",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Land Owner Name',
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Land Value As Per Client',
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Year of Construction',
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.of(context)
@@ -138,7 +170,17 @@ class _FormScreenState extends State<FormScreen> {
                         return HomeScreen();
                       }));
                     },
-                    child: const Text('Submit'),
+                    style: const ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(Colors.white),
+                        side: WidgetStatePropertyAll(
+                          BorderSide(color: Colors.black),
+                        ),
+                        minimumSize: WidgetStatePropertyAll(Size(100, 50)),
+                        shape: WidgetStatePropertyAll(
+                          RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+                        ),
+                    ),
+                    child: const Text('Submit', style: TextStyle(fontSize: 16, color: Colors.black),),
                   ),
                 ],
               ),

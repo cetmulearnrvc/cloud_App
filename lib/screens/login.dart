@@ -13,7 +13,7 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login Screen'),
+        title: const Text('Login Screen'),
       ),
       body: SafeArea(
           child: Padding(
@@ -22,7 +22,7 @@ class LoginScreen extends StatelessWidget {
           children: [
             TextFormField(
               controller: _usernameController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 helperText: 'Alphabets,numbers,underscore allowed',
                 iconColor: Colors.blue,
                 // icon: IconButton(onPressed: (){}, icon: Icon(Icons.check_circle_outline_rounded)),
@@ -30,26 +30,26 @@ class LoginScreen extends StatelessWidget {
                 hintText: 'Username',
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             TextFormField(
               controller: _passwdController,
               obscureText: true,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Password',
                 border: OutlineInputBorder(),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             ElevatedButton.icon(
                 onPressed: () {
                   LoginCheck(context);
                 },
-                icon: Icon(Icons.check),
-                label: Text('Login'))
+                icon: const Icon(Icons.check),
+                label: const Text('Login'))
           ],
         ),
       )),
@@ -71,7 +71,7 @@ class LoginScreen extends StatelessWidget {
     } 
     
     else {
-      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
         content: Text(msg),
         behavior: SnackBarBehavior.floating,
         margin: EdgeInsets.all(10),
@@ -82,12 +82,12 @@ class LoginScreen extends StatelessWidget {
       //Alert Dialog
 
       showDialog(context: ctx, builder: (ctx1){
-        return AlertDialog(title: Text('Error'),
-        content: Text(msg),
+        return AlertDialog(title: const Text('Error'),
+        content: const Text(msg),
         actions: [
           TextButton(onPressed: (){
             Navigator.of(ctx1).pop();
-          }, child: Text('Close'))
+          }, child: const Text('Close'))
         ],
         
         );
