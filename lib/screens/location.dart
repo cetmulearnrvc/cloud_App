@@ -62,9 +62,7 @@ class _LocationScreenState extends State<LocationScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(onPressed: (){
-          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (ctx){
-            return HomeScreen();
-          }));
+          Navigator.of(context).pop();
         }, icon: const Icon(Icons.arrow_back),
           color: Colors.white,),
         title: const Text('Location Screen', style: TextStyle(color: Color.fromARGB(255, 255, 255, 255))),

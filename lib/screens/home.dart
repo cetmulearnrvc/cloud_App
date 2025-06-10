@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:login_screen/screens/loanType.dart';
 import 'package:login_screen/screens/splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:login_screen/screens/location.dart';
@@ -23,6 +24,11 @@ class HomeScreen extends StatelessWidget {
     {
       'name': 'Federal Bank',
       'icon': 'assets/images/federal.jpeg',
+    },
+
+    {
+      'name': 'South Indian Bank',
+      'icon': 'assets/images/south indian.jpeg',
     },
   ];
 
@@ -82,7 +88,7 @@ class HomeScreen extends StatelessWidget {
                                 selectedData=value;
                                 //print(selectedData);
                                 Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (ctx) => LocationScreen()));
+                                    builder: (ctx) => LoanType(selectedBank: selectedData,)));
                               }),
                           // IconButton(
                           //   onPressed: () {
