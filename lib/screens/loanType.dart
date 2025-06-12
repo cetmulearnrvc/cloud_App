@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:login_screen/screens/LIC/pvr1/valuation_form_screen_pvr1.dart';
+import 'package:login_screen/screens/LIC/pvr3/valuation_form_screen.dart';
 import 'package:login_screen/screens/location.dart';
 
 //ignore_for_file:prefer_const_constructors
@@ -66,9 +68,19 @@ class LoanType extends StatelessWidget {
               );
             }).toList(),
             onChanged: (value) {
-              Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                return LocationScreen();
+              print(value?['title']);
+              if(value?['title']=='HOUSE RENOVATION')
+              {
+                Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
+                return ValuationFormScreen();
               }));
+              }
+              else
+              {
+                Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
+                return ValuationFormScreenPVR1();
+              }));
+              }
             }),
       ],
     );
