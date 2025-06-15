@@ -157,7 +157,7 @@ class PdfGeneratorPVR1 {
           childAspectRatio: 0.65,
           children: data.images.map((valuationImage) {
             final image =
-                pw.MemoryImage(valuationImage.imageFile.readAsBytesSync());
+                pw.MemoryImage(valuationImage.imageFile);
             return pw.Padding(
               padding: const pw.EdgeInsets.all(4),
               child: pw.Column(

@@ -1,7 +1,7 @@
 // lib/valuation_data_model.dart
-import 'dart:io';
 
-// Enums for dropdowns/choices
+import 'dart:typed_data';
+
 enum DeviationNature { NIL, Minor, Major }
 
 enum OccupantStatus { Occupied, Rented }
@@ -9,7 +9,7 @@ enum OccupantStatus { Occupied, Rented }
 enum PropertyType { House, Flat } // To choose between property types
 
 class ValuationImage {
-  final File imageFile;
+  final Uint8List imageFile;
   String latitude;
   String longitude;
   ValuationImage(

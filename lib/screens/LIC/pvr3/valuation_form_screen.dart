@@ -1,5 +1,5 @@
 // lib/valuation_form_screen.dart
-import 'dart:io';
+// import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -141,24 +141,34 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
     }
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    try {
-      if (source == ImageSource.gallery) {
-        final pickedFiles = await _picker.pickMultiImage();
-        if (pickedFiles.isNotEmpty) {
-          setState(() => _valuationImages.addAll(pickedFiles.map((f) => ValuationImage(imageFile: File(f.path)))));
+  // Inside _ValuationFormScreenPVR1State
+
+Future<void> _pickImage(ImageSource source) async {
+  try {
+    if (source == ImageSource.gallery) {
+      final pickedFiles = await _picker.pickMultiImage();
+      if (pickedFiles.isNotEmpty) {
+        for (var file in pickedFiles) {
+          final bytes = await file.readAsBytes();
+          _valuationImages.add(ValuationImage(imageFile: bytes));
         }
-      } else {
-        final pickedFile = await _picker.pickImage(source: source);
-        if (pickedFile != null) {
-          setState(() => _valuationImages.add(ValuationImage(imageFile: File(pickedFile.path))));
-        }
+        setState(() {}); 
       }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to pick images: $e')));
+    } else {
+      final pickedFile = await _picker.pickImage(source: source);
+      if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _valuationImages.add(ValuationImage(imageFile: bytes));
+        });
+      }
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to pick images: $e')),
+    );
   }
+}
 
   void _showImagePickerOptions() {
     showModalBottomSheet(
@@ -297,7 +307,7 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
                     margin: const EdgeInsets.symmetric(vertical: 10),
                     child: Padding(padding: const EdgeInsets.all(8.0), child: Column(children: [
                       Stack(children: [
-                        Image.file(valuationImage.imageFile, height: 150, width: double.infinity, fit: BoxFit.cover),
+                        Image.memory(valuationImage.imageFile, height: 150, width: double.infinity, fit: BoxFit.cover),
                         Positioned(right: 0, top: 0, child: CircleAvatar(radius: 18, backgroundColor: Colors.white70, child: IconButton(padding: EdgeInsets.zero, icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => setState(() => _valuationImages.removeAt(index))))),
                       ]),
                       const SizedBox(height: 10),
