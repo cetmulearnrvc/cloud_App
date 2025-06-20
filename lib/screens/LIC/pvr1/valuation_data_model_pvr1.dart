@@ -1,7 +1,6 @@
 // lib/valuation_data_model_pvr1.dart
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 
 class ValuationImage {
   final File imageFile;

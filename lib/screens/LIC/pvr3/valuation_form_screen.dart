@@ -9,7 +9,7 @@ import 'valuation_data_model.dart';
 import 'pdf_generator.dart';
 
 class ValuationFormScreen extends StatefulWidget {
-  const ValuationFormScreen({Key? key}) : super(key: key);
+  const ValuationFormScreen({super.key});
   @override
   _ValuationFormScreenState createState() => _ValuationFormScreenState();
 }
@@ -409,7 +409,7 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
 
 class PreviewScreen extends StatelessWidget {
   final ValuationData data;
-  const PreviewScreen({Key? key, required this.data}) : super(key: key);
+  const PreviewScreen({super.key, required this.data});
   @override
   Widget build(BuildContext context) {
     return Scaffold(

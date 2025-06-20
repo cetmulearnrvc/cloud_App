@@ -135,7 +135,7 @@ pw.Widget _buildHeader() => pw.Column(children: [
           pw.Text('AREA OFFICE: THIRUVANANTHAPURAM'),
           pw.SizedBox(height: 5),
           pw.Text('VALUATION REPORT BY PANEL VALUER FOR HOME LOAN',
-              style: pw.TextStyle(decoration: pw.TextDecoration.underline)),
+              style: const pw.TextStyle(decoration: pw.TextDecoration.underline)),
         ])),
         pw.Align(
             alignment: pw.Alignment.topRight,
