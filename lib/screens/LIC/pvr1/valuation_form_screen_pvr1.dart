@@ -9,7 +9,7 @@ import 'valuation_data_model_pvr1.dart';
 import 'pdf_generator_pvr1.dart';
 
 class ValuationFormScreenPVR1 extends StatefulWidget {
-  const ValuationFormScreenPVR1({Key? key}) : super(key: key);
+  const ValuationFormScreenPVR1({super.key});
   @override
   _ValuationFormScreenPVR1State createState() => _ValuationFormScreenPVR1State();
 }
@@ -496,7 +496,7 @@ Future<void> _pickImage(ImageSource source) async {
 
 class PreviewScreenPVR1 extends StatelessWidget {
   final ValuationDataPVR1 data;
-  const PreviewScreenPVR1({Key? key, required this.data}) : super(key: key);
+  const PreviewScreenPVR1({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {

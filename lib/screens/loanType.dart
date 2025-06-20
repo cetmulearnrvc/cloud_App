@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:login_screen/screens/LIC/pvr1/valuation_form_screen_pvr1.dart';
 import 'package:login_screen/screens/LIC/pvr3/valuation_form_screen.dart';
 import 'package:login_screen/screens/location.dart';
+import 'package:login_screen/screens/federal.dart';
 
 //ignore_for_file:prefer_const_constructors
 class LoanType extends StatelessWidget {
@@ -12,7 +13,7 @@ class LoanType extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bankName;
+    final Widget bankName;
     if (selectedBank['name'] == 'Canara Bank') {
       bankName = Canara(context);
     } else if (selectedBank['name'] == 'IDBI Bank') {
@@ -148,7 +149,7 @@ class LoanType extends StatelessWidget {
             }).toList(),
             onChanged: (value) {
               Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                return LocationScreen();
+                return PdfGeneratorScreen();
               }));
             }),
       ],
