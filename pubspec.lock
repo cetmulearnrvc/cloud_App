@@ -392,6 +392,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  number_to_indian_words:
+    dependency: "direct main"
+    description:
+      name: number_to_indian_words
+      sha256: "7e4a45a3379e3c4613e0f7ba6b6a679af7682521f2de194c1556883f03ca7acd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   path:
     dependency: transitive
     description:

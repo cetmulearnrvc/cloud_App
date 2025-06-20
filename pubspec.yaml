@@ -42,6 +42,7 @@ dependencies:
   path_provider: ^2.1.4
   pdf: ^3.11.3
   printing: ^5.14.2
+  number_to_indian_words: ^1.0.1
 
   permission_handler: ^11.3.0
 
