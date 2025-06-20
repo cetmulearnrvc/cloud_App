@@ -1,9 +1,10 @@
 // lib/valuation_data_model_pvr1.dart
-import 'dart:io';
+
+import 'dart:typed_data';
 
 
 class ValuationImage {
-  final File imageFile;
+  final Uint8List imageFile;
   String latitude;
   String longitude;
 

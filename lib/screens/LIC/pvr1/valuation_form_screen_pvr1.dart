@@ -155,31 +155,36 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
     }
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    try {
-      if (source == ImageSource.gallery) {
-        final pickedFiles = await _picker.pickMultiImage();
-        if (pickedFiles.isNotEmpty) {
-          setState(() {
-            for (var file in pickedFiles) {
-              _valuationImages.add(ValuationImage(imageFile: File(file.path)));
-            }
-          });
+  // Inside _ValuationFormScreenPVR1State
+
+Future<void> _pickImage(ImageSource source) async {
+  try {
+    if (source == ImageSource.gallery) {
+      final pickedFiles = await _picker.pickMultiImage();
+      if (pickedFiles.isNotEmpty) {
+        for (var file in pickedFiles) {
+          // Read the bytes from the picked file
+          final bytes = await file.readAsBytes();
+          // Add the bytes to your list, not the file object
+          _valuationImages.add(ValuationImage(imageFile: bytes));
         }
-      } else {
-        final pickedFile = await _picker.pickImage(source: source);
-        if (pickedFile != null) {
-          setState(() {
-            _valuationImages.add(ValuationImage(imageFile: File(pickedFile.path)));
-          });
-        }
+        setState(() {}); // Update the UI
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pick images: $e')),
-      );
+    } else {
+      final pickedFile = await _picker.pickImage(source: source);
+      if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _valuationImages.add(ValuationImage(imageFile: bytes));
+        });
+      }
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to pick images: $e')),
+    );
   }
+}
 
   void _showImagePickerOptions() {
     showModalBottomSheet(
@@ -413,8 +418,7 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
                             children: [
                               Stack(
                                 children: [
-                                  Image.file(valuationImage.imageFile, height: 150, width: double.infinity, fit: BoxFit.cover),
-                                  Positioned(
+                                  Image.memory(valuationImage.imageFile, height: 150, width: double.infinity, fit: BoxFit.cover),                                  Positioned(
                                     right: 0,
                                     top: 0,
                                     child: CircleAvatar(

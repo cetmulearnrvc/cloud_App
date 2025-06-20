@@ -1,5 +1,5 @@
 // lib/pdf_generator.dart
-import 'dart:io';
+// import 'dart:io';
 import 'dart:typed_data';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -100,8 +100,7 @@ pw.MultiPage _buildImagePage(ValuationData data) {
         crossAxisCount: 2,
         childAspectRatio: 0.65,
         children: data.images.map((valuationImage) {
-          final image =
-              pw.MemoryImage(valuationImage.imageFile.readAsBytesSync());
+          final image = pw.MemoryImage(valuationImage.imageFile);
           return pw.Padding(
             padding: const pw.EdgeInsets.all(4),
             child: pw.Column(
