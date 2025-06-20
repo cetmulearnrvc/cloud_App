@@ -192,7 +192,7 @@ class PdfGeneratorPVR1 {
             style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
         pw.SizedBox(height: 5),
         pw.Text('VALUATION REPORT BY PANEL VALUER FOR HOME LOAN',
-            style: pw.TextStyle(decoration: pw.TextDecoration.underline)),
+            style: const pw.TextStyle(decoration: pw.TextDecoration.underline)),
         pw.SizedBox(height: 10),
       ]));
 
@@ -392,7 +392,7 @@ class PdfGeneratorPVR1 {
       pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
         _sectionTitle('D. INSPECTION'),
         pw.SizedBox(height:10),
-        pw.Text('1.Construction Details',style: pw.TextStyle(fontSize: 10)),
+        pw.Text('1.Construction Details',style: const pw.TextStyle(fontSize: 10)),
         pw.TableHelper.fromTextArray(
           border: pw.TableBorder.all(width: 0.5),
           cellStyle: const pw.TextStyle(fontSize: 9),
@@ -422,7 +422,7 @@ class PdfGeneratorPVR1 {
             3: const pw.FlexColumnWidth(1.5)
           }),
           _buildKeyValue('2. Whether the construction is as per approved plan(Yes/No)',data.isConstructionAsPerPlan ? 'YES' : 'NO'),
-          pw.Text('3.Deviations',style: pw.TextStyle(fontSize: 10)),
+          pw.Text('3.Deviations',style: const pw.TextStyle(fontSize: 10)),
             pw.TableHelper.fromTextArray(
           border: pw.TableBorder.all(width: 0.5),
           cellStyle: const pw.TextStyle(fontSize: 9),
@@ -460,7 +460,7 @@ class PdfGeneratorPVR1 {
 
   // A special widget just for the "Total works" row
 pw.Widget _buildWorksCompletedRow() {
-  final keyStyle = const pw.TextStyle(fontSize: 9);
+  const keyStyle = pw.TextStyle(fontSize: 9);
   final valueStyle = pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold);
 
   return pw.Row(
