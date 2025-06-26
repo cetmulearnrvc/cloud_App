@@ -173,6 +173,7 @@ pw.Widget _buildHeader() {
           children: [
             _cell('3. List of documents verified'),
             pw.Table(
+              border: pw.TableBorder.all(),
               children: [
                 _buildSimpleRow(
                   'a. Land tax receipt no.',

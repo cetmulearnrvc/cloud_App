@@ -1,9 +1,9 @@
 // lib/valuation_form_screen.dart
-// import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'valuation_data_model.dart';
 import 'pdf_generator.dart';
@@ -25,6 +25,14 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
     FloorData(name: 'FF', area: '716', marketRate: '1500', guidelineRate: '1500'),
   ];
   final List<ValuationImage> _valuationImages = [];
+  // ADDED: State for the dynamic "Progress of Work" table
+  final List<ProgressWorkItem> _progressWorkItems = [
+    ProgressWorkItem(
+      description: 'FLOORING PAINTING SHEET ROOFING SANITARY FITTINGS ELECTRICAL WORKS ALL WORKS COMPLETED AS PER ESTIMATE',
+      applicantEstimate: '2000000',
+      valuerOpinion: ''
+    )
+  ];
 
   // --- ALL CONTROLLERS ---
   final _fileNoCtrl = TextEditingController(text: '5002050002910');
@@ -93,7 +101,8 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
   final _improvementDescriptionCtrl = TextEditingController(text: 'FLOORING PAINTING SHEET ROOFING...');
   final _improvementAmountCtrl = TextEditingController(text: '2000000');
   bool _improvementEstimateReasonable = true;
-  final _improvementCompletedValueCtrl = TextEditingController(text: '2000000');
+  final _improvementReasonableEstimateCtrl = TextEditingController(); // ADDED for section 5.4
+  // REMOVED: final _improvementCompletedValueCtrl = TextEditingController(text: '2000000');
   final _remarksBackgroundCtrl = TextEditingController(text: 'SUBMITTED DOCUMENTS');
   final _remarksSourcesCtrl = TextEditingController(text: 'LOCAL MARKET ENQUIRY');
   final _remarksProceduresCtrl = TextEditingController(text: 'MARKET APPROACH');
@@ -105,6 +114,12 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
     if (_floors.length > 1) {
       setState(() => _floors.removeAt(index));
     }
+  }
+
+  // ADDED: Methods to manage the "Progress of Work" items
+  void _addProgressWorkItem() => setState(() => _progressWorkItems.add(ProgressWorkItem()));
+  void _removeProgressWorkItem(int index) {
+    setState(() => _progressWorkItems.removeAt(index));
   }
 
   Future<void> _getCurrentLocation(int imageIndex) async {
@@ -141,34 +156,32 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
     }
   }
 
-  // Inside _ValuationFormScreenPVR1State
-
-Future<void> _pickImage(ImageSource source) async {
-  try {
-    if (source == ImageSource.gallery) {
-      final pickedFiles = await _picker.pickMultiImage();
-      if (pickedFiles.isNotEmpty) {
-        for (var file in pickedFiles) {
-          final bytes = await file.readAsBytes();
-          _valuationImages.add(ValuationImage(imageFile: bytes));
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      if (source == ImageSource.gallery) {
+        final pickedFiles = await _picker.pickMultiImage();
+        if (pickedFiles.isNotEmpty) {
+          for (var file in pickedFiles) {
+            final bytes = await file.readAsBytes();
+            _valuationImages.add(ValuationImage(imageFile: bytes));
+          }
+          setState(() {}); 
         }
-        setState(() {}); 
+      } else {
+        final pickedFile = await _picker.pickImage(source: source);
+        if (pickedFile != null) {
+          final bytes = await pickedFile.readAsBytes();
+          setState(() {
+            _valuationImages.add(ValuationImage(imageFile: bytes));
+          });
+        }
       }
-    } else {
-      final pickedFile = await _picker.pickImage(source: source);
-      if (pickedFile != null) {
-        final bytes = await pickedFile.readAsBytes();
-        setState(() {
-          _valuationImages.add(ValuationImage(imageFile: bytes));
-        });
-      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to pick images: $e')),
+      );
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to pick images: $e')),
-    );
   }
-}
 
   void _showImagePickerOptions() {
     showModalBottomSheet(
@@ -206,12 +219,17 @@ Future<void> _pickImage(ImageSource source) async {
         flatUndividedShare: _flatUndividedShareCtrl.text, flatBuiltUpArea: _flatBuiltUpAreaCtrl.text, flatCompositeRate: _flatCompositeRateCtrl.text,
         flatValueUnitRate: _flatValueUnitRateCtrl.text, flatValueMarket: _flatValueMarketCtrl.text, flatValueGuideline: _flatValueGuidelineCtrl.text, flatValueGuidelineRate: _flatValueGuidelineRateCtrl.text,
         marketValueSourceFlat: _marketValueSourceFlatCtrl.text, flatExtraAmenities: _flatExtraAmenitiesCtrl.text,
-        improvementDescription: _improvementDescriptionCtrl.text, improvementAmount: _improvementAmountCtrl.text, improvementEstimateReasonable: _improvementEstimateReasonable,
-        improvementCompletedValue: _improvementCompletedValueCtrl.text,
+        improvementDescription: _improvementDescriptionCtrl.text, 
+        improvementAmount: _improvementAmountCtrl.text, 
+        improvementEstimateReasonable: _improvementEstimateReasonable,
+        improvementReasonableEstimate: _improvementReasonableEstimateCtrl.text, // ADDED
+        progressWorkItems: _progressWorkItems, // MODIFIED
         remarksBackground: _remarksBackgroundCtrl.text, remarksSources: _remarksSourcesCtrl.text, remarksProcedures: _remarksProceduresCtrl.text, remarksMethodology: _remarksMethodologyCtrl.text, remarksFactors: _remarksFactorsCtrl.text,
         images: _valuationImages,
       );
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PreviewScreen(data: data)));
+      Printing.layoutPdf(
+            onLayout: (PdfPageFormat format) => generateValuationPdf(data),
+        );
     }
   }
 
@@ -237,27 +255,27 @@ Future<void> _pickImage(ImageSource source) async {
               TextFormField(controller: _applicantNameCtrl, decoration: const InputDecoration(labelText: 'Applicant Name')),
               TextFormField(controller: _documentPerusedCtrl, decoration: const InputDecoration(labelText: 'Document Perused')),
               TextFormField(controller: _addressCtrl, decoration: const InputDecoration(labelText: 'Property Address'), maxLines: 3),
-              SwitchListTile(title: const Text('Location Sketch Verified'), value: _locationSketchVerified, onChanged: (v) => setState(() => _locationSketchVerified = v)),
+              SwitchListTile(title: const Text('Location Sketch Verified?'), value: _locationSketchVerified, onChanged: (v) => setState(() => _locationSketchVerified = v)),
               TextFormField(controller: _propertyTypeCtrl, decoration: const InputDecoration(labelText: 'Type of property')),
               DropdownButtonFormField<OccupantStatus>(value: _occupantStatus, decoration: const InputDecoration(labelText: 'Occupant Status'), items: OccupantStatus.values.map((s) => DropdownMenuItem(value: s, child: Text(s.name))).toList(), onChanged: (v) => setState(() => _occupantStatus = v!)),
               TextFormField(controller: _occupantNameCtrl, decoration: InputDecoration(labelText: _occupantStatus == OccupantStatus.Occupied ? 'Name of Occupant' : 'List of Occupants')),
               TextFormField(controller: _usageOfBuildingCtrl, decoration: const InputDecoration(labelText: 'Usage of Building')),
-              TextFormField(controller: _nearbyLandmarkCtrl, decoration: const InputDecoration(labelText: 'Nearby Landmark')),
+              TextFormField(controller: _nearbyLandmarkCtrl, decoration: const InputDecoration(labelText: ' Details of the Nearby Landmark')),
               TextFormField(controller: _surroundingAreaDevCtrl, decoration: const InputDecoration(labelText: 'Development of surrounding area')),
-              SwitchListTile(title: const Text('Basic amenities available'), value: _basicAmenitiesAvailable, onChanged: (v) => setState(() => _basicAmenitiesAvailable = v)),
-              TextFormField(controller: _negativesToLocalityCtrl, decoration: const InputDecoration(labelText: 'Negatives to the locality')),
-              TextFormField(controller: _favourableConsiderationsCtrl, decoration: const InputDecoration(labelText: 'Favourable considerations')),
-              TextFormField(controller: _otherFeaturesCtrl, decoration: const InputDecoration(labelText: 'Other features')),
+              SwitchListTile(title: const Text('Basic amenities available?'), value: _basicAmenitiesAvailable, onChanged: (v) => setState(() => _basicAmenitiesAvailable = v)),
+              TextFormField(controller: _negativesToLocalityCtrl, decoration: const InputDecoration(labelText: 'Any negatives to the locality')),
+              TextFormField(controller: _favourableConsiderationsCtrl, decoration: const InputDecoration(labelText: 'Any favourable considerations for addl value')),
+              TextFormField(controller: _otherFeaturesCtrl, decoration: const InputDecoration(labelText: ' Any other features like board of other financier indicating mortgage, notice of Court/any authority which may effect the security.')),
             ]),
             _buildSection(title: '2. Drawing', children: [
-              SwitchListTile(title: const Text('Approved Drawing Available'), value: _approvedDrawingAvailable, onChanged: (v) => setState(() => _approvedDrawingAvailable = v)),
+              SwitchListTile(title: const Text('Whether the approved drawing is available?'), value: _approvedDrawingAvailable, onChanged: (v) => setState(() => _approvedDrawingAvailable = v)),
               TextFormField(controller: _approvalNoAndDateCtrl, decoration: const InputDecoration(labelText: 'Approval No. & Date')),
-              SwitchListTile(title: const Text('Construction as per plan'), value: _constructionAsPerPlan, onChanged: (v) => setState(() => _constructionAsPerPlan = v)),
-              TextFormField(controller: _drawingDeviationsCtrl, decoration: const InputDecoration(labelText: 'Deviations between drawing & actual')),
-              DropdownButtonFormField<DeviationNature>(value: _deviationNature, decoration: const InputDecoration(labelText: 'Deviation Nature'), items: DeviationNature.values.map((d) => DropdownMenuItem(value: d, child: Text(d.name))).toList(), onChanged: (v) => setState(() => _deviationNature = v!)),
+              SwitchListTile(title: const Text('Construction as per plan?'), value: _constructionAsPerPlan, onChanged: (v) => setState(() => _constructionAsPerPlan = v)),
+              TextFormField(controller: _drawingDeviationsCtrl, decoration: const InputDecoration(labelText: 'What are the deviations between drawing & actual')),
+              DropdownButtonFormField<DeviationNature>(value: _deviationNature, decoration: const InputDecoration(labelText: 'Whether deviations are minor/major in nature '), items: DeviationNature.values.map((d) => DropdownMenuItem(value: d, child: Text(d.name))).toList(), onChanged: (v) => setState(() => _deviationNature = v!)),
             ]),
             _buildSection(title: '3. Building Details', children: [
-              TextFormField(controller: _marketabilityCtrl, decoration: const InputDecoration(labelText: 'Marketability')),
+              TextFormField(controller: _marketabilityCtrl, decoration: const InputDecoration(labelText: 'Marketability of the Property')),
               TextFormField(controller: _buildingAgeCtrl, decoration: const InputDecoration(labelText: 'Age of Building'), keyboardType: TextInputType.number),
               TextFormField(controller: _residualLifeCtrl, decoration: const InputDecoration(labelText: 'Future Residual Life'), keyboardType: TextInputType.number),
               TextFormField(controller: _fsiApprovedCtrl, decoration: const InputDecoration(labelText: 'FSI (Approved)')),
@@ -266,8 +284,8 @@ Future<void> _pickImage(ImageSource source) async {
               TextFormField(controller: _specRoofCtrl, decoration: const InputDecoration(labelText: 'Specification: Roof')),
               TextFormField(controller: _specFlooringCtrl, decoration: const InputDecoration(labelText: 'Specification: Flooring')),
               TextFormField(controller: _qualityOfConstructionCtrl, decoration: const InputDecoration(labelText: 'Quality of Construction')),
-              SwitchListTile(title: const Text('Adheres to Safety Specs (NBC/NDMA)'), value: _adheresToSafetySpecs, onChanged: (v) => setState(() => _adheresToSafetySpecs = v)),
-              SwitchListTile(title: const Text('Adverse Impact from High Tension Lines'), value: _highTensionLineImpact, onChanged: (v) => setState(() => _highTensionLineImpact = v)),
+              SwitchListTile(title: const Text('Adheres to Safety Specs (NBC/NDMA)?'), value: _adheresToSafetySpecs, onChanged: (v) => setState(() => _adheresToSafetySpecs = v)),
+              SwitchListTile(title: const Text('Adverse Impact from High Tension Lines?'), value: _highTensionLineImpact, onChanged: (v) => setState(() => _highTensionLineImpact = v)),
             ]),
             _buildSection(title: '4. Valuation Details', initiallyExpanded: true, children: [
               Text('Select Property Type:', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -278,13 +296,35 @@ Future<void> _pickImage(ImageSource source) async {
               const Divider(height: 20),
               if (_selectedPropertyType == PropertyType.House) _buildHouseValuationUI() else _buildFlatValuationUI(),
             ]),
+            // MODIFIED: Section 5 UI
             _buildSection(title: '5. Estimate for Improvement', children: [
-               TextFormField(controller: _improvementDescriptionCtrl, decoration: const InputDecoration(labelText: 'Description of Improvement Works'), maxLines: 2),
-               TextFormField(controller: _improvementAmountCtrl, decoration: const InputDecoration(labelText: 'Amount Estimated by Applicant'), keyboardType: TextInputType.number),
-               SwitchListTile(title: const Text('Is the estimate reasonable?'), value: _improvementEstimateReasonable, onChanged: (v) => setState(() => _improvementEstimateReasonable = v)),
+               TextFormField(controller: _improvementDescriptionCtrl, decoration: const InputDecoration(labelText: '1. Description of improvement works as per applicants estimate'), maxLines: 2),
+               TextFormField(controller: _improvementAmountCtrl, decoration: const InputDecoration(labelText: '2. Amount estimated by the applicant for the improvement works'), keyboardType: TextInputType.number),
+               SwitchListTile(title: const Text('3. Whether the estimate submitted by the applicant is reasonable?'), value: _improvementEstimateReasonable, onChanged: (v) => setState(() => _improvementEstimateReasonable = v)),
+               if (!_improvementEstimateReasonable)
+                 TextFormField(
+                   controller: _improvementReasonableEstimateCtrl,
+                   decoration: const InputDecoration(labelText: '4. If not, what would be the reasonable estimate'),
+                   keyboardType: TextInputType.number,
+                 ),
             ]),
+            // MODIFIED: Section 6 UI
             _buildSection(title: '6. Progress of Work', children: [
-                TextFormField(controller: _improvementCompletedValueCtrl, decoration: const InputDecoration(labelText: 'Value of Improvement Works Completed'), keyboardType: TextInputType.number),
+              const Text('1. Value of improvement works completed'),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _progressWorkItems.length,
+                itemBuilder: (context, index) => _buildProgressWorkItemRow(index),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.add_circle),
+                  label: const Text('Add Row'),
+                  onPressed: _addProgressWorkItem,
+                ),
+              ),
             ]),
             _buildSection(title: '8. Remarks', children: [
                 TextFormField(controller: _remarksBackgroundCtrl, decoration: const InputDecoration(labelText: 'a) Background information')),
@@ -391,6 +431,50 @@ Future<void> _pickImage(ImageSource source) async {
     );
   }
 
+  // ADDED: New widget builder for a row in the "Progress of Work" table
+  Widget _buildProgressWorkItemRow(int index) {
+    final item = _progressWorkItems[index];
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(child: Text('Item ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold))),
+                IconButton(
+                  icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                  onPressed: () => _removeProgressWorkItem(index),
+                )
+              ],
+            ),
+            TextFormField(
+              initialValue: item.description,
+              decoration: const InputDecoration(labelText: 'Description of work'),
+              onChanged: (value) => item.description = value,
+              maxLines: 2,
+            ),
+            TextFormField(
+              initialValue: item.applicantEstimate,
+              decoration: const InputDecoration(labelText: "Applicant's estimate"),
+              onChanged: (value) => item.applicantEstimate = value,
+              keyboardType: TextInputType.number,
+            ),
+            TextFormField(
+              initialValue: item.valuerOpinion,
+              decoration: const InputDecoration(labelText: "Valuer's opinion"),
+              onChanged: (value) => item.valuerOpinion = value,
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildFlatValuationUI() => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -415,20 +499,4 @@ Future<void> _pickImage(ImageSource source) async {
       TextFormField(controller: _flatExtraAmenitiesCtrl, decoration: const InputDecoration(labelText: 'f. Add for extra amenities if any')),
     ],
   );
-}
-
-class PreviewScreen extends StatelessWidget {
-  final ValuationData data;
-  const PreviewScreen({super.key, required this.data});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('PDF Preview')),
-      body: PdfPreview(
-        build: (format) => generateValuationPdf(data),
-        canChangeOrientation: false,
-        canDebug: false,
-      ),
-    );
-  }
 }

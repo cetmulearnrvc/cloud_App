@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:login_screen/screens/savedDrafts.dart';
+import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'valuation_data_model.dart';
 import 'pdf_generator.dart';
@@ -25,6 +27,10 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
   void initState() {
     super.initState();
     _controllers = {
+      'nearbyLatitude': TextEditingController(),
+
+      'nearbyLongitude': TextEditingController(),
+
       'valuerNameAndQuals': TextEditingController(
         text: _data.valuerNameAndQuals,
       ),
@@ -164,6 +170,62 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
   String _sanitizeString(String input) {
     // Replaces the special "en dash" with a standard hyphen.
     return input.replaceAll('–', '-');
+  }
+
+  // In lib/valuation_form.dart -> inside _ValuationFormScreenState
+
+// NEW METHOD to get the location for the main property
+  Future<void> _getNearbyLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enable location services")),
+      );
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Location permissions denied")),
+        );
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Location permissions permanently denied")),
+      );
+      return;
+    }
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // This is the key difference: update the main controllers
+      setState(() {
+        _controllers['nearbyLatitude']!.text = position.latitude.toString();
+        _controllers['nearbyLongitude']!.text = position.longitude.toString();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error getting location: $e")),
+      );
+    }
   }
 
   Future<void> _getCurrentLocation(int imageIndex) async {
@@ -369,10 +431,8 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
       _data.buildingRealizableValue =
           _controllers['buildingRealizableValue']!.text;
       _data.buildingDistressValue = _controllers['buildingDistressValue']!.text;
-
-      // Finally, navigate to the preview screen with the complete data.
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => PdfPreviewScreen(data: _data)),
+      Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) => PdfGenerator(_data).generate(),
       );
     }
   }
@@ -386,6 +446,52 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
+            ElevatedButton(child: Text('Search Saved Drafts'),onPressed: (){
+        Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
+          return SavedDrafts();
+        }));
+      },),
+            Card(
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Search for Nearby Property",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTextField(
+                      'Latitude',
+                      _controllers['nearbyLatitude']!,
+                    ),
+                    _buildTextField(
+                      'Longitude',
+                      _controllers['nearbyLongitude']!,
+                    ),
+                    const SizedBox(height: 8),
+                    Center(
+                        child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: _getNearbyLocation, // Call our new method
+                              icon: const Icon(Icons.my_location),
+                              label: const Text('Get Current Location'),
+                            ),
+                            SizedBox(width: 50,),
+                            ElevatedButton.icon(onPressed: (){}, label: Text('Search'),icon: Icon(Icons.search),)
+                          ],
+                        ),
+                      ],
+                    )),
+                  ],
+                ),
+              ),
+            ),
             _buildSection(
               title: 'Valuer Header Info',
               initiallyExpanded: true,
@@ -517,7 +623,6 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
                   _controllers['westAsPerSketch']!,
                   _controllers['westActual']!,
                 ),
-
                 _buildTextField(
                   '5. Local authority',
                   _controllers['localAuthority']!,
@@ -953,25 +1058,6 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
         initiallyExpanded: initiallyExpanded,
         childrenPadding: const EdgeInsets.all(16),
         children: children,
-      ),
-    );
-  }
-}
-
-// The dedicated screen for showing the PDF preview.
-class PdfPreviewScreen extends StatelessWidget {
-  final ValuationData data;
-
-  const PdfPreviewScreen({Key? key, required this.data}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('PDF Preview')),
-      body: PdfPreview(
-        // The `build` callback is called by the `printing` package.
-        // It creates an instance of our generator and calls the `generate` method.
-        build: (format) => PdfGenerator(data).generate(),
       ),
     );
   }

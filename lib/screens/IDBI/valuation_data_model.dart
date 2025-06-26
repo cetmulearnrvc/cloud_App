@@ -12,6 +12,10 @@ class ValuationImage {
 }
 
 class ValuationData {
+  
+  String nearbyLatitude;
+  String nearbyLongitude;
+
   // Valuer Header Info
   String valuerNameAndQuals;
   String valuerCredentials;
@@ -124,6 +128,8 @@ class ValuationData {
   late List<ValuationImage> images;
 
   ValuationData({
+    this.nearbyLatitude='',
+    this.nearbyLongitude='',
     this.valuerNameAndQuals = 'Er. Belram S.U. B.Tech, AMIE, AIV',
     this.valuerCredentials =
         'Chartered Engineer (AM 190746-0)\nApproved Valuer Cat 1 (A-29296)\nPanel Valuer of IDBI Bank',

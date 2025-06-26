@@ -91,6 +91,8 @@ class PdfGeneratorPVR1 {
           _buildCertificate(),
           pw.SizedBox(height: 70),
           _buildSignature(),
+          pw.SizedBox(height: 50),
+          _seal(),
         ],
       ),
     );
@@ -266,23 +268,23 @@ class PdfGeneratorPVR1 {
         _buildKeyValueBordered(
             '4.', 'Documents produced for perusal', data.documentsPerused),
         _buildKeyValueBordered(
-            '5.', 'Location of the property...', data.propertyLocation),
-        _buildKeyBoolBordered('6.', 'Whether address of the site tallies...',
+            '5.', 'Location of the property : Plot No./ S. No./C.T.S.No. /R.S.No.Village/Block No./ Taluk/Ward.District/Corporation/Municipality', data.propertyLocation),
+        _buildKeyBoolBordered('6.', 'Whether address of the site tallies with address at point number \'5\'',
             data.addressTallies),
         _buildKeyBoolBordered(
             '7.', 'Location Sketch Verified', data.locationSketchVerified),
         _buildKeyValueBordered(
-            '8.', 'Development of surrounding area...', data.surroundingDev),
-        _buildKeyBoolBordered('9.', 'Whether basic amenities like water...',
+            '8.', 'Development of surrounding area with Special reference to population', data.surroundingDev),
+        _buildKeyBoolBordered('9.', 'Whether basic amenities like water, electricity, sewerage, roads, telephone are available',
             data.basicAmenitiesAvailable),
-        _buildKeyValueBordered('10.', 'Any negatives to the locality...',
+        _buildKeyValueBordered('10.', 'Any negatives to the locality (Crematoriums, slums, riot prone ,gases, chemical hazards,nagbana etc)',
             data.negativesToLocality),
-        _buildKeyValueBordered('11.', 'Any favorable consideration...',
+        _buildKeyValueBordered('11.', 'Any favorable consideration for additional cost/value',
             data.favorableConsiderations),
         _buildKeyValueBordered(
             '12.', 'Details of the Nearby Landmark', data.nearbyLandmark),
         _buildKeyValueBordered(
-            '13.', 'Any other features like board...', data.otherFeatures),
+            '13.', 'Any other features like board of other financier indicating mortgage, notice of Court/any authority which may effect the security.', data.otherFeatures),
       ]);
 
   pw.Widget _buildKeyValue(String key, String value) =>
@@ -327,12 +329,10 @@ class PdfGeneratorPVR1 {
         ),
         pw.SizedBox(height: 5),
         _buildKeyBoolValue(
-            '2. Do these boundaries & dimensions tally with the approved drawing?',
+            '2. Do these boundaries & dimensions tally with the approved drawing? If not furnish details',
             data.boundariesTally),
         pw.SizedBox(height: 5),
-        pw.Text('3. Nature of land use',
-            style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
-        _buildAlignedKeyValue('    Natuer of land use', data.natureOfLandUse),
+        _buildAlignedKeyValue('3. Nature of land use', data.natureOfLandUse),
         _buildAlignedKeyValue('    a. Existing', data.existingLandUse),
         _buildAlignedKeyValue('    b. Proposed', data.proposedLandUse),
         pw.SizedBox(height: 5),
@@ -346,7 +346,7 @@ class PdfGeneratorPVR1 {
         _sectionTitle('C. BUILDINGS'),
         pw.Text('1. Building Plan Approval',
             style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
-        _buildKeyValue('i) Layout planning approval No./...', data.approvalNo),
+        _buildKeyValue('i) Layout planning approval No./ Planning permit No./ Building permission No.', data.approvalNo),
         _buildKeyValue('ii) Period of validity', data.validityPeriod),
         _buildKeyBoolValue('iii) If validity is expired, whether it is renewed',
             data.isValidityExpiredRenewed),
@@ -405,7 +405,6 @@ class PdfGeneratorPVR1 {
           ],
           data: [
             [
-              '',
               'i) Plinth/ Built Up Area',
               data.plinthApproved,
               data.plinthActual
@@ -422,18 +421,15 @@ class PdfGeneratorPVR1 {
             3: const pw.FlexColumnWidth(1.5)
           }),
           _buildKeyValue('2. Whether the construction is as per approved plan(Yes/No)',data.isConstructionAsPerPlan ? 'YES' : 'NO'),
-          pw.Text('3.Deviations',style: const pw.TextStyle(fontSize: 10)),
+          pw.Text('3.Deviations (Please mention in detail)',style: const pw.TextStyle(fontSize: 10)),
             pw.TableHelper.fromTextArray(
           border: pw.TableBorder.all(width: 0.5),
           cellStyle: const pw.TextStyle(fontSize: 9),
-          headerStyle:
-              pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9),
-          
+          headers: [],
           data: [
             [
-              
               'i)',
-              ' What are the deviations between approved drawing & actual?',
+              'What are the deviations between approved drawing & actual?',
               data.deviations,
             ],
             [
@@ -446,16 +442,15 @@ class PdfGeneratorPVR1 {
             'Whether revised approval is necessary',
             data.revisedApprovalNecessary ? 'Yes' : 'No',
           ]],columnWidths: {
-            0: const pw.FlexColumnWidth(2),
+            0: const pw.FlexColumnWidth(1),
             1: const pw.FlexColumnWidth(2),
             2: const pw.FlexColumnWidth(1.5),
-            3: const pw.FlexColumnWidth(1.5)
           }),
         _buildWorksCompletedRow(),
 
-           _buildKeyValue('5. i) Whether the Construction carried out / being carried out adheres to the Safety Specifications prescribed in the National Building Code of India 2005?ii) Guidelines issued by the National Disaster Management A', data.adheresToSafety ? 'YES' : 'NO'),
+           _buildKeyValue('5. i) Whether the Construction carried out / being carried out adheres to the Safety Specifications prescribed in the National Building Code of India 2005?ii) Guidelines issued by the National Disaster Management  Authority (NDMA)?', data.adheresToSafety ? 'YES' : 'NO'),
 
-          _buildKeyValue('6. Whether any High Tension Wire Lines are passing through the property and if there is any adverse impact d', data.highTensionImpact ? 'YES' : 'NO'),
+          _buildKeyValue('6. Whether any High Tension Wire Lines are passing through the property and if there is any adverse impact due to this? ', data.highTensionImpact ? 'YES' : 'NO'),
       ]);
 
   // A special widget just for the "Total works" row
@@ -501,59 +496,6 @@ pw.Widget _buildWorksCompletedRow() {
     ],
   );
 }
-  // pw.Widget _buildSectionCPage2() => pw.TableHelper.fromTextArray(
-  //       border: pw.TableBorder.all(width: 0.5),
-  //       cellStyle: const pw.TextStyle(fontSize: 9),
-  //       data: [
-  //         ['ii) F.S.I', data.fsi, data.fsi],
-  //         [
-  //           'iii) No. Of dwelling units',
-  //           data.dwellingUnits,
-  //           data.dwellingUnits
-  //         ],
-  //         [
-  //           '2. Whether the construction is as per approved plan(Yes/No)',
-  //           data.isConstructionAsPerPlan ? 'YES' : 'NO',
-  //           ''
-  //         ],
-  //         ['3. Deviations (Please mention in detail)', '', ''],
-  //         [
-  //           '   i) What are the deviations between approved drawing & actual?',
-  //           data.deviations,
-  //           ''
-  //         ],
-  //         [
-  //           '  ii) Whether deviation are minor/ major nature',
-  //           data.deviationNature,
-  //           ''
-  //         ],
-  //         [
-  //           ' iii) Whether revised approval is necessary',
-  //           data.revisedApprovalNecessary ? 'Yes' : 'No',
-  //           ''
-  //         ],
-  //         [
-  //           '4. Total works completed as per applicant\'s estimate',
-  //           'Percentage\n${data.worksCompletedPercentage}',
-  //           'Value\n0'
-  //         ],
-  //         [
-  //           '5. i) Whether the Construction carried out adheres to the Safety Specifications...',
-  //           data.adheresToSafety ? 'YES' : 'NO',
-  //           ''
-  //         ],
-  //         [
-  //           '6. Whether any High Tension Wire Lines are passing through...',
-  //           data.highTensionImpact ? 'YES' : 'NO',
-  //           ''
-  //         ],
-  //       ],
-  //       columnWidths: {
-  //         0: const pw.FlexColumnWidth(3),
-  //         1: const pw.FlexColumnWidth(1),
-  //         2: const pw.FlexColumnWidth(1)
-  //       },
-  //     );
 
   pw.Widget _buildTotalValueTable() => pw.TableHelper.fromTextArray(
           border: pw.TableBorder.all(width: 0.5),
@@ -589,7 +531,8 @@ pw.Widget _buildWorksCompletedRow() {
             ],
             [
               '4. Value of building on completion',
-              '',
+              currencyFormat
+                  .format(double.tryParse(data.buildingCompletionValue) ?? 0),
               currencyFormat.format(
                   (double.tryParse(data.buildingCompletionValue) ?? 0) / 1.8),
               currencyFormat
@@ -716,15 +659,20 @@ pw.Widget _buildAlignedKeyValue(String key, String value, {double keyWidth = 203
         ]),
         pw.Text('SIGNATURE OF THE VALUER',
             style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
-        pw.Container(
-            width: 150,
-            height: 40,
-            child: pw.Center(
-                child: pw.Text(
+        
+      ]));
+
+pw.Widget _seal() => pw.Align(
+            alignment: pw.Alignment.bottomRight,
+            child:  pw.Container(
+              decoration:  pw.BoxDecoration(border: pw.Border.all(color: PdfColors.black, width: 0.5)),
+              padding: pw.EdgeInsets.all(8.0),
+              child: pw.Text(
                     'Seal Containing Name, Code Number etc. allotted by LICHFL',
                     style: const pw.TextStyle(fontSize: 7),
-                    textAlign: pw.TextAlign.center)))
-      ]));
+                    
+                    textAlign: pw.TextAlign.end)
+            ));
 
   pw.Widget _buildAnnexureTable() {
     final landMarketVal = (double.tryParse(data.annexLandArea) ?? 0) *

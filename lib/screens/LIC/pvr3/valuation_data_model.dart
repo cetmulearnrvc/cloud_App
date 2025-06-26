@@ -28,6 +28,17 @@ class FloorData {
       this.guidelineRate = '0'});
 }
 
+// ADDED: New class to represent a row in the "Progress of Work" table
+class ProgressWorkItem {
+  String description;
+  String applicantEstimate;
+  String valuerOpinion;
+  ProgressWorkItem(
+      {this.description = '',
+      this.applicantEstimate = '',
+      this.valuerOpinion = ''});
+}
+
 class ValuationData {
   // Header
   final String fileNo,
@@ -81,10 +92,11 @@ class ValuationData {
   final String marketValueSourceFlat, flatExtraAmenities;
 
   // Improvement & Progress
-  final String improvementDescription,
-      improvementAmount,
-      improvementCompletedValue;
+  final String improvementDescription, improvementAmount;
   final bool improvementEstimateReasonable;
+  final String improvementReasonableEstimate; // ADDED: For section 5, point 4
+  final List<ProgressWorkItem>
+      progressWorkItems; // MODIFIED: For section 6 table
 
   // Remarks
   final String remarksBackground,
@@ -165,7 +177,8 @@ class ValuationData {
     required this.improvementDescription,
     required this.improvementAmount,
     required this.improvementEstimateReasonable,
-    required this.improvementCompletedValue,
+    required this.improvementReasonableEstimate, // ADDED
+    required this.progressWorkItems, // MODIFIED
     required this.remarksBackground,
     required this.remarksSources,
     required this.remarksProcedures,

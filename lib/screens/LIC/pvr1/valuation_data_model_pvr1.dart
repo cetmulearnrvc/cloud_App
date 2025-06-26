@@ -16,6 +16,9 @@ class ValuationImage {
 }
 
 class ValuationDataPVR1 {
+
+  String nearbyLatitude;
+  String nearbyLongitude;
   // Header
   final String valuerName, valuerCode;
   final DateTime inspectionDate;
@@ -80,6 +83,8 @@ class ValuationDataPVR1 {
   final List<ValuationImage> images;
 
   ValuationDataPVR1({
+    this.nearbyLatitude='',
+    this.nearbyLongitude='',
     required this.worksCompletedValue,
     required this.buildingStageValueGuide,required this.buildingStageValueMarket,
     required this.natureOfLandUse,

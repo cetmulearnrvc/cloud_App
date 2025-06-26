@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:login_screen/screens/Federal/federal.dart';
+import 'package:login_screen/screens/IDBI/valuation_form_ui.dart';
 import 'package:login_screen/screens/LIC/pvr1/valuation_form_screen_pvr1.dart';
 import 'package:login_screen/screens/LIC/pvr3/valuation_form_screen.dart';
 import 'package:login_screen/screens/location.dart';
-import 'package:login_screen/screens/federal.dart';
+import 'package:login_screen/screens/Federal/federal.dart';
 
 //ignore_for_file:prefer_const_constructors
 class LoanType extends StatelessWidget {
@@ -44,8 +46,8 @@ class LoanType extends StatelessWidget {
 
   Widget LIC(BuildContext ctx) {
     final List<Map<String, String>> loanTypes = [
-      {'title': 'HOUSE CONSTRUCTION'},
-      {'title': 'HOUSE RENOVATION'},
+      {'title': 'HOUSE CONSTRUCTION (PVR - 1)'},
+      {'title': 'HOUSE RENOVATION (PVR - 3)'},
     ];
 
     return Column(
@@ -69,8 +71,7 @@ class LoanType extends StatelessWidget {
               );
             }).toList(),
             onChanged: (value) {
-              print(value?['title']);
-              if(value?['title']=='HOUSE RENOVATION')
+              if(value?['title']=='HOUSE RENOVATION (PVR - 3)')
               {
                 Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
                 return ValuationFormScreen();
@@ -89,8 +90,7 @@ class LoanType extends StatelessWidget {
 
   Widget IDBI(BuildContext ctx) {
     final List<Map<String, String>> loanTypes = [
-      {'title': 'HOUSE CONSTRUCTION'},
-      {'title': 'HOUSE RENOVATION'},
+      {'title': 'Valuation Report'},
     ];
 
     return Column(
@@ -115,7 +115,7 @@ class LoanType extends StatelessWidget {
             }).toList(),
             onChanged: (value) {
               Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                return LocationScreen();
+                return ValuationFormScreenIDBI();
               }));
             }),
       ],

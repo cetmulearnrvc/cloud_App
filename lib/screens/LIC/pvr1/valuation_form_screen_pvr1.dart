@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart'; // Import for location
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:login_screen/screens/savedDrafts.dart';
+import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'valuation_data_model_pvr1.dart';
 import 'pdf_generator_pvr1.dart';
@@ -15,6 +17,10 @@ class ValuationFormScreenPVR1 extends StatefulWidget {
 }
 
 class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
+
+  late final _nearbyLatitude=TextEditingController();
+  late final _nearbyLongitude=TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
   final _picker = ImagePicker();
 
@@ -155,6 +161,47 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
     }
   }
 
+
+  Future<void> _getNearbytLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      await Geolocator.openLocationSettings();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Location services are disabled. Please enable them.")),
+      );
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Location permissions are denied.")),
+        );
+        return;
+      }
+    }
+    
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Location permissions are permanently denied, we cannot request permissions.")),
+      );
+      return;
+    } 
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      setState(() {
+        _nearbyLatitude.text = position.latitude.toString();
+        _nearbyLongitude.text = position.longitude.toString();
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error getting location: $e")),
+      );
+    }
+  }
   // Inside _ValuationFormScreenPVR1State
 
 Future<void> _pickImage(ImageSource source) async {
@@ -219,6 +266,8 @@ Future<void> _pickImage(ImageSource source) async {
   void _generatePdf() {
     if (_formKey.currentState!.validate()) {
       final data = ValuationDataPVR1(
+        nearbyLatitude: _nearbyLatitude.text,
+        nearbyLongitude: _nearbyLongitude.text,
         worksCompletedValue: _worksCompletedValue.text,
         buildingStageValueMarket: _buildingStageValueMarket.text,
         buildingStageValueGuide: _buildingStageValueGuide.text,
@@ -254,19 +303,73 @@ Future<void> _pickImage(ImageSource source) async {
         annexYearOfConstruction: _annexYearOfConstructionCtrl.text, annexBuildingAge: _annexBuildingAgeCtrl.text,
         images: _valuationImages,
       );
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PreviewScreenPVR1(data: data)));
+      Printing.layoutPdf(
+            onLayout: (PdfPageFormat format) => PdfGeneratorPVR1(data).generate(),
+        );
+      
     }
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('PVR 1 - House Construction')),
+      appBar: AppBar(title: const Text('PVR 1 - House Construction'),backgroundColor: Colors.blue,),
+      
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
+            ElevatedButton(child: Text('Search Saved Drafts'),onPressed: (){
+        Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
+          return SavedDrafts();
+        }));
+      },),
+      Card(
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Search for Nearby Property",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _nearbyLatitude,
+                      decoration: InputDecoration(labelText: 'Latitude'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _nearbyLongitude,
+                      decoration: InputDecoration(labelText: 'Longitude'),
+                    ),
+
+                    const SizedBox(height: 8),
+                    Center(
+                        child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: _getNearbytLocation, // Call our new method
+                              icon: const Icon(Icons.my_location),
+                              label: const Text('Get Current Location'),
+                            ),
+                            SizedBox(width: 50,),
+                            ElevatedButton.icon(onPressed: (){}, label: Text('Search'),icon: Icon(Icons.search),)
+                          ],
+                        ),
+                      ],
+                    )),
+                  ],
+                ),
+              ),
+            ),
             _buildSection(title: 'Header', initiallyExpanded: true, children: [
               TextFormField(controller: _valuerNameCtrl, decoration: const InputDecoration(labelText: 'Name of the Panel Valuer')),
               TextFormField(controller: _valuerCodeCtrl, decoration: const InputDecoration(labelText: 'Code No.')),
@@ -286,15 +389,15 @@ Future<void> _pickImage(ImageSource source) async {
               TextFormField(controller: _applicantNameCtrl, decoration: const InputDecoration(labelText: '2. Name of the Applicant')),
               TextFormField(controller: _ownerNameCtrl, decoration: const InputDecoration(labelText: '3. Name of the owner')),
               TextFormField(controller: _documentsPerusedCtrl, decoration: const InputDecoration(labelText: '4. Documents produced for perusal')),
-              TextFormField(controller: _propertyLocationCtrl, decoration: const InputDecoration(labelText: '5. Location of the property'), maxLines: 4),
-              SwitchListTile(title: const Text('6. Address tallies with site'), value: _addressTallies, onChanged: (v) => setState(() => _addressTallies = v)),
-              SwitchListTile(title: const Text('7. Location Sketch Verified'), value: _locationSketchVerified, onChanged: (v) => setState(() => _locationSketchVerified = v)),
-              TextFormField(controller: _surroundingDevCtrl, decoration: const InputDecoration(labelText: '8. Development of surrounding area')),
-              SwitchListTile(title: const Text('9. Basic amenities available'), value: _basicAmenitiesAvailable, onChanged: (v) => setState(() => _basicAmenitiesAvailable = v)),
-              TextFormField(controller: _negativesToLocalityCtrl, decoration: const InputDecoration(labelText: '10. Any negatives to the locality')),
-              TextFormField(controller: _favorableConsiderationsCtrl, decoration: const InputDecoration(labelText: '11. Any favorable consideration')),
+              TextFormField(controller: _propertyLocationCtrl, decoration: const InputDecoration(labelText: '5. Location of the property : Plot No./ S. No./C.T.S.No. /R.S.No.Village/Block No./ Taluk/Ward.District/Corporation/Municipality'), maxLines: 4),
+              SwitchListTile(title: const Text('6. Whether address tallies with site with point number 5?'), value: _addressTallies, onChanged: (v) => setState(() => _addressTallies = v)),
+              SwitchListTile(title: const Text('7. Is Location Sketch Verified'), value: _locationSketchVerified, onChanged: (v) => setState(() => _locationSketchVerified = v)),
+              TextFormField(controller: _surroundingDevCtrl, decoration: const InputDecoration(labelText: '8. Development of surrounding area with Special reference to population')),
+              SwitchListTile(title: const Text('9. Basic amenities available?'), value: _basicAmenitiesAvailable, onChanged: (v) => setState(() => _basicAmenitiesAvailable = v)),
+              TextFormField(controller: _negativesToLocalityCtrl, decoration: const InputDecoration(labelText: '10. Any negatives to the locality?')),
+              TextFormField(controller: _favorableConsiderationsCtrl, decoration: const InputDecoration(labelText: '11. Any favorable consideration for additional cost/value?')),
               TextFormField(controller: _nearbyLandmarkCtrl, decoration: const InputDecoration(labelText: '12. Details of the Nearby Landmark')),
-              TextFormField(controller: _otherFeaturesCtrl, decoration: const InputDecoration(labelText: '13. Any other features')),
+              TextFormField(controller: _otherFeaturesCtrl, decoration: const InputDecoration(labelText: '13. Any other features like board of other financier indicating mortgage, notice of Court/any authority which may effect the security?')),
             ]),
             _buildSection(title: 'B. LAND', children: [
               TextFormField(controller: _northBoundaryCtrl, decoration: const InputDecoration(labelText: 'North Boundary')),
@@ -307,17 +410,17 @@ Future<void> _pickImage(ImageSource source) async {
               TextFormField(controller: _westDimCtrl, decoration: const InputDecoration(labelText: 'West Dimension')),
               TextFormField(controller: _totalExtent1Ctrl, decoration: const InputDecoration(labelText: 'Total Extent 1')),
               TextFormField(controller: _totalExtent2Ctrl, decoration: const InputDecoration(labelText: 'Total Extent 2')),
-              SwitchListTile(title: const Text('2. Boundaries Tally with Drawing'), value: _boundariesTally, onChanged: (v) => setState(() => _boundariesTally = v)),
+              SwitchListTile(title: const Text('2. Do boundaries Tally with Approved Drawing?'), value: _boundariesTally, onChanged: (v) => setState(() => _boundariesTally = v)),
               TextFormField(controller: _natureOflandUse, decoration: const InputDecoration(labelText: 'Nature of Land Use')),
               TextFormField(controller: _existingLandUseCtrl, decoration: const InputDecoration(labelText: '3a. Existing Land Use'),maxLines: 4,),
               TextFormField(controller: _proposedLandUseCtrl, decoration: const InputDecoration(labelText: '3b. Proposed Land Use'), maxLines: 4),
-              SwitchListTile(title: const Text('4. N.A. Permission Required'), value: _naPermissionRequired, onChanged: (v) => setState(() => _naPermissionRequired = v)),
+              SwitchListTile(title: const Text('4. Whether N.A. Permission Required'), value: _naPermissionRequired, onChanged: (v) => setState(() => _naPermissionRequired = v)),
             ]),
             _buildSection(title: 'C. BUILDINGS', children: [
-              TextFormField(controller: _approvalNoCtrl, decoration: const InputDecoration(labelText: '1. Approval No./Planning Permit No/Building Permission No')),
+              TextFormField(controller: _approvalNoCtrl, decoration: const InputDecoration(labelText: '1. Layout planning approval No./Planning Permit No/Building Permission No')),
               TextFormField(controller: _validityPeriodCtrl, decoration: const InputDecoration(labelText: '1.ii Period of validity')),
-              SwitchListTile(title: const Text('1.iii If expired, is it renewed?'), value: _isValidityExpiredRenewed, onChanged: (v) => setState(() => _isValidityExpiredRenewed = v)),
-              TextFormField(controller: _approvalAuthorityCtrl, decoration: const InputDecoration(labelText: '1.iv Approval authority')),
+              SwitchListTile(title: const Text('1.iii If validity is expired, is it renewed?'), value: _isValidityExpiredRenewed, onChanged: (v) => setState(() => _isValidityExpiredRenewed = v)),
+              TextFormField(controller: _approvalAuthorityCtrl, decoration: const InputDecoration(labelText: '1.iv Approval was given by (authority)')),
               TextFormField(controller: _approvedGfCtrl, decoration: const InputDecoration(labelText: '2.i Approved G.F. Area')),
               TextFormField(controller: _approvedFfCtrl, decoration: const InputDecoration(labelText: '2.i Approved F.F. Area')),
               TextFormField(controller: _approvedSfCtrl, decoration: const InputDecoration(labelText: '2.i Approved S.F. Area')),
@@ -327,7 +430,7 @@ Future<void> _pickImage(ImageSource source) async {
               TextFormField(controller: _estimateCostCtrl, decoration: const InputDecoration(labelText: '3.i Estimate Cost (Rs)')),
               TextFormField(controller: _costPerSqFtCtrl, decoration: const InputDecoration(labelText: '3.ii Cost per Sq ft')),
               SwitchListTile(title: const Text('3.iii Is estimate reasonable?'), value: _isEstimateReasonable, onChanged: (v) => setState(() => _isEstimateReasonable = v)),
-              TextFormField(controller: _marketabilityCtrl, decoration: const InputDecoration(labelText: '4. Marketability')),
+              TextFormField(controller: _marketabilityCtrl, decoration: const InputDecoration(labelText: '4. Marketability of the Property')),
                    ]),
             _buildSection(title: 'D. INSPECTION', children: [
               TextFormField(controller: _plinthApprovedCtrl, decoration: const InputDecoration(labelText: 'Plinth/Built Up Area (Approved)')),
@@ -335,14 +438,14 @@ Future<void> _pickImage(ImageSource source) async {
               TextFormField(controller: _fsiCtrl, decoration: const InputDecoration(labelText: 'F.S.I.')),
               TextFormField(controller: _dwellingUnitsCtrl, decoration: const InputDecoration(labelText: 'No. Of dwelling units')),
               SwitchListTile(title: const Text('Construction as per plan?'), value: _isConstructionAsPerPlan, onChanged: (v) => setState(() => _isConstructionAsPerPlan = v)),
-              TextFormField(controller: _deviationsCtrl, decoration: const InputDecoration(labelText: 'Deviations')),
-              TextFormField(controller: _deviationNatureCtrl, decoration: const InputDecoration(labelText: 'Deviation nature')),
-              SwitchListTile(title: const Text('Revised approval necessary?'), value: _revisedApprovalNecessary, onChanged: (v) => setState(() => _revisedApprovalNecessary = v)),
+              TextFormField(controller: _deviationsCtrl, decoration: const InputDecoration(labelText: 'Deviations between approved drawing & actual?')),
+              TextFormField(controller: _deviationNatureCtrl, decoration: const InputDecoration(labelText: 'Whether deviations are of minor/ major nature?')),
+              SwitchListTile(title: const Text('Whether revised approval is necessary?'), value: _revisedApprovalNecessary, onChanged: (v) => setState(() => _revisedApprovalNecessary = v)),
               TextFormField(controller: _worksCompletedPercentageCtrl, decoration: const InputDecoration(labelText: 'Total works completed %')),
               TextFormField(controller: _worksCompletedValue, decoration: const InputDecoration(labelText: 'Total works value')),
 
-              SwitchListTile(title: const Text('Adheres to Safety Specs?'), value: _adheresToSafety, onChanged: (v) => setState(() => _adheresToSafety = v)),
-              SwitchListTile(title: const Text('High Tension Line Impact?'), value: _highTensionImpact, onChanged: (v) => setState(() => _highTensionImpact = v)),
+              SwitchListTile(title: const Text('Construction Adheres to Safety Specs?'), value: _adheresToSafety, onChanged: (v) => setState(() => _adheresToSafety = v)),
+              SwitchListTile(title: const Text('Any High Tension Wire Lines are passing through the property?'), value: _highTensionImpact, onChanged: (v) => setState(() => _highTensionImpact = v)),
        
             ]),
             _buildSection(title: 'E. TOTAL VALUE', children: [
@@ -357,8 +460,8 @@ Future<void> _pickImage(ImageSource source) async {
               TextFormField(controller: _buildingUsageCtrl, decoration: const InputDecoration(labelText: '6. Usage of building')),
             ]),
             _buildSection(title: 'F. RECOMMENDATION', children: [
-              TextFormField(controller: _recBackgroundCtrl, decoration: const InputDecoration(labelText: '1. Background information')),
-              TextFormField(controller: _recSourcesCtrl, decoration: const InputDecoration(labelText: '2. Sources of information')),
+              TextFormField(controller: _recBackgroundCtrl, decoration: const InputDecoration(labelText: '1. Background information of the asset being valued')),
+              TextFormField(controller: _recSourcesCtrl, decoration: const InputDecoration(labelText: '2. Sources of information used for valuation of property')),
               TextFormField(controller: _recProceduresCtrl, decoration: const InputDecoration(labelText: '3. Procedures adopted carrying out valuation')),
               TextFormField(controller: _recMethodologyCtrl, decoration: const InputDecoration(labelText: '4. Valuation methodology')),
               TextFormField(controller: _recFactorsCtrl, decoration: const InputDecoration(labelText: '5. Major factors that influenced the valuation')),
@@ -489,21 +592,6 @@ Future<void> _pickImage(ImageSource source) async {
         initiallyExpanded: initiallyExpanded,
         childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         children: children.map((child) => Padding(padding: const EdgeInsets.only(bottom: 12), child: child)).toList(),
-      ),
-    );
-  }
-}
-
-class PreviewScreenPVR1 extends StatelessWidget {
-  final ValuationDataPVR1 data;
-  const PreviewScreenPVR1({super.key, required this.data});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('PDF Preview')),
-      body: PdfPreview(
-        build: (format) => PdfGeneratorPVR1(data).generate(),
       ),
     );
   }
