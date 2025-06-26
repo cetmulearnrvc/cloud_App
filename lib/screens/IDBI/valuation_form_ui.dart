@@ -446,11 +446,7 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            ElevatedButton(child: Text('Search Saved Drafts'),onPressed: (){
-        Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
-          return SavedDrafts();
-        }));
-      },),
+            
             Card(
               elevation: 4,
               child: Padding(
@@ -968,10 +964,21 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        icon: const Icon(Icons.picture_as_pdf),
-        label: const Text('Generate PDF'),
-        onPressed: _generatePdf,
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(icon: Icon(Icons.search),label: Text('Search Saved Drafts'),onPressed: (){
+        Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
+          return SavedDrafts();
+        }));
+      },),
+      SizedBox(height: 10,),
+          FloatingActionButton.extended(
+            icon: const Icon(Icons.picture_as_pdf),
+            label: const Text('Generate PDF'),
+            onPressed: _generatePdf,
+          ),
+        ],
       ),
     );
   }
