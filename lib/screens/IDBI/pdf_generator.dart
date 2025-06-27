@@ -112,7 +112,7 @@ pw.Widget _buildHeader() {
             children: [
               pw.Text(data.valuerNameAndQuals, style: pw.TextStyle(font: boldFont)),
               // The credentials string from the model might have newlines, so we handle it.
-              ...data.valuerCredentials.split('\n').map((line) => pw.Text(line, style: pw.TextStyle(font: font))).toList(),
+              ...data.valuerCredentials.split('\n').map((line) => pw.Text(line, style: pw.TextStyle(font: font))),
             ],
           ),
           pw.Column(

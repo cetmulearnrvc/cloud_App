@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:typed_data';
 import 'package:geolocator/geolocator.dart'; // Import geolocator package
-import 'package:login_screen/screens/loanType.dart'; // Import geolocator package
+// Import geolocator package
 
 void main() {
   runApp(const MyApp());

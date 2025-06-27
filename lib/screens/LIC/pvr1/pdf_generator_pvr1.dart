@@ -666,7 +666,7 @@ pw.Widget _seal() => pw.Align(
             alignment: pw.Alignment.bottomRight,
             child:  pw.Container(
               decoration:  pw.BoxDecoration(border: pw.Border.all(color: PdfColors.black, width: 0.5)),
-              padding: pw.EdgeInsets.all(8.0),
+              padding: const pw.EdgeInsets.all(8.0),
               child: pw.Text(
                     'Seal Containing Name, Code Number etc. allotted by LICHFL',
                     style: const pw.TextStyle(fontSize: 7),
