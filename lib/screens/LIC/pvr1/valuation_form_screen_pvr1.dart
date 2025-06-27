@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart'; // Import for location
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:login_screen/screens/nearbyDetails.dart';
 import 'package:login_screen/screens/savedDrafts.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
@@ -357,7 +358,11 @@ Future<void> _pickImage(ImageSource source) async {
                               label: const Text('Get Current Location'),
                             ),
                             SizedBox(width: 50,),
-                            ElevatedButton.icon(onPressed: (){}, label: Text('Search'),icon: Icon(Icons.search),)
+                            ElevatedButton.icon(onPressed: (){
+                                Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
+                                  return Nearbydetails(latitude: _nearbyLatitude.text,longitude:_nearbyLongitude.text);
+                                }));
+                            }, label: Text('Search'),icon: Icon(Icons.search),)
                           ],
                         ),
                       ],

@@ -89,42 +89,6 @@ class HomeScreen extends StatelessWidget {
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (ctx) => LoanType(selectedBank: selectedData,)));
                               }),
-                          // IconButton(
-                          //   onPressed: () {
-                          //     Navigator.of(context).push(MaterialPageRoute(
-                          //       builder: (ctx) => FormScreen(),
-                          //     ));
-                          //   },
-                          //   icon: Image.asset(
-                          //     'assets/images/canara.jpeg',
-                          //     height: 200,
-                          //     width: 200,
-                          //   ),
-                          // ),
-                          // IconButton(
-                          //   onPressed: () {
-                          //     Navigator.of(context).push(MaterialPageRoute(
-                          //       builder: (ctx) => FormScreen(),
-                          //     ));
-                          //   },
-                          //   icon: Image.asset(
-                          //     'assets/images/idbi.jpeg',
-                          //     height: 200,
-                          //     width: 200,
-                          //   ),
-                          // ),
-                          // IconButton(
-                          //   onPressed: () {
-                          //     Navigator.of(context).push(MaterialPageRoute(
-                          //       builder: (ctx) => FormScreen(),
-                          //     ));
-                          //   },
-                          //   icon: Image.asset(
-                          //     'assets/images/lic.jpeg',
-                          //     height: 200,
-                          //     width: 200,
-                          //   ),
-                          // ),
                         ],
                       ),
                     );
