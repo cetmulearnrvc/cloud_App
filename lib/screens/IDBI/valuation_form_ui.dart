@@ -9,7 +9,7 @@ import 'valuation_data_model.dart';
 import 'pdf_generator.dart';
 
 class ValuationFormScreenIDBI extends StatefulWidget {
-  const ValuationFormScreenIDBI({Key? key}) : super(key: key);
+  const ValuationFormScreenIDBI({super.key});
 
   @override
   _ValuationFormScreenState createState() => _ValuationFormScreenState();
@@ -22,7 +22,7 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
 
   late final Map<String, TextEditingController> _controllers;
 
-  late List<ValuationImage> _valuationImages = [];
+  late final List<ValuationImage> _valuationImages = [];
   @override
   void initState() {
     super.initState();
@@ -478,8 +478,8 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
                               icon: const Icon(Icons.my_location),
                               label: const Text('Get Current Location'),
                             ),
-                            SizedBox(width: 50,),
-                            ElevatedButton.icon(onPressed: (){}, label: Text('Search'),icon: Icon(Icons.search),)
+                            const SizedBox(width: 50,),
+                            ElevatedButton.icon(onPressed: (){}, label: const Text('Search'),icon: const Icon(Icons.search),)
                           ],
                         ),
                       ],
@@ -577,7 +577,7 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
                   maxLines: 5,
                 ),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   "3. Details of land",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
@@ -967,12 +967,12 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          FloatingActionButton.extended(icon: Icon(Icons.search),label: Text('Search Saved Drafts'),onPressed: (){
+          FloatingActionButton.extended(icon: const Icon(Icons.search),label: const Text('Search Saved Drafts'),onPressed: (){
         Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
           return SavedDrafts();
         }));
       },),
-      SizedBox(height: 10,),
+      const SizedBox(height: 10,),
           FloatingActionButton.extended(
             icon: const Icon(Icons.picture_as_pdf),
             label: const Text('Generate PDF'),
