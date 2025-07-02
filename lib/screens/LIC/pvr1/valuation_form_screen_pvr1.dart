@@ -15,13 +15,34 @@ import 'package:http/http.dart' as http;
 import 'config.dart';
 
 class ValuationFormScreenPVR1 extends StatefulWidget {
-  const ValuationFormScreenPVR1({super.key});
+  final Map<String, dynamic>? propertyData;
+
+  const ValuationFormScreenPVR1({
+    super.key,
+    this.propertyData,
+  });
+
   @override
   _ValuationFormScreenPVR1State createState() =>
       _ValuationFormScreenPVR1State();
 }
 
 class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.propertyData != null) {
+      // Use the passed data to initialize your form only if it exists
+      debugPrint('Received property data: ${widget.propertyData}');
+      // Example:
+      // _fileNoController.text = widget.propertyData!['fileNo'].toString();
+    } else {
+      debugPrint('No property data received - creating new valuation');
+      // Initialize with empty/default values
+    }
+    _initializeFormWithPropertyData();
+  }
+
   late final _nearbyLatitude = TextEditingController();
   late final _nearbyLongitude = TextEditingController();
 
@@ -175,11 +196,94 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
       request.fields.addAll({
         "valuerName": _valuerNameCtrl.text,
         "valuationCode": _valuerCodeCtrl.text,
+        "inspectionDate": _inspectionDate.toString(),
         "fileNo": _fileNoCtrl.text,
         "applicantName": _applicantNameCtrl.text,
         "ownerName": _ownerNameCtrl.text,
+        "documentsPerused": _documentsPerusedCtrl.text,
         "propertyLocation": _propertyLocationCtrl.text,
-        "marketValue": _landValueMarketCtrl.text,
+        "addressTallies": _addressTallies.toString(),
+        "locationSketchVerified": _locationSketchVerified.toString(),
+        "surroundingDevelopment": _surroundingDevCtrl.text,
+        "basicAmenitiesAvailable": _basicAmenitiesAvailable.toString(),
+        "negativesToLocality": _negativesToLocalityCtrl.text,
+        "favorableConsiderations": _favorableConsiderationsCtrl.text,
+        "nearbyLandmark": _nearbyLandmarkCtrl.text,
+        "otherFeatures": _otherFeaturesCtrl.text,
+        "northBoundary": _northBoundaryCtrl.text,
+        "northDimension": _northDimCtrl.text,
+        "southBoundary": _southBoundaryCtrl.text,
+        "southDimension": _southDimCtrl.text,
+        "eastBoundary": _eastBoundaryCtrl.text,
+        "eastDimension": _eastDimCtrl.text,
+        "westBoundary": _westBoundaryCtrl.text,
+        "westDimension": _westDimCtrl.text,
+        "totalExtent1": _totalExtent1Ctrl.text,
+        "totalExtent2": _totalExtent2Ctrl.text,
+        "boundariesTally": _boundariesTally.toString(),
+        "existingLandUse": _existingLandUseCtrl.text,
+        "proposedLandUse": _proposedLandUseCtrl.text,
+        "naPermissionRequired": _naPermissionRequired.toString(),
+        "approvalNo": _approvalNoCtrl.text,
+        "validityPeriod": _validityPeriodCtrl.text,
+        "isValidityExpiredRenewed": _isValidityExpiredRenewed.toString(),
+        "approvalAuthority": _approvalAuthorityCtrl.text,
+        "approvedGF": _approvedGfCtrl.text,
+        "approvedFF": _approvedFfCtrl.text,
+        "approvedSF": _approvedSfCtrl.text,
+        "actualGF": _actualGfCtrl.text,
+        "actualFF": _actualFfCtrl.text,
+        "actualSF": _actualSfCtrl.text,
+        "estimateCost": _estimateCostCtrl.text,
+        "costPerSqFt": _costPerSqFtCtrl.text,
+        "isEstimateReasonable": _isEstimateReasonable.toString(),
+        "marketability": _marketabilityCtrl.text,
+        "fsi": _fsiCtrl.text,
+        "dwellingUnits": _dwellingUnitsCtrl.text,
+        "isConstructionAsPerPlan": _isConstructionAsPerPlan.toString(),
+        "deviations": _deviationsCtrl.text,
+        "deviationNature": _deviationNatureCtrl.text,
+        "revisedApprovalNecessary": _revisedApprovalNecessary.toString(),
+        "worksCompletedPercentage": _worksCompletedPercentageCtrl.text,
+        "worksCompletedValue": _worksCompletedValue.text,
+        "adheresToSafety": _adheresToSafety.toString(),
+        "highTensionImpact": _highTensionImpact.toString(),
+        "plinthApproved": _plinthApprovedCtrl.text,
+        "plinthActual": _plinthActualCtrl.text,
+        "landValueApp": _landValueAppCtrl.text,
+        "landValueGuide": _landValueGuideCtrl.text,
+        "landValueMarket": _landValueMarketCtrl.text,
+        "buildingStageValueApp": _buildingStageValueAppCtrl.text,
+        "buildingCompletionValue": _buildingCompletionValueCtrl.text,
+        "marketValueSource": _marketValueSourceCtrl.text,
+        "buildingUsage": _buildingUsageCtrl.text,
+        "recBackground": _recBackgroundCtrl.text,
+        "recSources": _recSourcesCtrl.text,
+        "recProcedures": _recProceduresCtrl.text,
+        "recMethodology": _recMethodologyCtrl.text,
+        "recFactors": _recFactorsCtrl.text,
+        "stageOfConstruction": _stageOfConstructionCtrl.text,
+        "progressPercentage": _progressPercentageCtrl.text,
+        "certificatePlace": _certificatePlaceCtrl.text,
+        "annexLandArea": _annexLandAreaCtrl.text,
+        "annexLandUnitRateMarket": _annexLandUnitRateMarketCtrl.text,
+        "annexLandUnitRateGuide": _annexLandUnitRateGuideCtrl.text,
+        "annexGFArea": _annexGfAreaCtrl.text,
+        "annexGFUnitRateMarket": _annexGfUnitRateMarketCtrl.text,
+        "annexGFUnitRateGuide": _annexGfUnitRateGuideCtrl.text,
+        "annexFFArea": _annexFfAreaCtrl.text,
+        "annexFFUnitRateMarket": _annexFfUnitRateMarketCtrl.text,
+        "annexFFUnitRateGuide": _annexFfUnitRateGuideCtrl.text,
+        "annexSFArea": _annexSfAreaCtrl.text,
+        "annexSFUnitRateMarket": _annexSfUnitRateMarketCtrl.text,
+        "annexSFUnitRateGuide": _annexSfUnitRateGuideCtrl.text,
+        "annexAmenitiesMarket": _annexAmenitiesMarketCtrl.text,
+        "annexAmenitiesGuide": _annexAmenitiesGuideCtrl.text,
+        "annexYearOfConstruction": _annexYearOfConstructionCtrl.text,
+        "annexBuildingAge": _annexBuildingAgeCtrl.text,
+        "natureOfLandUse": _natureOflandUse.text,
+        "buildingStageValueGuide": _buildingStageValueGuide.text,
+        "buildingStageValueMarket": _buildingStageValueMarket.text,
       });
 
       // Handle the image upload - works for both File and Uint8List
@@ -281,12 +385,12 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
         }
 
         if (context.mounted) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (ctx) => Nearbydetails(responseData: responseData),
-          ),
-        );
-      }
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (ctx) => Nearbydetails(responseData: responseData),
+            ),
+          );
+        }
       }
 
       if (response.statusCode == 200) {
@@ -303,6 +407,131 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
+    }
+  }
+
+  void _initializeFormWithPropertyData() {
+    if (widget.propertyData != null) {
+      final data = widget.propertyData!;
+
+      // Basic information
+      _valuerNameCtrl.text = data['valuerName'].toString();
+      _fileNoCtrl.text = data['fileNo']?.toString() ?? _fileNoCtrl.text;
+      _applicantNameCtrl.text =
+          data['applicantName'] ?? _applicantNameCtrl.text;
+      _ownerNameCtrl.text = data['ownerName'] ?? _ownerNameCtrl.text;
+      _documentsPerusedCtrl.text =
+          data['documentsPerused'] ?? _documentsPerusedCtrl.text;
+      _propertyLocationCtrl.text =
+          data['propertyLocation'] ?? _propertyLocationCtrl.text;
+
+      // Boolean fields
+      _addressTallies = data['addressTallies'] as bool? ?? _addressTallies;
+      _locationSketchVerified =
+          data['locationSketchVerified'] as bool? ?? _locationSketchVerified;
+      _basicAmenitiesAvailable =
+          data['basicAmenitiesAvailable'] as bool? ?? _basicAmenitiesAvailable;
+      _boundariesTally = data['boundariesTally'] as bool? ?? _boundariesTally;
+      _naPermissionRequired =
+          data['naPermissionRequired'] as bool? ?? _naPermissionRequired;
+      _isValidityExpiredRenewed = data['isValidityExpiredRenewed'] as bool? ??
+          _isValidityExpiredRenewed;
+      _isEstimateReasonable =
+          data['isEstimateReasonable'] as bool? ?? _isEstimateReasonable;
+      _isConstructionAsPerPlan =
+          data['isConstructionAsPerPlan'] as bool? ?? _isConstructionAsPerPlan;
+      _revisedApprovalNecessary = data['revisedApprovalNecessary'] as bool? ??
+          _revisedApprovalNecessary;
+      _adheresToSafety = data['adheresToSafety'] as bool? ?? _adheresToSafety;
+      _highTensionImpact =
+          data['highTensionImpact'] as bool? ?? _highTensionImpact;
+
+      // Text fields
+      _surroundingDevCtrl.text =
+          data['surroundingDev'] ?? _surroundingDevCtrl.text;
+      _negativesToLocalityCtrl.text =
+          data['negativesToLocality'] ?? _negativesToLocalityCtrl.text;
+      _favorableConsiderationsCtrl.text =
+          data['favorableConsiderations'] ?? _favorableConsiderationsCtrl.text;
+      _nearbyLandmarkCtrl.text =
+          data['nearbyLandmark'] ?? _nearbyLandmarkCtrl.text;
+      _otherFeaturesCtrl.text =
+          data['otherFeatures'] ?? _otherFeaturesCtrl.text;
+
+      // Boundary fields
+      _northBoundaryCtrl.text =
+          data['northBoundary'] ?? _northBoundaryCtrl.text;
+      _northDimCtrl.text = data['northDim'] ?? _northDimCtrl.text;
+      _southBoundaryCtrl.text =
+          data['southBoundary'] ?? _southBoundaryCtrl.text;
+      _southDimCtrl.text = data['southDim'] ?? _southDimCtrl.text;
+      _eastBoundaryCtrl.text = data['eastBoundary'] ?? _eastBoundaryCtrl.text;
+      _eastDimCtrl.text = data['eastDim'] ?? _eastDimCtrl.text;
+      _westBoundaryCtrl.text = data['westBoundary'] ?? _westBoundaryCtrl.text;
+      _westDimCtrl.text = data['westDim'] ?? _westDimCtrl.text;
+
+      // Land and building details
+      _totalExtent1Ctrl.text =
+          data['totalExtent1']?.toString() ?? _totalExtent1Ctrl.text;
+      _totalExtent2Ctrl.text =
+          data['totalExtent2']?.toString() ?? _totalExtent2Ctrl.text;
+      _existingLandUseCtrl.text =
+          data['existingLandUse'] ?? _existingLandUseCtrl.text;
+      _proposedLandUseCtrl.text =
+          data['proposedLandUse'] ?? _proposedLandUseCtrl.text;
+
+      // Approval details
+      _approvalNoCtrl.text = data['approvalNo'] ?? _approvalNoCtrl.text;
+      _validityPeriodCtrl.text =
+          data['validityPeriod'] ?? _validityPeriodCtrl.text;
+      _approvalAuthorityCtrl.text =
+          data['approvalAuthority'] ?? _approvalAuthorityCtrl.text;
+
+      // Area fields
+      _approvedGfCtrl.text =
+          data['approvedGf']?.toString() ?? _approvedGfCtrl.text;
+      _approvedFfCtrl.text =
+          data['approvedFf']?.toString() ?? _approvedFfCtrl.text;
+      _approvedSfCtrl.text =
+          data['approvedSf']?.toString() ?? _approvedSfCtrl.text;
+      _actualGfCtrl.text = data['actualGf']?.toString() ?? _actualGfCtrl.text;
+      _actualFfCtrl.text = data['actualFf']?.toString() ?? _actualFfCtrl.text;
+      _actualSfCtrl.text = data['actualSf']?.toString() ?? _actualSfCtrl.text;
+
+      // Value fields
+      _landValueAppCtrl.text =
+          data['landValueApp']?.toString() ?? _landValueAppCtrl.text;
+      _landValueGuideCtrl.text =
+          data['landValueGuide']?.toString() ?? _landValueGuideCtrl.text;
+      _landValueMarketCtrl.text =
+          data['landValueMarket']?.toString() ?? _landValueMarketCtrl.text;
+      _buildingStageValueAppCtrl.text =
+          data['buildingStageValueApp']?.toString() ??
+              _buildingStageValueAppCtrl.text;
+      _buildingCompletionValueCtrl.text =
+          data['buildingCompletionValue']?.toString() ??
+              _buildingCompletionValueCtrl.text;
+
+      // Other fields
+      _marketValueSourceCtrl.text =
+          data['marketValueSource'] ?? _marketValueSourceCtrl.text;
+      _buildingUsageCtrl.text =
+          data['buildingUsage'] ?? _buildingUsageCtrl.text;
+      _certificatePlaceCtrl.text =
+          data['certificatePlace'] ?? _certificatePlaceCtrl.text;
+
+      // Date fields
+      if (data['inspectionDate'] != null) {
+        try {
+          _inspectionDate = DateTime.parse(data['inspectionDate']);
+        } catch (e) {
+          debugPrint('Error parsing inspection date: $e');
+        }
+      }
+
+      debugPrint('Form initialized with property data');
+    } else {
+      debugPrint('No property data - form will use default values');
     }
   }
 
@@ -590,12 +819,12 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _nearbyLatitude,
-                      decoration: InputDecoration(labelText: 'Latitude'),
+                      decoration: const InputDecoration(labelText: 'Latitude'),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _nearbyLongitude,
-                      decoration: InputDecoration(labelText: 'Longitude'),
+                      decoration: const InputDecoration(labelText: 'Longitude'),
                     ),
                     const SizedBox(height: 8),
                     Center(
@@ -609,7 +838,7 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
                               icon: const Icon(Icons.my_location),
                               label: const Text('Get Current Location'),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 50,
                             ),
                             ElevatedButton.icon(
@@ -622,8 +851,8 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
                                 }));
                               } */
                                   _getNearbyProperty,
-                              label: Text('Search'),
-                              icon: Icon(Icons.search),
+                              label: const Text('Search'),
+                              icon: const Icon(Icons.search),
                             )
                           ],
                         ),
@@ -1146,8 +1375,8 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton.extended(
-            icon: Icon(Icons.search),
-            label: Text('Search Saved Drafts'),
+            icon: const Icon(Icons.search),
+            label: const Text('Search Saved Drafts'),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
                 return SavedDrafts();
