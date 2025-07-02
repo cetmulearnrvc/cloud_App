@@ -3,6 +3,7 @@ import 'package:login_screen/screens/Federal/federal.dart';
 import 'package:login_screen/screens/IDBI/valuation_form_ui.dart';
 import 'package:login_screen/screens/LIC/pvr1/valuation_form_screen_pvr1.dart';
 import 'package:login_screen/screens/LIC/pvr3/valuation_form_screen.dart';
+import 'package:login_screen/screens/SIB/Flat/valuation_form.dart';
 import 'package:login_screen/screens/location.dart';
 import 'package:login_screen/screens/Federal/federal.dart';
 
@@ -230,9 +231,13 @@ class LoanType extends StatelessWidget {
               );
             }).toList(),
             onChanged: (value) {
-              Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                return LocationScreen();
+              if(value?['title']=='VALUATION REPORT (IN RESPECT OF FLATS)')
+              {
+                Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
+                return SIBValuationFormScreen();
               }));
+              }
+              
             }),
       ],
     );

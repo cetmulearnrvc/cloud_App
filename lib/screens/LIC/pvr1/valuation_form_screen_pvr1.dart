@@ -224,7 +224,7 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
       debugPrint("send req to back");
 
       if (context.mounted) Navigator.of(context).pop();
-
+      // debugPrint("${response.statusCode}");
       if (response.statusCode == 200) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -1162,6 +1162,14 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
               label: const Text('Generate PDF'),
               onPressed: () {
                 _generatePdf();
+              }),
+              const SizedBox(
+            height: 10,
+          ),
+              FloatingActionButton.extended(
+              icon: const Icon(Icons.picture_as_pdf),
+              label: const Text('Save data'),
+              onPressed: () {
                 _saveData();
               }),
         ],

@@ -172,9 +172,6 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
     return input.replaceAll('–', '-');
   }
 
-  // In lib/valuation_form.dart -> inside _ValuationFormScreenState
-
-// NEW METHOD to get the location for the main property
   Future<void> _getNearbyLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
