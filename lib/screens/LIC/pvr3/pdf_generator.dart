@@ -122,7 +122,7 @@ pw.Page _buildPage3(ValuationData data) {
           _buildSectionHeader('9. CERTIFICATE'),
           pw.SizedBox(height: 7),
           pw.Text('I declare that I am not associated with the builder or with any of his associate companies or with the borrower directly or indirectly in the past or in the present and this report has been prepared by me with highest professional integrity.',
-          style: pw.TextStyle(fontSize: 9)),
+          style: const pw.TextStyle(fontSize: 9)),
           pw.Spacer(),
           pw.Align(
               alignment: pw.Alignment.centerRight,
@@ -178,7 +178,7 @@ pw.Widget _buildHeader() => pw.Column(children: [
             child: pw.Column(children: [
           pw.Text('LIC HOUSING FINANCE LIMITED',
               style: pw.TextStyle(fontWeight: pw.FontWeight.bold,fontSize: 10)),
-          pw.Text('AREA OFFICE: THIRUVANANTHAPURAM',style: pw.TextStyle(fontSize: 10)),
+          pw.Text('AREA OFFICE: THIRUVANANTHAPURAM',style: const pw.TextStyle(fontSize: 10)),
           pw.SizedBox(height: 5),
           pw.Text('VALUATION REPORT BY PANEL VALUER FOR HOME LOAN',
               style: const pw.TextStyle(decoration: pw.TextDecoration.underline,fontSize: 10)),
@@ -198,22 +198,22 @@ pw.Table _buildInfoTable(ValuationData data, DateFormat dateFormat) => pw.Table(
       },
       children: [
         pw.TableRow(
-            children: [pw.Text(' * File no.',style: pw.TextStyle(fontSize: 9)), pw.Text(': ${data.fileNo}',style: pw.TextStyle(fontSize: 9))]),
+            children: [pw.Text(' * File no.',style: const pw.TextStyle(fontSize: 9)), pw.Text(': ${data.fileNo}',style: const pw.TextStyle(fontSize: 9))]),
         pw.TableRow(children: [
-          pw.Text(' * Name of the Valuer',style: pw.TextStyle(fontSize: 9)),
-          pw.Text(': ${data.valuerName} (${data.valuerCode})',style: pw.TextStyle(fontSize: 9))
+          pw.Text(' * Name of the Valuer',style: const pw.TextStyle(fontSize: 9)),
+          pw.Text(': ${data.valuerName} (${data.valuerCode})',style: const pw.TextStyle(fontSize: 9))
         ]),
         pw.TableRow(children: [
-          pw.Text(' Appointing Authority',style: pw.TextStyle(fontSize: 9)),
-          pw.Text(': ${data.appointingAuthority}',style: pw.TextStyle(fontSize: 9))
+          pw.Text(' Appointing Authority',style: const pw.TextStyle(fontSize: 9)),
+          pw.Text(': ${data.appointingAuthority}',style: const pw.TextStyle(fontSize: 9))
         ]),
         pw.TableRow(children: [
-          pw.Text(' Date of Inspection',style: pw.TextStyle(fontSize: 9)),
-          pw.Text(': ${dateFormat.format(data.inspectionDate)}',style: pw.TextStyle(fontSize: 9))
+          pw.Text(' Date of Inspection',style: const pw.TextStyle(fontSize: 9)),
+          pw.Text(': ${dateFormat.format(data.inspectionDate)}',style: const pw.TextStyle(fontSize: 9))
         ]),
         pw.TableRow(children: [
-          pw.Text(' RERA NO. (For Flats)',style: pw.TextStyle(fontSize: 9)),
-          pw.Text(': ${data.reraNo}',style: pw.TextStyle(fontSize: 9))
+          pw.Text(' RERA NO. (For Flats)',style: const pw.TextStyle(fontSize: 9)),
+          pw.Text(': ${data.reraNo}',style: const pw.TextStyle(fontSize: 9))
         ]),
       ],
     );
@@ -549,7 +549,7 @@ pw.Widget _buildImprovementDetails(
 pw.Widget _buildProgressOfWorkTable(ValuationData data, NumberFormat currencyFormat) {
   final headerStyle = pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9);
   final subHeaderStyle = pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8);
-  final cellStyle = const pw.TextStyle(fontSize: 9);
+  const cellStyle = pw.TextStyle(fontSize: 9);
   const cellPadding = pw.EdgeInsets.all(3);
 
   // Define column widths that will be used by both header and data tables to ensure alignment.
