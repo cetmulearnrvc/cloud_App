@@ -15,7 +15,7 @@ export async function searchByDate(req,res){
 
     const docs = await pvr1.find({
     updatedAt: { $gte: start, $lte: end }
-    }).select('fileNo typo propertyLocation ownerName');
+    });
 
     res.status(200).json(docs)
 
