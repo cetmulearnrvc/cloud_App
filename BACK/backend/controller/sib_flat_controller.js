@@ -1,0 +1,162 @@
+import SIBValuationFlat from "../models/flat_sib_model.js";
+
+import mongoose from "mongoose";
+
+export const saveFlatData = async (req, res) => {
+  console.log('A post req received');
+  console.log(req.body);
+
+  const flatData = req.body;
+  flatData.typo = 'sibFlat';
+
+  // Validate images metadata
+  let imagesMeta = [];
+  try {
+    imagesMeta = JSON.parse(flatData.images);
+  } catch (err) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid images metadata format"
+    });
+  }
+
+  // Process uploaded images
+  flatData.images = [];
+  if (req.files && req.files.length > 0) {
+    for (let i = 0; i < req.files.length; i++) {
+      const file = req.files[i];
+      const meta = imagesMeta[i] || {};
+
+      const imageData = {
+        fileName: file.filename,
+        filePath: file.path,
+        latitude: meta.latitude ? parseFloat(meta.latitude) : null,
+        longitude: meta.longitude ? parseFloat(meta.longitude) : null
+      };
+
+      flatData.images.push(imageData);
+    }
+  } else {
+    return res.status(400).json({
+      success: false,
+      message: "Please add at least one image"
+    });
+  }
+
+  try {
+    const existingDoc = await SIBValuationFlat.findOne({ refNo: flatData.refNo });
+
+    let savedDoc;
+    if (existingDoc) {
+      // If document with same refNo exists ➔ Overwrite (Update)
+      savedDoc = await SIBValuationFlat.findOneAndUpdate(
+        { refNo: flatData.refNo },
+        { $set: flatData },
+        { new: true }  // Return the updated document
+      );
+      console.log('Document updated:', savedDoc._id);
+      res.status(200).json({ status: true, data: savedDoc, message: "Existing record updated successfully" });
+
+    } else {
+      // If not exists ➔ Create new
+      const newFlatData = new SIBValuationFlat(flatData);
+      savedDoc = await newFlatData.save();
+      console.log('New document created:', savedDoc._id);
+      res.status(201).json({ status: true, data: savedDoc, message: "New record created successfully" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ status: false, message: "Server error" });
+  }
+};
+
+
+export const getNearbyFlat = async(req,res)=>{
+
+  console.log("A nearby Search received")
+  const {latitude,longitude} = req.body
+  const lat1=latitude;
+  const lon1=longitude;
+
+  console.log(lat1,lon1)
+  let dis=100000;
+  const responseData=[];
+
+  const cursor=SIBValuationFlat.find()
+
+  for await(const doc of cursor)
+  {   
+      doc.images.forEach((img, index) => {
+
+  if (img.latitude && img.longitude) {
+
+    const lat2=parseFloat(img.latitude);
+    const lon2=parseFloat(img.longitude);
+    
+    dis=haversineDistance(lat1,lon1,lat2,lon2)
+    
+
+    if (dis <= 100) {
+        responseData.push({
+          distance:dis,
+          latitude:lat2,
+          longitude:lon2,
+          marketValue:doc.presentMarketValue || 0
+        });
+      }
+    
+  }
+  }); 
+  }
+
+  console.log(responseData)
+
+  return res.status(200).json(responseData)
+  
+}
+
+function toRadians(degrees) {
+  return degrees * (Math.PI / 180);
+}
+
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth's radius in kilometers
+
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+
+  const radLat1 = toRadians(lat1);
+  const radLat2 = toRadians(lat2);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(radLat1) * Math.cos(radLat2) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; // distance in km
+}
+
+
+export async function searchByDate(req,res){
+
+    const {date}=req.body
+
+    console.log(date)
+
+    const targetDate = new Date(date);
+
+    // Start of day (UTC)
+    const start = new Date(targetDate.setUTCHours(0, 0, 0, 0));
+    // End of day (UTC)
+    const end = new Date(targetDate.setUTCHours(23, 59, 59, 999));
+
+    const docs = await pvr1.find({
+    updatedAt: { $gte: start, $lte: end }
+    }).select('refNo typo docLocationSketch nameOfOwner');
+
+    res.status(200).json(docs)
+
+    
+}

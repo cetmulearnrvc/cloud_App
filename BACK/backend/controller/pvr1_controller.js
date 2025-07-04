@@ -6,9 +6,6 @@ export const savePVR1Data = async(req,res)=>{
     console.log("A post req received");
     console.log(req.body); 
     
-
-    
-    
     const pvr1Data=req.body;
     pvr1Data.typo="pvr1"
     if(!pvr1Data.valuerName || !pvr1Data.valuationCode || !pvr1Data.fileNo || !pvr1Data.applicantName || !pvr1Data.ownerName || !pvr1Data.propertyLocation )
@@ -93,7 +90,7 @@ export const getNearbyPVR1 = async(req,res)=>{
           distance:dis,
           latitude:lat2,
           longitude:lon2,
-          marketValue:doc.marketValue || 0
+          marketValue:doc.landValueMarket || 0
         });
       }
     
@@ -131,4 +128,3 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 
   return R * c; // distance in km
 }
-

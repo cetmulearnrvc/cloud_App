@@ -1,5 +1,8 @@
 // lib/valuation_form_sib.dart
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +11,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:login_screen/screens/SIB/Flat/config.dart';
 import 'package:login_screen/screens/SIB/Flat/data_model.dart';
 import 'package:login_screen/screens/SIB/Flat/pdf_generator.dart';
+import 'package:login_screen/screens/nearbyDetails.dart';
+import 'package:login_screen/screens/savedDrafts.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
@@ -260,6 +265,69 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
       );
     }
   }
+
+  Future<void> _getNearbyProperty() async {
+    final latitude = _controllers['nearbyLatitude']!.text.trim();
+    final longitude = _controllers['nearbyLongitude']!.text.trim();
+
+    debugPrint(latitude);
+
+    if (latitude.isEmpty || longitude.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Please enter both latitude and longitude')),
+      );
+      return;
+    }
+
+    try {
+      final url = Uri.parse(url2);
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'latitude': latitude,
+          'longitude': longitude,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Decode the JSON response (assuming it's an array)
+        final List<dynamic> responseData = jsonDecode(response.body);
+
+        // Debug print the array
+        debugPrint('Response Data (Array):');
+        for (var item in responseData) {
+          debugPrint(item.toString()); // Print each item in the array
+        }
+
+        if (context.mounted) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (ctx) => Nearbydetails(responseData: responseData),
+            ),
+          );
+        }
+      }
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Nearby properties fetched successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+
   Future<void> _saveData() async{
 
     try
@@ -276,6 +344,27 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
   _controllers.map((key, controller) => MapEntry(key, controller.text)),
 );
 
+    List<Map<String, String>> imageMetadata = [];
+
+      for (int i = 0; i < _valuationImages.length; i++) {
+        final image = _valuationImages[i];
+        final imageBytes = image.imageFile is File
+            ? await (image.imageFile as File).readAsBytes()
+            : image.imageFile;
+
+        request.files.add(http.MultipartFile.fromBytes(
+          'images', // Field name for array of images
+          imageBytes,
+          filename: 'property_${_controllers['refNo']!.text}_$i.jpg',
+        ));
+
+        imageMetadata.add({
+          "latitude": image.latitude.toString(),
+          "longitude": image.longitude.toString(),
+        });
+
+        request.fields['images'] = jsonEncode(imageMetadata);
+      }
 
     final response = await request.send();
 
@@ -283,7 +372,7 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
 
       if (context.mounted) Navigator.of(context).pop();
       // debugPrint("${response.statusCode}");
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Data saved successfully!')));
@@ -292,7 +381,7 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
       else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Upload failed: ${response.reasonPhrase}')));
+              content: Text('Upload failed: ${response.statusCode}')));
         }
       }
     }
@@ -305,6 +394,7 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
       }
     }
   }
+
   Future<void> _getNearbyLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -476,7 +566,7 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
-                      controller: _controllers['nearbyLatitude'],
+                      controller: _controllers['nearbyLongitude'],
                       decoration: InputDecoration(labelText: 'Longitude'),
                     ),
                     const SizedBox(height: 8),
@@ -503,7 +593,7 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                                       longitude: _nearbyLongitude.text);
                                 }));
                               } */
-                                  _getNearbyLocation,
+                                  _getNearbyProperty,
                               label: Text('Search'),
                               icon: Icon(Icons.search),
                             )
@@ -758,11 +848,32 @@ GridView.builder(
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _generatePdf,
+      
+      
+      floatingActionButton: Column(
+        children: [
+          FloatingActionButton.extended(
+        onPressed: _saveData,
         icon: const Icon(Icons.picture_as_pdf),
-        label: const Text('Generate PDF'),
+        label: const Text('Save'),),
+        
+          FloatingActionButton.extended(
+            onPressed: _generatePdf,
+            icon: const Icon(Icons.picture_as_pdf),
+            label: const Text('Generate PDF'),
+          ),
+          FloatingActionButton.extended(
+            icon: const Icon(Icons.search),
+            label: const Text('Search Saved Drafts'),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                return SavedDrafts();
+              }));
+            },
+          ),
+        ],
       ),
+
     );
   }
 

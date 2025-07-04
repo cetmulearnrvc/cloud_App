@@ -96,6 +96,7 @@ const pvr1Schema = new mongoose.Schema({
     landValueMarket: String,
     buildingStageValueApp: String,
     buildingStageValueGuide: String,
+    
     buildingStageValueMarket: String,
     buildingCompletionValue: String,
     marketValueSource: String,
