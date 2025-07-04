@@ -415,7 +415,10 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
       final data = widget.propertyData!;
 
       // Basic information
-      _valuerNameCtrl.text = data['valuerName'].toString();
+      _valuerCodeCtrl.text =
+          data["valuationCode"].toString() ?? _valuerCodeCtrl.text;
+      _valuerNameCtrl.text =
+          data['valuerName'].toString() ?? _valuerNameCtrl.text;
       _fileNoCtrl.text = data['fileNo']?.toString() ?? _fileNoCtrl.text;
       _applicantNameCtrl.text =
           data['applicantName'] ?? _applicantNameCtrl.text;
@@ -461,14 +464,14 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
       // Boundary fields
       _northBoundaryCtrl.text =
           data['northBoundary'] ?? _northBoundaryCtrl.text;
-      _northDimCtrl.text = data['northDim'] ?? _northDimCtrl.text;
+      _northDimCtrl.text = data['northDimension'] ?? _northDimCtrl.text;
       _southBoundaryCtrl.text =
           data['southBoundary'] ?? _southBoundaryCtrl.text;
-      _southDimCtrl.text = data['southDim'] ?? _southDimCtrl.text;
+      _southDimCtrl.text = data['southDimension'] ?? _southDimCtrl.text;
       _eastBoundaryCtrl.text = data['eastBoundary'] ?? _eastBoundaryCtrl.text;
-      _eastDimCtrl.text = data['eastDim'] ?? _eastDimCtrl.text;
+      _eastDimCtrl.text = data['eastDimension'] ?? _eastDimCtrl.text;
       _westBoundaryCtrl.text = data['westBoundary'] ?? _westBoundaryCtrl.text;
-      _westDimCtrl.text = data['westDim'] ?? _westDimCtrl.text;
+      _westDimCtrl.text = data['westDimension'] ?? _westDimCtrl.text;
 
       // Land and building details
       _totalExtent1Ctrl.text =
@@ -489,14 +492,45 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
 
       // Area fields
       _approvedGfCtrl.text =
-          data['approvedGf']?.toString() ?? _approvedGfCtrl.text;
+          data['approvedGF']?.toString() ?? _approvedGfCtrl.text;
       _approvedFfCtrl.text =
-          data['approvedFf']?.toString() ?? _approvedFfCtrl.text;
+          data['approvedFF']?.toString() ?? _approvedFfCtrl.text;
       _approvedSfCtrl.text =
-          data['approvedSf']?.toString() ?? _approvedSfCtrl.text;
-      _actualGfCtrl.text = data['actualGf']?.toString() ?? _actualGfCtrl.text;
-      _actualFfCtrl.text = data['actualFf']?.toString() ?? _actualFfCtrl.text;
-      _actualSfCtrl.text = data['actualSf']?.toString() ?? _actualSfCtrl.text;
+          data['approvedSF']?.toString() ?? _approvedSfCtrl.text;
+      _actualGfCtrl.text = data['actualGF']?.toString() ?? _actualGfCtrl.text;
+      _actualFfCtrl.text = data['actualFF']?.toString() ?? _actualFfCtrl.text;
+      _actualSfCtrl.text = data['actualSF']?.toString() ?? _actualSfCtrl.text;
+
+      //Construction details
+      _plinthApprovedCtrl.text =
+          data['plinthApproved']?.toString() ?? _plinthApprovedCtrl.text;
+      _plinthActualCtrl.text =
+          data['plinthActual']?.toString() ?? _plinthActualCtrl.text;
+      _fsiCtrl.text = data['fsi']?.toString() ?? _fsiCtrl.text;
+      _dwellingUnitsCtrl.text =
+          data['dwellingUnits']?.toString() ?? _dwellingUnitsCtrl.text;
+      _deviationsCtrl.text =
+          data['deviations']?.toString() ?? _deviationsCtrl.text;
+      _deviationNatureCtrl.text =
+          data['deviationNature']?.toString() ?? _deviationNatureCtrl.text;
+      _stageOfConstructionCtrl.text = data['stageOfConstruction']?.toString() ??
+          _stageOfConstructionCtrl.text;
+      _progressPercentageCtrl.text = data['progressPercentage']?.toString() ??
+          _progressPercentageCtrl.text;
+
+      // Works Completed
+      _worksCompletedPercentageCtrl.text =
+          data['worksCompletedPercentage']?.toString() ??
+              _worksCompletedPercentageCtrl.text;
+      _worksCompletedValue.text =
+          data['worksCompletedValue']?.toString() ?? _worksCompletedValue.text;
+
+      _estimateCostCtrl.text =
+          data['estimateCost']?.toString() ?? _estimateCostCtrl.text;
+      _costPerSqFtCtrl.text =
+          data['costPerSqFt']?.toString() ?? _costPerSqFtCtrl.text;
+      _marketabilityCtrl.text =
+          data['marketability']?.toString() ?? _marketabilityCtrl.text;
 
       // Value fields
       _landValueAppCtrl.text =
@@ -508,9 +542,27 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
       _buildingStageValueAppCtrl.text =
           data['buildingStageValueApp']?.toString() ??
               _buildingStageValueAppCtrl.text;
+      _buildingStageValueGuide.text =
+          data['buildingStageValueGuide']?.toString() ??
+              _buildingStageValueGuide.text;
+      _buildingStageValueMarket.text =
+          data['buildingStageValueMarket']?.toString() ??
+              _buildingStageValueMarket.text;
       _buildingCompletionValueCtrl.text =
           data['buildingCompletionValue']?.toString() ??
               _buildingCompletionValueCtrl.text;
+
+      //Recomended fields
+      _recBackgroundCtrl.text =
+          data['recBackground']?.toString() ?? _recBackgroundCtrl.text;
+      _recSourcesCtrl.text =
+          data['recSources']?.toString() ?? _recSourcesCtrl.text;
+      _recProceduresCtrl.text =
+          data['recProcedures']?.toString() ?? _recProceduresCtrl.text;
+      _recMethodologyCtrl.text =
+          data['recMethodology']?.toString() ?? _recMethodologyCtrl.text;
+      _recFactorsCtrl.text =
+          data['recFactors']?.toString() ?? _recFactorsCtrl.text;
 
       // Other fields
       _marketValueSourceCtrl.text =
@@ -519,6 +571,50 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
           data['buildingUsage'] ?? _buildingUsageCtrl.text;
       _certificatePlaceCtrl.text =
           data['certificatePlace'] ?? _certificatePlaceCtrl.text;
+
+      // Annexure Details
+      _annexLandAreaCtrl.text =
+          data['annexLandArea']?.toString() ?? _annexLandAreaCtrl.text;
+      _annexLandUnitRateMarketCtrl.text =
+          data['annexLandUnitRateMarket']?.toString() ??
+              _annexLandUnitRateMarketCtrl.text;
+      _annexLandUnitRateGuideCtrl.text =
+          data['annexLandUnitRateGuide']?.toString() ??
+              _annexLandUnitRateGuideCtrl.text;
+      _annexGfAreaCtrl.text =
+          data['annexGFArea']?.toString() ?? _annexGfAreaCtrl.text;
+      _annexGfUnitRateMarketCtrl.text =
+          data['annexGFUnitRateMarket']?.toString() ??
+              _annexGfUnitRateMarketCtrl.text;
+      _annexGfUnitRateGuideCtrl.text =
+          data['annexGFUnitRateGuide']?.toString() ??
+              _annexGfUnitRateGuideCtrl.text;
+      _annexFfAreaCtrl.text =
+          data['annexFFArea']?.toString() ?? _annexFfAreaCtrl.text;
+      _annexFfUnitRateMarketCtrl.text =
+          data['annexFFUnitRateMarket']?.toString() ??
+              _annexFfUnitRateMarketCtrl.text;
+      _annexFfUnitRateGuideCtrl.text =
+          data['annexFFUnitRateGuide']?.toString() ??
+              _annexFfUnitRateGuideCtrl.text;
+      _annexSfAreaCtrl.text =
+          data['annexSFArea']?.toString() ?? _annexSfAreaCtrl.text;
+      _annexSfUnitRateMarketCtrl.text =
+          data['annexSFUnitRateMarket']?.toString() ??
+              _annexSfUnitRateMarketCtrl.text;
+      _annexSfUnitRateGuideCtrl.text =
+          data['annexSFUnitRateGuide']?.toString() ??
+              _annexSfUnitRateGuideCtrl.text;
+      _annexAmenitiesMarketCtrl.text =
+          data['annexAmenitiesMarket']?.toString() ??
+              _annexAmenitiesMarketCtrl.text;
+      _annexAmenitiesGuideCtrl.text = data['annexAmenitiesGuide']?.toString() ??
+          _annexAmenitiesGuideCtrl.text;
+      _annexYearOfConstructionCtrl.text =
+          data['annexYearOfConstruction']?.toString() ??
+              _annexYearOfConstructionCtrl.text;
+      _annexBuildingAgeCtrl.text =
+          data['annexBuildingAge']?.toString() ?? _annexBuildingAgeCtrl.text;
 
       // Date fields
       if (data['inspectionDate'] != null) {
@@ -1392,10 +1488,10 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
               onPressed: () {
                 _generatePdf();
               }),
-              const SizedBox(
+          const SizedBox(
             height: 10,
           ),
-              FloatingActionButton.extended(
+          FloatingActionButton.extended(
               icon: const Icon(Icons.picture_as_pdf),
               label: const Text('Save data'),
               onPressed: () {
