@@ -1,18 +1,23 @@
 // lib/valuation_form_screen_pvr1.dart
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart'; // Import for location
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:login_screen/screens/nearbyDetails.dart';
 import 'package:login_screen/screens/savedDrafts.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'valuation_data_model_pvr1.dart';
 import 'pdf_generator_pvr1.dart';
 import 'package:http/http.dart' as http;
 import 'config.dart';
+// ignore: depend_on_referenced_packages
+import 'package:path/path.dart' as path;
 
 class ValuationFormScreenPVR1 extends StatefulWidget {
   final Map<String, dynamic>? propertyData;
@@ -410,7 +415,28 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
     }
   }
 
-  void _initializeFormWithPropertyData() {
+  Future<Uint8List> fetchImage(String imageUrl) async {
+    try {
+      debugPrint("Attempting to fetch image from: $imageUrl");
+      final response = await http.get(Uri.parse(imageUrl));
+
+      debugPrint("Response status: ${response.statusCode}");
+      debugPrint("Response headers: ${response.headers}");
+
+      if (response.statusCode == 200) {
+        debugPrint(
+            "Successfully fetched image (bytes length: ${response.bodyBytes.length})");
+        return response.bodyBytes;
+      } else {
+        throw Exception('Failed to load image: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint("Error details: $e");
+      throw Exception('Error fetching image: $e');
+    }
+  }
+
+  void _initializeFormWithPropertyData() async {
     if (widget.propertyData != null) {
       final data = widget.propertyData!;
 
@@ -615,6 +641,36 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
               _annexYearOfConstructionCtrl.text;
       _annexBuildingAgeCtrl.text =
           data['annexBuildingAge']?.toString() ?? _annexBuildingAgeCtrl.text;
+
+      try {
+        // Check if the property data contains image information
+        if (data['images'] != null && data['images'] is List) {
+          final List<dynamic> imagesData = data['images'];
+
+          for (var imgData in imagesData) {
+            try {
+              // Construct the image URL based on your server configuration
+              String imageUrl =
+                  'http://192.168.29.100:3000/uploads/${imgData['fileName']}';
+              debugPrint("Fetching image from: $imageUrl");
+
+              Uint8List imageBytes = await fetchImage(imageUrl);
+
+              _valuationImages.add(ValuationImage(
+                imageFile: imageBytes,
+                latitude: imgData['latitude']?.toString() ?? '',
+                longitude: imgData['longitude']?.toString() ?? '',
+              ));
+            } catch (e) {
+              debugPrint('Error loading image: $e');
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Error initializing images: $e');
+      }
+
+      if (mounted) setState(() {});
 
       // Date fields
       if (data['inspectionDate'] != null) {
@@ -1475,7 +1531,7 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
             label: const Text('Search Saved Drafts'),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-                return SavedDrafts();
+                return const SavedDrafts();
               }));
             },
           ),

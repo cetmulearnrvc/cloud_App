@@ -2,6 +2,7 @@ import app from "./app.js"
 import dotenv from "dotenv"
 import { connectDB } from "./db.js";
 import pvr1_router from "./router/pvr1router.js";
+import pvr3_router from "./router/pvr3router.js";
 
 
 dotenv.config();
@@ -11,6 +12,8 @@ app.get('/',(req,res)=>{
 })
 
 app.use('/api/v1',pvr1_router)
+
+app.use('/api/v1',pvr3_router);
 
 app.listen(3000,()=>
 {

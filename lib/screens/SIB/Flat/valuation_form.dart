@@ -12,7 +12,7 @@ import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
 class SIBValuationFormScreen extends StatefulWidget {
-  const SIBValuationFormScreen({Key? key}) : super(key: key);
+  const SIBValuationFormScreen({super.key});
 
   @override
   _SIBValuationFormScreenState createState() => _SIBValuationFormScreenState();
@@ -472,12 +472,12 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _controllers['nearbyLatitude'],
-                      decoration: InputDecoration(labelText: 'Latitude'),
+                      decoration: const InputDecoration(labelText: 'Latitude'),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _controllers['nearbyLatitude'],
-                      decoration: InputDecoration(labelText: 'Longitude'),
+                      decoration: const InputDecoration(labelText: 'Longitude'),
                     ),
                     const SizedBox(height: 8),
                     Center(
@@ -491,7 +491,7 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                               icon: const Icon(Icons.my_location),
                               label: const Text('Get Current Location'),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 50,
                             ),
                             ElevatedButton.icon(
@@ -504,8 +504,8 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                                 }));
                               } */
                                   _getNearbyLocation,
-                              label: Text('Search'),
-                              icon: Icon(Icons.search),
+                              label: const Text('Search'),
+                              icon: const Icon(Icons.search),
                             )
                           ],
                         ),
@@ -738,11 +738,11 @@ GridView.builder(
                   height: 30, // Give the button a fixed, smaller height
                   child: ElevatedButton(
                     onPressed: () => _getCurrentLocation(index),
-                    child: const Text('Get Location', style: TextStyle(fontSize: 12)),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
+                    child: const Text('Get Location', style: TextStyle(fontSize: 12)),
                   ),
                 ),
               ],
@@ -793,7 +793,7 @@ GridView.builder(
                 Padding(padding: const EdgeInsets.all(4.0), child: TextFormField(initialValue: item.ratePerUnit, onChanged: (val) => item.ratePerUnit = val, decoration: const InputDecoration(border: InputBorder.none))),
                 Padding(padding: const EdgeInsets.all(4.0), child: TextFormField(initialValue: item.estimatedValue, onChanged: (val) => item.estimatedValue = val, decoration: const InputDecoration(border: InputBorder.none))),
               ]);
-            }).toList(),
+            }),
           ],
         ),
       ],

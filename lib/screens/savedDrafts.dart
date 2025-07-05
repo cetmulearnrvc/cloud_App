@@ -54,7 +54,6 @@ class _SavedDraftsState extends State<SavedDrafts> {
 
   void navigateToValuationForm(Map<String, dynamic> propertyData) {
     final detail = jsonEncode(propertyData);
-    debugPrint(detail);
     Navigator.push(
       context,
       MaterialPageRoute(

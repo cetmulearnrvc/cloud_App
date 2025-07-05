@@ -18,14 +18,17 @@ export const savePVR1Data = async(req,res)=>{
     }
 
     let imagesMeta = [];
-        try {
+    if(pvr1Data.images)
+    {
+      try {
             imagesMeta = JSON.parse(pvr1Data.images);
-        } catch (err) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid images metadata format"
-            });
-        }
+          } catch (err) {
+              return res.status(400).json({
+                  success: false,
+                  message: "Invalid images metadata format"
+              });
+          }
+    }
 
 
      pvr1Data.images = [];
@@ -45,17 +48,25 @@ export const savePVR1Data = async(req,res)=>{
         console.log(imageData.latitude)
         pvr1Data.images.push(imageData);
       }
-    } else {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Please add at least one image" 
-      });
     }
 
-    const newPVR1Data=new pvr1(pvr1Data);
+    /* const newPVR1Data=new pvr1(pvr1Data); */
+
+    
+
     try{
-        await newPVR1Data.save();
-        res.status(201).json({status:true,data:newPVR1Data})
+        const newPVR1Data = await pvr1.findOneAndUpdate(
+          { fileNo: pvr1Data.fileNo },
+          { 
+              $set: { ...pvr1Data, images: undefined }, // Set all other fields except images
+              $push: { images: { $each: pvr1Data.images } } // Append new images to array
+          },
+          {
+              upsert: true,
+              new: true
+          }
+      );
+      res.status(201).json({status:true, data:newPVR1Data});
     }
     catch(err)
     {

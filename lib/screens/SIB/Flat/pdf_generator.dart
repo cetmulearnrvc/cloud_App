@@ -454,7 +454,7 @@ _buildTableRow('', 'Extract Amenities If any', ': ${data.facilitiesExtraAmenitie
             pw.Text('Details of Valuation:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                pw.Table(
                   border: pw.TableBorder.all(),
-                  columnWidths: {0: pw.FlexColumnWidth(1), 1: pw.FlexColumnWidth(4), 2: pw.FlexColumnWidth(2), 3: pw.FlexColumnWidth(2), 4: pw.FlexColumnWidth(2)},
+                  columnWidths: {0: const pw.FlexColumnWidth(1), 1: const pw.FlexColumnWidth(4), 2: const pw.FlexColumnWidth(2), 3: const pw.FlexColumnWidth(2), 4: const pw.FlexColumnWidth(2)},
                   children: [
                     pw.TableRow(children: [
                       _headerCell('Sr.No'), _headerCell('Description'), _headerCell('Area in Sqft'), _headerCell('Rate Per unit Rs'), _headerCell('Estimated Rs.')
@@ -465,7 +465,7 @@ _buildTableRow('', 'Extract Amenities If any', ': ${data.facilitiesExtraAmenitie
                       return pw.TableRow(children: [
                         _dataCell((idx + 1).toString()), _dataCell(item.description), _dataCell(item.area), _dataCell(item.ratePerUnit), _dataCell(item.estimatedValue)
                       ]);
-                    }).toList(),
+                    }),
                     pw.TableRow(children: [
                        _dataCell(''), _dataCell('Total', bold: true), _dataCell(''), _dataCell(''), _dataCell('') // You'd calculate totals here
                     ])
@@ -482,9 +482,9 @@ _buildTableRow('', 'Extract Amenities If any', ': ${data.facilitiesExtraAmenitie
             // pw.SizedBox(height: ),
             // pw.Text(data.valuationApproach, style:  pw.TextStyle(fontSize: 10, fontStyle: pw.FontStyle.italic)),
             pw.SizedBox(height: 10),
-            pw.Text('Photograph of owner/representative with property in background to be enclosed.',style: pw.TextStyle(fontSize: 10)),
+            pw.Text('Photograph of owner/representative with property in background to be enclosed.',style: const pw.TextStyle(fontSize: 10)),
             pw.SizedBox(height: 10),
-            pw.Text('Screen shot of longitude/latitude and co-ordinates of property using GPS/Various Apps/Internet sites',style: pw.TextStyle(fontSize: 10)),
+            pw.Text('Screen shot of longitude/latitude and co-ordinates of property using GPS/Various Apps/Internet sites',style: const pw.TextStyle(fontSize: 10)),
             pw.SizedBox(height: 10),
             pw.Text('As a result of my appraisal and analysis, it is my considered opinion that the present value\'s of the above property in the prevailing condition with aforesaid specifications is'),
             pw.SizedBox(height: 10),
@@ -568,7 +568,7 @@ _buildTableRow('', 'Extract Amenities If any', ': ${data.facilitiesExtraAmenitie
           children: [
             pw.Table(
               border: pw.TableBorder.all(),
-              columnWidths: {0: pw.FlexColumnWidth(1), 1: pw.FlexColumnWidth(4), 2: pw.FlexColumnWidth(6)},
+              columnWidths: {0: const pw.FlexColumnWidth(1), 1: const pw.FlexColumnWidth(4), 2: const pw.FlexColumnWidth(6)},
               children: [
                 pw.TableRow(children: [_headerCell('Sl No.'), _headerCell('Particulars'), _headerCell('Valuer comment')]),
                 _finalTableRow('1', 'background information of the asset being valued;', data.p7background),
