@@ -650,8 +650,7 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
           for (var imgData in imagesData) {
             try {
               // Construct the image URL based on your server configuration
-              String imageUrl =
-                  'http://192.168.29.100:3000/uploads/${imgData['fileName']}';
+              String imageUrl = '${url4}${imgData['fileName']}';
               debugPrint("Fetching image from: $imageUrl");
 
               Uint8List imageBytes = await fetchImage(imageUrl);
