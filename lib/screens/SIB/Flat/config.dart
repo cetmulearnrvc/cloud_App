@@ -1,3 +1,6 @@
-const url = "http://192.168.29.78:3000/api/v1/pvr1/generatepdf";
+const url = "http://192.168.1.8:3000/api/v2/flat/savepdf";
+//  https://app-backend-1hc9.onrender.com
+const url2 = "http://192.168.1.8:3000/api/v2/flat/getnearby";
 
-const url2 = "http://192.168.29.46:3000/api/v1/pvr1/getnearby";
+const url3 = "http://192.168.1.8:3000/api/v2/flat/getByDate";
+

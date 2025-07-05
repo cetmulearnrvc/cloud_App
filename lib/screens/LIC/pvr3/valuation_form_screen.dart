@@ -867,13 +867,36 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-          icon: const Icon(Icons.picture_as_pdf),
-          label: const Text('Generate PDF'),
-          onPressed: () {
-            _generatePdf();
-            _saveData();
-          }),
+//       floatingActionButton: FloatingActionButton.extended(
+//           icon: const Icon(Icons.picture_as_pdf),
+//           label: const Text('Generate PDF'),
+//           onPressed: () {
+//             _generatePdf();
+           
+//           }),
+
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            icon: const Icon(Icons.search),
+            label: const Text('Search Saved Drafts'),
+            onPressed: () {},
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          FloatingActionButton.extended(icon: const Icon(Icons.picture_as_pdf), label: const Text('Generate PDF'), onPressed: _generatePdf),
+          const SizedBox(
+            height: 10,
+          ),
+          FloatingActionButton.extended(
+            icon: const Icon(Icons.search),
+            label: const Text('Save Data'),
+            onPressed: _saveData,
+          ),
+        ],
+      ),
     );
   }
 

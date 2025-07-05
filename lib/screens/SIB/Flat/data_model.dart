@@ -13,7 +13,6 @@ class ValuationImage {
 
 class ValuationDetailItem {
 
- 
 
   String description;
   String area;

@@ -1,5 +1,9 @@
 // lib/valuation_form_sib.dart
 
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -8,12 +12,20 @@ import 'package:image_picker/image_picker.dart';
 import 'package:login_screen/screens/SIB/Flat/config.dart';
 import 'package:login_screen/screens/SIB/Flat/data_model.dart';
 import 'package:login_screen/screens/SIB/Flat/pdf_generator.dart';
+import 'package:login_screen/screens/SIB/Flat/savedDrafts.dart';
+import 'package:login_screen/screens/nearbyDetails.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
 class SIBValuationFormScreen extends StatefulWidget {
-  const SIBValuationFormScreen({super.key});
 
+  final Map<String, dynamic>? propertyData;
+
+
+  const SIBValuationFormScreen({
+    super.key,
+    this.propertyData,
+  });
   @override
   _SIBValuationFormScreenState createState() => _SIBValuationFormScreenState();
 }
@@ -33,6 +45,7 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
     _valuationImages = _data.images;
     _valuationDetails = _data.valuationDetails;
     _controllers = _initializeControllers();
+    _initializeFormWithPropertyData();
   }
 
   Map<String, TextEditingController> _initializeControllers() {
@@ -138,6 +151,81 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
       'p7reportPlace': TextEditingController(text: _data.p7reportPlace),
     };
   }
+
+  void _initializeFormWithPropertyData() {
+    print('PROPERTY DATA: ${widget.propertyData}');
+  if (widget.propertyData != null) {
+    final data = widget.propertyData!;
+    print('PROPERTY DATA: $data');
+
+    // Loop over all controllers and set values if present in data
+    _controllers.forEach((key, controller) {
+      if (data.containsKey(key) && data[key] != null) {
+        controller.text = data[key].toString();
+      }
+    });
+
+    // Initialize images if available
+    if (data.containsKey('images') && data['images'] is List) {
+      _valuationImages = (data['images'] as List)
+          .map((img) => ValuationImage(
+                imageFile: Uint8List(0), // Placeholder since images can't be deserialized directly here
+                latitude: img['latitude']?.toString() ?? '',
+                longitude: img['longitude']?.toString() ?? '',
+              ))
+          .toList();
+    }
+
+    // Initialize valuationDetails if available
+    if (data.containsKey('valuationDetails') && data['valuationDetails'] is List) {
+      _valuationDetails = (data['valuationDetails'] as List)
+          .map((item) => ValuationDetailItem(
+                description: item['description'] ?? '',
+                area: item['area'] ?? '',
+                ratePerUnit: item['ratePerUnit'] ?? '',
+                estimatedValue: item['estimatedValue'] ?? '',
+              ))
+          .toList();
+    }
+
+    // Initialize date fields safely
+    // if (data['dateOfInspection'] != null) {
+    //   try {
+    //     _controllers['p7inspections'].text = DateTime.parse(data['dateOfInspection']);
+    //   } catch (e) {
+    //     debugPrint('Invalid dateOfInspection: $e');
+    //   }
+    // }
+
+    // if (data['dateOfValuation'] != null) {
+    //   try {
+    //     _valuationDate = DateTime.parse(data['dateOfValuation']);
+    //   } catch (e) {
+    //     debugPrint('Invalid dateOfValuation: $e');
+    //   }
+    // }
+
+    // if (data['finalValuationDate'] != null) {
+    //   try {
+    //     _finalValuationDate = DateTime.parse(data['finalValuationDate']);
+    //   } catch (e) {
+    //     debugPrint('Invalid finalValuationDate: $e');
+    //   }
+    // }
+
+    // if (data['p7reportDate'] != null) {
+    //   try {
+    //     _p7ReportDate = DateTime.parse(data['p7reportDate']);
+    //   } catch (e) {
+    //     debugPrint('Invalid p7reportDate: $e');
+    //   }
+    // }
+
+    debugPrint('Form initialized with SIB property data');
+  } else {
+    debugPrint('No property data - using default values');
+  }
+}
 
   @override
   void dispose() {
@@ -260,6 +348,73 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
       );
     }
   }
+
+  Future<void> _getNearbyProperty() async {
+    final latitude = _controllers['nearbyLatitude']!.text.trim();
+    final longitude = _controllers['nearbyLongitude']!.text.trim();
+
+    debugPrint(latitude);
+
+    if (latitude.isEmpty || longitude.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Please enter both latitude and longitude')),
+      );
+      return;
+    }
+
+    try {
+      final url = Uri.parse(url2);
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'latitude': latitude,
+          'longitude': longitude,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Decode the JSON response (assuming it's an array)
+        final List<dynamic> responseData = jsonDecode(response.body);
+
+        // Debug print the array
+        debugPrint('Response Data (Array):');
+        for (var item in responseData) {
+          debugPrint(item.toString()); // Print each item in the array
+        }
+
+        if (context.mounted) {
+          // Navigator.of(context).push(
+          //   MaterialPageRoute(
+          //     builder: (ctx) => Nearbydetails(responseData: responseData),
+          //   ),
+          // );
+          showModalBottomSheet(context: context, builder: (ctx)
+          {
+            return Nearbydetails(responseData: responseData);
+          });
+        }
+      }
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Nearby properties fetched successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+
   Future<void> _saveData() async{
 
     try
@@ -276,6 +431,27 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
   _controllers.map((key, controller) => MapEntry(key, controller.text)),
 );
 
+    List<Map<String, String>> imageMetadata = [];
+
+      for (int i = 0; i < _valuationImages.length; i++) {
+        final image = _valuationImages[i];
+        final imageBytes = image.imageFile is File
+            ? await (image.imageFile as File).readAsBytes()
+            : image.imageFile;
+
+        request.files.add(http.MultipartFile.fromBytes(
+          'images', // Field name for array of images
+          imageBytes,
+          filename: 'property_${_controllers['refNo']!.text}_$i.jpg',
+        ));
+
+        imageMetadata.add({
+          "latitude": image.latitude.toString(),
+          "longitude": image.longitude.toString(),
+        });
+
+        request.fields['images'] = jsonEncode(imageMetadata);
+      }
 
     final response = await request.send();
 
@@ -283,7 +459,7 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
 
       if (context.mounted) Navigator.of(context).pop();
       // debugPrint("${response.statusCode}");
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Data saved successfully!')));
@@ -292,7 +468,7 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
       else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Upload failed: ${response.reasonPhrase}')));
+              content: Text('Upload failed: ${response.statusCode}')));
         }
       }
     }
@@ -305,6 +481,7 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
       }
     }
   }
+
   Future<void> _getNearbyLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -476,36 +653,45 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
-                      controller: _controllers['nearbyLatitude'],
-                      decoration: const InputDecoration(labelText: 'Longitude'),
+
+                      controller: _controllers['nearbyLongitude'],
+                      decoration: InputDecoration(labelText: 'Longitude'),
+
                     ),
                     const SizedBox(height: 8),
                     Center(
                         child: Column(
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            ElevatedButton.icon(
-                              onPressed:
-                                  _getNearbyLocation, // Call our new method
-                              icon: const Icon(Icons.my_location),
-                              label: const Text('Get Current Location'),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed:
+                                    _getNearbyLocation, // Call our new method
+                                icon: const Icon(Icons.my_location),
+                                label: const Text('Get Location'),
+                              ),
                             ),
-                            const SizedBox(
-                              width: 50,
+
+                            SizedBox(
+                              width: 5,
                             ),
-                            ElevatedButton.icon(
-                              onPressed: /* () {
-                                Navigator.of(context)
-                                    .push(MaterialPageRoute(builder: (ctx) {
-                                  return Nearbydetails(
-                                      latitude: _nearbyLatitude.text,
-                                      longitude: _nearbyLongitude.text);
-                                }));
-                              } */
-                                  _getNearbyLocation,
-                              label: const Text('Search'),
-                              icon: const Icon(Icons.search),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: /* () {
+                                  Navigator.of(context)
+                                      .push(MaterialPageRoute(builder: (ctx) {
+                                    return Nearbydetails(
+                                        latitude: _nearbyLatitude.text,
+                                        longitude: _nearbyLongitude.text);
+                                  }));
+                                } */
+                                    _getNearbyProperty,
+                                label: Text('Search'),
+                                icon: Icon(Icons.search),
+                              ),
+
                             )
                           ],
                         ),
@@ -514,6 +700,18 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                   ],
                 ),
               ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 50,left: 50,top: 10,bottom: 10),
+              child: FloatingActionButton.extended(
+              icon: const Icon(Icons.search),
+              label: const Text('Search Saved Drafts'),
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                  return SavedDrafts();
+                }));
+              },
+                        ),
             ),
             _buildSection(title: 'Header & Recipient', initiallyExpanded: false, children: [
               _buildTextField('Valuer Name', 'valuerName'),
@@ -650,6 +848,7 @@ Row(children: [ Expanded(child: _buildTextField('As per actuals', 'deviationsAct
             _buildSection(title: 'Photo Report', children: [
               Center(child: ElevatedButton.icon(onPressed: _showImagePickerOptions, icon: const Icon(Icons.add_a_photo), label: const Text('Add Images'))),
               const SizedBox(height: 10),
+              
               // lib/valuation_form_sib.dart -> build() method -> 'Photo Report' section
 
 // In lib/valuation_form_sib.dart -> build() method -> 'Photo Report' section
@@ -755,14 +954,25 @@ GridView.builder(
 )
 // --- END OF REPLACEMENT WIDGET ---
             ]),
+            Padding(
+              padding: const EdgeInsets.only(left:50,right: 50,top: 10),
+              child: FloatingActionButton.extended(
+              onPressed: _generatePdf,
+              icon: const Icon(Icons.picture_as_pdf),
+              label: const Text('Generate PDF'),
+                        ),
+            ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _generatePdf,
-        icon: const Icon(Icons.picture_as_pdf),
-        label: const Text('Generate PDF'),
-      ),
+      
+      
+      floatingActionButton: 
+          FloatingActionButton.extended(
+        onPressed: _saveData,
+        icon: const Icon(Icons.save),
+        label: const Text('Save'),),
+
     );
   }
 
