@@ -59,12 +59,16 @@ class _NearbydetailsState extends State<Nearbydetails> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Land Value of Nearby Locations'),
-        backgroundColor: Colors.blue,
-      ),
-      body: Padding(
+    // return Scaffold(
+    //   appBar: AppBar(
+    //     title: const Text('Land Value of Nearby Locations'),
+    //     backgroundColor: Colors.blue,
+    //   ),
+    //   body: 
+    // );
+    return Container(
+      width: double.infinity,
+      child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: data.isNotEmpty
             ? ListView.separated(
@@ -118,4 +122,6 @@ class _NearbydetailsState extends State<Nearbydetails> {
       ),
     );
   }
+
+
 }

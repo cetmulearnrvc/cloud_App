@@ -152,9 +152,9 @@ export async function searchByDate(req,res){
     // End of day (UTC)
     const end = new Date(targetDate.setUTCHours(23, 59, 59, 999));
 
-    const docs = await pvr1.find({
+    const docs = await SIBValuationFlat.find({
     updatedAt: { $gte: start, $lte: end }
-    }).select('refNo typo docLocationSketch nameOfOwner');
+    });
 
     res.status(200).json(docs)
 

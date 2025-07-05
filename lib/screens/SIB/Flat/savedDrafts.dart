@@ -115,14 +115,14 @@ class _SavedDraftsState extends State<SavedDrafts> {
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       child: ListTile(
-                        title: Text('File No: ${property['fileNo']}'),
+                        title: Text('File No: ${property['refNo']}'),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Owner: ${property['ownerName']}'),
+                            Text('Owner: ${property['nameOfOwner']}'),
                             const SizedBox(height: 4),
                             Text(
-                              'Location: ${property['propertyLocation']}',
+                              'Location: ${property['docLocationSketch']}',
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),

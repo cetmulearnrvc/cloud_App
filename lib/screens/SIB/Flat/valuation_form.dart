@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,14 +12,18 @@ import 'package:image_picker/image_picker.dart';
 import 'package:login_screen/screens/SIB/Flat/config.dart';
 import 'package:login_screen/screens/SIB/Flat/data_model.dart';
 import 'package:login_screen/screens/SIB/Flat/pdf_generator.dart';
+import 'package:login_screen/screens/SIB/Flat/savedDrafts.dart';
 import 'package:login_screen/screens/nearbyDetails.dart';
-import 'package:login_screen/screens/savedDrafts.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
 class SIBValuationFormScreen extends StatefulWidget {
-  const SIBValuationFormScreen({Key? key}) : super(key: key);
+  final Map<String, dynamic>? propertyData;
 
+  const SIBValuationFormScreen({
+    super.key,
+    this.propertyData,
+  });
   @override
   _SIBValuationFormScreenState createState() => _SIBValuationFormScreenState();
 }
@@ -38,6 +43,7 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
     _valuationImages = _data.images;
     _valuationDetails = _data.valuationDetails;
     _controllers = _initializeControllers();
+    _initializeFormWithPropertyData();
   }
 
   Map<String, TextEditingController> _initializeControllers() {
@@ -143,6 +149,81 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
       'p7reportPlace': TextEditingController(text: _data.p7reportPlace),
     };
   }
+
+  void _initializeFormWithPropertyData() {
+    print('PROPERTY DATA: ${widget.propertyData}');
+  if (widget.propertyData != null) {
+    final data = widget.propertyData!;
+    print('PROPERTY DATA: $data');
+
+    // Loop over all controllers and set values if present in data
+    _controllers.forEach((key, controller) {
+      if (data.containsKey(key) && data[key] != null) {
+        controller.text = data[key].toString();
+      }
+    });
+
+    // Initialize images if available
+    if (data.containsKey('images') && data['images'] is List) {
+      _valuationImages = (data['images'] as List)
+          .map((img) => ValuationImage(
+                imageFile: Uint8List(0), // Placeholder since images can't be deserialized directly here
+                latitude: img['latitude']?.toString() ?? '',
+                longitude: img['longitude']?.toString() ?? '',
+              ))
+          .toList();
+    }
+
+    // Initialize valuationDetails if available
+    if (data.containsKey('valuationDetails') && data['valuationDetails'] is List) {
+      _valuationDetails = (data['valuationDetails'] as List)
+          .map((item) => ValuationDetailItem(
+                description: item['description'] ?? '',
+                area: item['area'] ?? '',
+                ratePerUnit: item['ratePerUnit'] ?? '',
+                estimatedValue: item['estimatedValue'] ?? '',
+              ))
+          .toList();
+    }
+
+    // Initialize date fields safely
+    // if (data['dateOfInspection'] != null) {
+    //   try {
+    //     _controllers['p7inspections'].text = DateTime.parse(data['dateOfInspection']);
+    //   } catch (e) {
+    //     debugPrint('Invalid dateOfInspection: $e');
+    //   }
+    // }
+
+    // if (data['dateOfValuation'] != null) {
+    //   try {
+    //     _valuationDate = DateTime.parse(data['dateOfValuation']);
+    //   } catch (e) {
+    //     debugPrint('Invalid dateOfValuation: $e');
+    //   }
+    // }
+
+    // if (data['finalValuationDate'] != null) {
+    //   try {
+    //     _finalValuationDate = DateTime.parse(data['finalValuationDate']);
+    //   } catch (e) {
+    //     debugPrint('Invalid finalValuationDate: $e');
+    //   }
+    // }
+
+    // if (data['p7reportDate'] != null) {
+    //   try {
+    //     _p7ReportDate = DateTime.parse(data['p7reportDate']);
+    //   } catch (e) {
+    //     debugPrint('Invalid p7reportDate: $e');
+    //   }
+    // }
+
+    debugPrint('Form initialized with SIB property data');
+  } else {
+    debugPrint('No property data - using default values');
+  }
+}
 
   @override
   void dispose() {
@@ -302,11 +383,15 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
         }
 
         if (context.mounted) {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (ctx) => Nearbydetails(responseData: responseData),
-            ),
-          );
+          // Navigator.of(context).push(
+          //   MaterialPageRoute(
+          //     builder: (ctx) => Nearbydetails(responseData: responseData),
+          //   ),
+          // );
+          showModalBottomSheet(context: context, builder: (ctx)
+          {
+            return Nearbydetails(responseData: responseData);
+          });
         }
       }
 
@@ -574,28 +659,33 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                         child: Column(
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            ElevatedButton.icon(
-                              onPressed:
-                                  _getNearbyLocation, // Call our new method
-                              icon: const Icon(Icons.my_location),
-                              label: const Text('Get Current Location'),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed:
+                                    _getNearbyLocation, // Call our new method
+                                icon: const Icon(Icons.my_location),
+                                label: const Text('Get Location'),
+                              ),
                             ),
                             SizedBox(
-                              width: 50,
+                              width: 5,
                             ),
-                            ElevatedButton.icon(
-                              onPressed: /* () {
-                                Navigator.of(context)
-                                    .push(MaterialPageRoute(builder: (ctx) {
-                                  return Nearbydetails(
-                                      latitude: _nearbyLatitude.text,
-                                      longitude: _nearbyLongitude.text);
-                                }));
-                              } */
-                                  _getNearbyProperty,
-                              label: Text('Search'),
-                              icon: Icon(Icons.search),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: /* () {
+                                  Navigator.of(context)
+                                      .push(MaterialPageRoute(builder: (ctx) {
+                                    return Nearbydetails(
+                                        latitude: _nearbyLatitude.text,
+                                        longitude: _nearbyLongitude.text);
+                                  }));
+                                } */
+                                    _getNearbyProperty,
+                                label: Text('Search'),
+                                icon: Icon(Icons.search),
+                              ),
                             )
                           ],
                         ),
@@ -604,6 +694,18 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                   ],
                 ),
               ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 50,left: 50,top: 10,bottom: 10),
+              child: FloatingActionButton.extended(
+              icon: const Icon(Icons.search),
+              label: const Text('Search Saved Drafts'),
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                  return SavedDrafts();
+                }));
+              },
+                        ),
             ),
             _buildSection(title: 'Header & Recipient', initiallyExpanded: false, children: [
               _buildTextField('Valuer Name', 'valuerName'),
@@ -740,6 +842,7 @@ Row(children: [ Expanded(child: _buildTextField('As per actuals', 'deviationsAct
             _buildSection(title: 'Photo Report', children: [
               Center(child: ElevatedButton.icon(onPressed: _showImagePickerOptions, icon: const Icon(Icons.add_a_photo), label: const Text('Add Images'))),
               const SizedBox(height: 10),
+              
               // lib/valuation_form_sib.dart -> build() method -> 'Photo Report' section
 
 // In lib/valuation_form_sib.dart -> build() method -> 'Photo Report' section
@@ -845,34 +948,24 @@ GridView.builder(
 )
 // --- END OF REPLACEMENT WIDGET ---
             ]),
+            Padding(
+              padding: const EdgeInsets.only(left:50,right: 50,top: 10),
+              child: FloatingActionButton.extended(
+              onPressed: _generatePdf,
+              icon: const Icon(Icons.picture_as_pdf),
+              label: const Text('Generate PDF'),
+                        ),
+            ),
           ],
         ),
       ),
       
       
-      floatingActionButton: Column(
-        children: [
+      floatingActionButton: 
           FloatingActionButton.extended(
         onPressed: _saveData,
-        icon: const Icon(Icons.picture_as_pdf),
+        icon: const Icon(Icons.save),
         label: const Text('Save'),),
-        
-          FloatingActionButton.extended(
-            onPressed: _generatePdf,
-            icon: const Icon(Icons.picture_as_pdf),
-            label: const Text('Generate PDF'),
-          ),
-          FloatingActionButton.extended(
-            icon: const Icon(Icons.search),
-            label: const Text('Search Saved Drafts'),
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-                return SavedDrafts();
-              }));
-            },
-          ),
-        ],
-      ),
 
     );
   }

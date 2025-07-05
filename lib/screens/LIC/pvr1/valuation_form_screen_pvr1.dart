@@ -385,11 +385,15 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
         }
 
         if (context.mounted) {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (ctx) => Nearbydetails(responseData: responseData),
-            ),
-          );
+          // Navigator.of(context).push(
+          //   MaterialPageRoute(
+          //     builder: (ctx) => Nearbydetails(responseData: responseData),
+          //   ),
+          // );
+          showModalBottomSheet(context: context, builder: (ctx)
+          {
+            return Nearbydetails(responseData: responseData);
+          });
         }
       }
 
@@ -927,28 +931,31 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
                         child: Column(
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            ElevatedButton.icon(
-                              onPressed:
-                                  _getNearbytLocation, // Call our new method
-                              icon: const Icon(Icons.my_location),
-                              label: const Text('Get Current Location'),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed:
+                                    _getNearbytLocation, // Call our new method
+                                icon: const Icon(Icons.my_location),
+                                label: const Text('Get Location'),
+                              ),
                             ),
-                            const SizedBox(
-                              width: 50,
-                            ),
-                            ElevatedButton.icon(
-                              onPressed: /* () {
-                                Navigator.of(context)
-                                    .push(MaterialPageRoute(builder: (ctx) {
-                                  return Nearbydetails(
-                                      latitude: _nearbyLatitude.text,
-                                      longitude: _nearbyLongitude.text);
-                                }));
-                              } */
-                                  _getNearbyProperty,
-                              label: const Text('Search'),
-                              icon: const Icon(Icons.search),
+                            SizedBox(width: 4,),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: /* () {
+                                  Navigator.of(context)
+                                      .push(MaterialPageRoute(builder: (ctx) {
+                                    return Nearbydetails(
+                                        latitude: _nearbyLatitude.text,
+                                        longitude: _nearbyLongitude.text);
+                                  }));
+                                } */
+                                    _getNearbyProperty,
+                                label: const Text('Search'),
+                                icon: const Icon(Icons.search),
+                              ),
                             )
                           ],
                         ),
