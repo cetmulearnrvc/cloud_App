@@ -18,7 +18,9 @@ import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
 class SIBValuationFormScreen extends StatefulWidget {
+
   final Map<String, dynamic>? propertyData;
+
 
   const SIBValuationFormScreen({
     super.key,
@@ -647,12 +649,14 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _controllers['nearbyLatitude'],
-                      decoration: InputDecoration(labelText: 'Latitude'),
+                      decoration: const InputDecoration(labelText: 'Latitude'),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
+
                       controller: _controllers['nearbyLongitude'],
                       decoration: InputDecoration(labelText: 'Longitude'),
+
                     ),
                     const SizedBox(height: 8),
                     Center(
@@ -669,6 +673,7 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                                 label: const Text('Get Location'),
                               ),
                             ),
+
                             SizedBox(
                               width: 5,
                             ),
@@ -686,6 +691,7 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                                 label: Text('Search'),
                                 icon: Icon(Icons.search),
                               ),
+
                             )
                           ],
                         ),
@@ -931,11 +937,11 @@ GridView.builder(
                   height: 30, // Give the button a fixed, smaller height
                   child: ElevatedButton(
                     onPressed: () => _getCurrentLocation(index),
-                    child: const Text('Get Location', style: TextStyle(fontSize: 12)),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
+                    child: const Text('Get Location', style: TextStyle(fontSize: 12)),
                   ),
                 ),
               ],
@@ -997,7 +1003,7 @@ GridView.builder(
                 Padding(padding: const EdgeInsets.all(4.0), child: TextFormField(initialValue: item.ratePerUnit, onChanged: (val) => item.ratePerUnit = val, decoration: const InputDecoration(border: InputBorder.none))),
                 Padding(padding: const EdgeInsets.all(4.0), child: TextFormField(initialValue: item.estimatedValue, onChanged: (val) => item.estimatedValue = val, decoration: const InputDecoration(border: InputBorder.none))),
               ]);
-            }).toList(),
+            }),
           ],
         ),
       ],

@@ -262,8 +262,8 @@ class SIBValuationData {
     this.p7reportDate,
     this.p7reportPlace = 'Thiruvananthapuram',
     List<ValuationImage>? images,
-  }) : this.images = images ?? [],
-       this.valuationDetails = valuationDetails ?? [
+  }) : images = images ?? [],
+       valuationDetails = valuationDetails ?? [
          ValuationDetailItem(description: 'Present value of the flat'),
          ValuationDetailItem(description: 'Car park'),
          ValuationDetailItem(description: 'Wardrobes'),
