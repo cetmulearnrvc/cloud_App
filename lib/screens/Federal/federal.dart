@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:login_screen/screens/Federal/savedDraftsFederal.dart';
+import 'package:login_screen/screens/nearbyDetails.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart' as pdfLib;
 import 'package:printing/printing.dart';
@@ -26,22 +29,45 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Federal Bank',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const PdfGeneratorScreen(),
+      home: const PdfGeneratorScreen(
+        propertyData: {},
+      ),
     );
   }
 }
 
 class PdfGeneratorScreen extends StatefulWidget {
-  const PdfGeneratorScreen({super.key});
+  final Map<String, dynamic>? propertyData;
+  const PdfGeneratorScreen({
+    super.key,
+    this.propertyData,
+  });
 
   @override
   State<PdfGeneratorScreen> createState() => _PdfGeneratorScreenState();
 }
 
 class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.propertyData != null) {
+      // Use the passed data to initialize your form only if it exists
+      debugPrint('Received property data: ${widget.propertyData}');
+      // Example:
+      // _fileNoController.text = widget.propertyData!['fileNo'].toString();
+    } else {
+      debugPrint('No property data received - creating new valuation');
+      // Initialize with empty/default values
+    }
+    _initializeFormWithPropertyData();
+  }
+
   // New controllers for Latitude and Longitude
   final TextEditingController _latController = TextEditingController();
   final TextEditingController _lonController = TextEditingController();
+  final TextEditingController _nearBylatController = TextEditingController();
+  final TextEditingController _nearBylonController = TextEditingController();
 
   final Map<String, TextEditingController> controllers = {
     // SECTION 1: INTRODUCTION
@@ -865,6 +891,651 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
     }
   }
 
+  Future<Uint8List> fetchImage(String imageUrl) async {
+    try {
+      debugPrint("Attempting to fetch image from: $imageUrl");
+      final response = await http.get(Uri.parse(imageUrl));
+
+      debugPrint("Response status: ${response.statusCode}");
+      debugPrint("Response headers: ${response.headers}");
+
+      if (response.statusCode == 200) {
+        debugPrint(
+            "Successfully fetched image (bytes length: ${response.bodyBytes.length})");
+        return response.bodyBytes;
+      } else {
+        throw Exception('Failed to load image: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint("Error details: $e");
+      throw Exception('Error fetching image: $e');
+    }
+  }
+
+  void _initializeFormWithPropertyData() async {
+    if (widget.propertyData != null) {
+      final data = widget.propertyData!;
+
+      // Set latitude and longitude
+      _latController.text = data['latitude']?.toString() ?? '';
+      _lonController.text = data['longitude']?.toString() ?? '';
+
+      // SECTION 1: INTRODUCTION
+      controllers['Applicant Name and Branch Details']?.text =
+          data['applicantNameAndBranchDetails']?.toString() ?? '';
+      controllers['Owner of the Property']?.text =
+          data['ownerOfTheProperty']?.toString() ?? '';
+      controllers['Name of the prospective purchaser(s)']?.text =
+          data['nameOfTheProspectivePurchaser']?.toString() ?? '';
+      controllers['Builder Name and RERA ID']?.text =
+          data['builderNameAndRERAID']?.toString() ?? '';
+      controllers['Property Description']?.text =
+          data['propertyDescription']?.toString() ?? '';
+      controllers[
+              'Person Met on Site and his/ her relationship with the Applicant']
+          ?.text = data['personMetOnSite']?.toString() ?? '';
+      controllers['Property Address as per Site Visit']?.text =
+          data['propertyAddressAsPerSiteVisit']?.toString() ?? '';
+      controllers['Business Name']?.text =
+          data['businessName']?.toString() ?? '';
+      controllers['House/ Door / Unit/ Flat/ Shop /Office / Gala No.']?.text =
+          data['houseDoorUnitFlatShopOfficeGalaNo']?.toString() ?? '';
+      controllers['Plot No.']?.text = data['plotNo']?.toString() ?? '';
+      controllers['Floor']?.text = data['floor']?.toString() ?? '';
+      controllers['Project Name/ Building Name']?.text =
+          data['projectNameBuildingName']?.toString() ?? '';
+      controllers['Locality/ Sub Locality']?.text =
+          data['localitySubLocality']?.toString() ?? '';
+      controllers['Street Name/ Road No']?.text =
+          data['streetNameRoadNo']?.toString() ?? '';
+      controllers['Nearest Landmark']?.text =
+          data['nearestLandmark']?.toString() ?? '';
+      controllers['City/ Town']?.text = data['cityTown']?.toString() ?? '';
+      controllers['Village']?.text = data['village']?.toString() ?? '';
+      controllers['Pincode']?.text = data['pincode']?.toString() ?? '';
+      controllers['Plot No./Survey No./Khasra No.']?.text =
+          data['plotNoSurveyNoKhasraNo']?.toString() ?? '';
+      controllers['Sub-zone (upvibhag)']?.text =
+          data['subZone']?.toString() ?? '';
+      controllers['Village_Technical']?.text =
+          data['villageTechnical']?.toString() ?? '';
+      controllers['Sub district (Taluka)']?.text =
+          data['subDistrictTaluka']?.toString() ?? '';
+      controllers['District']?.text = data['district']?.toString() ?? '';
+      controllers['State']?.text = data['state']?.toString() ?? '';
+      controllers['Legal Address of Property']?.text =
+          data['legalAddressOfProperty']?.toString() ?? '';
+
+      // SECTION 2: PROPERTY DETAILS (Existing)
+      controllers['Property Type']?.text =
+          data['propertyType']?.toString() ?? '';
+      controllers['Property Usage']?.text =
+          data['propertyUsage']?.toString() ?? '';
+      controllers['Permitted Usage of the Property']?.text =
+          data['permittedUsageOfTheProperty']?.toString() ?? '';
+      controllers['Within Municipal Limits']?.text =
+          data['withinMunicipalLimits']?.toString() ?? '';
+      controllers['Municipal Number']?.text =
+          data['municipalNumber']?.toString() ?? '';
+      controllers['Construction Status']?.text =
+          data['constructionStatus']?.toString() ?? '';
+      controllers['% Complete']?.text =
+          data['percentComplete']?.toString() ?? '';
+      controllers['% Recommended']?.text =
+          data['percentRecommended']?.toString() ?? '';
+      controllers['Type of Occupancy']?.text =
+          data['typeOfOccupancy']?.toString() ?? '';
+      controllers['Tenure (if Self-Occupied)']?.text =
+          data['tenureIfSelfOccupied']?.toString() ?? '';
+      controllers['Tenure (if Vacant)']?.text =
+          data['tenureIfVacant']?.toString() ?? '';
+      controllers['If rented, Tenant Details']?.text =
+          data['ifRentedTenantDetails']?.toString() ?? '';
+      controllers['Customer Relationship with Occupant']?.text =
+          data['customerRelationshipWithOccupant']?.toString() ?? '';
+      controllers['Ownership Type']?.text =
+          data['ownershipType']?.toString() ?? '';
+      controllers['Total No. of Blocks/ Buildings']?.text =
+          data['totalNoOfBlocksBuildings']?.toString() ?? '';
+      controllers['No. of Floors']?.text = data['noOfFloors']?.toString() ?? '';
+      controllers['No. of Units_Total Units']?.text =
+          data['noOfUnitsTotalUnits']?.toString() ?? '';
+      controllers['No. of Units_Units on each Floor']?.text =
+          data['noOfUnitsUnitsOnEachFloor']?.toString() ?? '';
+      controllers['Year Built / Age of Property (in Years)']?.text =
+          data['yearBuiltAgeOfProperty']?.toString() ?? '';
+      controllers['Year Built / Age of the Property (in Years)_Years']?.text =
+          data['yearBuiltAgeOfPropertyYears']?.toString() ?? '';
+      controllers['Residual Age of the Property (in Years)']?.text =
+          data['residualAgeOfTheProperty']?.toString() ?? '';
+      controllers['Maintenance Level of Building']?.text =
+          data['maintenanceLevelOfBuilding']?.toString() ?? '';
+      controllers['Amenities']?.text = data['amenities']?.toString() ?? '';
+      controllers['Amenities_Lifts']?.text =
+          data['amenitiesLifts']?.toString() ?? '';
+      controllers[
+              'Whether the Building is constructed strictly according to Plan approved by Government authority? Give details']
+          ?.text = data['buildingConstructedAccordingToPlan']?.toString() ?? '';
+
+      // SECTION 3: UNIT DETAILS
+      controllers['Basement']?.text = data['basement']?.toString() ?? '';
+      controllers['Ground Floor']?.text = data['groundFloor']?.toString() ?? '';
+      controllers['First Floor']?.text = data['firstFloor']?.toString() ?? '';
+      controllers['Second Floor']?.text = data['secondFloor']?.toString() ?? '';
+      controllers['Third Floor']?.text = data['thirdFloor']?.toString() ?? '';
+      controllers['Fourth Floor']?.text = data['fourthFloor']?.toString() ?? '';
+      controllers['Fifth Floor']?.text = data['fifthFloor']?.toString() ?? '';
+
+      // SECTION 4: SURROUNDING LOCALITY DETAILS
+      controllers['Type of Area']?.text = data['typeOfArea']?.toString() ?? '';
+      controllers['Classification of Area']?.text =
+          data['classificationOfArea']?.toString() ?? '';
+      controllers['Development in Vicinity (%)']?.text =
+          data['developmentInVicinityPercent']?.toString() ?? '';
+      controllers['Quality of Infrastructure in the Vicinity']?.text =
+          data['qualityOfInfrastructureInVicinity']?.toString() ?? '';
+      controllers['Class of Locality']?.text =
+          data['classOfLocality']?.toString() ?? '';
+      controllers['Nature of Locality']?.text =
+          data['natureOfLocality']?.toString() ?? '';
+      controllers['Details of the Route through which Property can be reached']
+          ?.text = data['detailsOfTheRoute']?.toString() ?? '';
+      controllers['Has the Property got direct and independent Access?']?.text =
+          data['hasDirectIndependentAccess']?.toString() ?? '';
+      controllers[
+              'Is the property accessible by car/ mode of accessibility available?']
+          ?.text = data['propertyAccessibleByCar']?.toString() ?? '';
+      controllers['Proximity to Civic Amenities']?.text =
+          data['proximityToCivicAmenities']?.toString() ?? '';
+      controllers['Nearest Railway Station (Distance & Name)']?.text =
+          data['nearestRailwayStation']?.toString() ?? '';
+      controllers['Nearest Hospital (Distance & Name)']?.text =
+          data['nearestHospital']?.toString() ?? '';
+      controllers['Nearest City Center (Distance & Name)']?.text =
+          data['nearestCityCenter']?.toString() ?? '';
+      controllers['Is this Corner Property?']?.text =
+          data['isCornerProperty']?.toString() ?? '';
+      controllers['Property Identified Through']?.text =
+          data['propertyIdentifiedThrough']?.toString() ?? '';
+      controllers['Property Demarcated']?.text =
+          data['propertyDemarcated']?.toString() ?? '';
+      controllers['Nature of Land/ Type of Use to which it can be put']?.text =
+          data['natureOfLandTypeOfUse']?.toString() ?? '';
+      controllers['If Others, Give Details']?.text =
+          data['ifOthersGiveDetails']?.toString() ?? '';
+      controllers['General Description of Layout']?.text =
+          data['generalDescriptionOfLayout']?.toString() ?? '';
+      controllers['If Others, Give Details_2']?.text =
+          data['ifOthersGiveDetails2']?.toString() ?? '';
+      controllers[
+              'Other Developments on the Property excluding Building, if any']
+          ?.text = data['otherDevelopmentsOnProperty']?.toString() ?? '';
+      controllers['Approach Road Details']?.text =
+          data['approachRoadDetails']?.toString() ?? '';
+      controllers['Approach Road Details_Width']?.text =
+          data['approachRoadDetailsWidth']?.toString() ?? '';
+      controllers['Marketability']?.text =
+          data['marketability']?.toString() ?? '';
+      controllers['Encroachment Details, if any']?.text =
+          data['encroachmentDetails']?.toString() ?? '';
+      controllers['Is the Property Prone to any Disaster?']?.text =
+          data['isPropertyProneToDisaster']?.toString() ?? '';
+      controllers['Any Locational Advantages Noted']?.text =
+          data['anyLocationalAdvantages']?.toString() ?? '';
+
+      // SECTION 5: PHYSICAL DETAILS
+      controllers['Boundaries_North_SiteVisit']?.text =
+          data['boundariesNorthSiteVisit']?.toString() ?? '';
+      controllers['Boundaries_North_LegalDocuments']?.text =
+          data['boundariesNorthLegalDocuments']?.toString() ?? '';
+      controllers['Boundaries_South_SiteVisit']?.text =
+          data['boundariesSouthSiteVisit']?.toString() ?? '';
+      controllers['Boundaries_South_LegalDocuments']?.text =
+          data['boundariesSouthLegalDocuments']?.toString() ?? '';
+      controllers['Boundaries_East_SiteVisit']?.text =
+          data['boundariesEastSiteVisit']?.toString() ?? '';
+      controllers['Boundaries_East_LegalDocuments']?.text =
+          data['boundariesEastLegalDocuments']?.toString() ?? '';
+      controllers['Boundaries_West_SiteVisit']?.text =
+          data['boundariesWestSiteVisit']?.toString() ?? '';
+      controllers['Boundaries_West_LegalDocuments']?.text =
+          data['boundariesWestLegalDocuments']?.toString() ?? '';
+      controllers['Boundaries_MatchingWithSite']?.text =
+          data['boundariesMatchingWithSite']?.toString() ?? '';
+
+      // SECTION 6: STRUCTURAL DETAILS
+      controllers['Type of Construction Structure']?.text =
+          data['typeOfConstructionStructure']?.toString() ?? '';
+      controllers['Quality of Construction']?.text =
+          data['qualityOfConstruction']?.toString() ?? '';
+      controllers['Foundation Type']?.text =
+          data['foundationType']?.toString() ?? '';
+      controllers['Roof Type']?.text = data['roofType']?.toString() ?? '';
+      controllers['Masonry Type']?.text = data['masonryType']?.toString() ?? '';
+      controllers['Walls']?.text = data['walls']?.toString() ?? '';
+      controllers['Doors and Windows']?.text =
+          data['doorsAndWindows']?.toString() ?? '';
+      controllers['Finishing']?.text = data['finishing']?.toString() ?? '';
+      controllers['Flooring']?.text = data['flooring']?.toString() ?? '';
+      controllers['Any Other Construction Specifications']?.text =
+          data['anyOtherConstructionSpecifications']?.toString() ?? '';
+      controllers['Does Property fall in Demolition List?']?.text =
+          data['doesPropertyFallInDemolitionList']?.toString() ?? '';
+
+      // SECTION 7: PROPERTY STAGE OF CONSTRUCTION
+      controllers['Foundation_AllottedConstructionStage']?.text =
+          data['foundationAllottedConstructionStage']?.toString() ?? '';
+      controllers['Foundation_PresentCompletion']?.text =
+          data['foundationPresentCompletion']?.toString() ?? '';
+      controllers['Foundation_NoOfFloorsCompleted']?.text =
+          data['foundationNoOfFloorsCompleted']?.toString() ?? '';
+      controllers['Plinth_AllottedConstructionStage']?.text =
+          data['plinthAllottedConstructionStage']?.toString() ?? '';
+      controllers['Plinth_PresentCompletion']?.text =
+          data['plinthPresentCompletion']?.toString() ?? '';
+      controllers['Plinth_NoOfFloorsCompleted']?.text =
+          data['plinthNoOfFloorsCompleted']?.toString() ?? '';
+      controllers['BrickworkUptoSlab_AllottedConstructionStage']?.text =
+          data['brickworkUptoSlabAllottedConstructionStage']?.toString() ?? '';
+      controllers['BrickworkUptoSlab_PresentCompletion']?.text =
+          data['brickworkUptoSlabPresentCompletion']?.toString() ?? '';
+      controllers['BrickworkUptoSlab_NoOfFloorsCompleted']?.text =
+          data['brickworkUptoSlabNoOfFloorsCompleted']?.toString() ?? '';
+      controllers['SlabRCCCasting_AllottedConstructionStage']?.text =
+          data['slabRCCCastingAllottedConstructionStage']?.toString() ?? '';
+      controllers['SlabRCCCasting_PresentCompletion']?.text =
+          data['slabRCCCastingPresentCompletion']?.toString() ?? '';
+      controllers['SlabRCCCasting_NoOfFloorsCompleted']?.text =
+          data['slabRCCCastingNoOfFloorsCompleted']?.toString() ?? '';
+      controllers['InsideOutsidePlaster_AllottedConstructionStage']?.text =
+          data['insideOutsidePlasterAllottedConstructionStage']?.toString() ??
+              '';
+      controllers['InsideOutsidePlaster_PresentCompletion']?.text =
+          data['insideOutsidePlasterPresentCompletion']?.toString() ?? '';
+      controllers['InsideOutsidePlaster_NoOfFloorsCompleted']?.text =
+          data['insideOutsidePlasterNoOfFloorsCompleted']?.toString() ?? '';
+      controllers['FlooringWork_AllottedConstructionStage']?.text =
+          data['flooringWorkAllottedConstructionStage']?.toString() ?? '';
+      controllers['FlooringWork_PresentCompletion']?.text =
+          data['flooringWorkPresentCompletion']?.toString() ?? '';
+      controllers['FlooringWork_NoOfFloorsCompleted']?.text =
+          data['flooringWorkNoOfFloorsCompleted']?.toString() ?? '';
+      controllers['ElectrificationWork_AllottedConstructionStage']?.text =
+          data['electrificationWorkAllottedConstructionStage']?.toString() ??
+              '';
+      controllers['ElectrificationWork_PresentCompletion']?.text =
+          data['electrificationWorkPresentCompletion']?.toString() ?? '';
+      controllers['ElectrificationWork_NoOfFloorsCompleted']?.text =
+          data['electrificationWorkNoOfFloorsCompleted']?.toString() ?? '';
+      controllers['WoodworkPainting_AllottedConstructionStage']?.text =
+          data['woodworkPaintingAllottedConstructionStage']?.toString() ?? '';
+      controllers['WoodworkPainting_PresentCompletion']?.text =
+          data['woodworkPaintingPresentCompletion']?.toString() ?? '';
+      controllers['WoodworkPainting_NoOfFloorsCompleted']?.text =
+          data['woodworkPaintingNoOfFloorsCompleted']?.toString() ?? '';
+      controllers['TotalCompletion_AllottedConstructionStage']?.text =
+          data['totalCompletionAllottedConstructionStage']?.toString() ?? '';
+      controllers['TotalCompletion_PresentCompletion']?.text =
+          data['totalCompletionPresentCompletion']?.toString() ?? '';
+      controllers['TotalCompletion_NoOfFloorsCompleted']?.text =
+          data['totalCompletionNoOfFloorsCompleted']?.toString() ?? '';
+      controllers['RecommendedAmountInPercent']?.text =
+          data['recommendedAmountInPercent']?.toString() ?? '';
+
+      // SECTION 8: DOCUMENTS AND PERMISSIONS
+      controllers['Layout Plans Details']?.text =
+          data['layoutPlansDetails']?.toString() ?? '';
+      controllers['Building Plan Details']?.text =
+          data['buildingPlanDetails']?.toString() ?? '';
+      controllers[
+              'Construction Permission Number & Date/Commencement Certificate Details']
+          ?.text = data['constructionPermissionDetails']?.toString() ?? '';
+      controllers['Occupation/ Completion Certificate Details']?.text =
+          data['occupationCompletionCertificateDetails']?.toString() ?? '';
+      controllers['Title Documents Verification Certificate']?.text =
+          data['titleDocumentsVerificationCertificate']?.toString() ?? '';
+      controllers[
+              'Latest Ownership Document with Address and Area under Transaction']
+          ?.text = data['latestOwnershipDocument']?.toString() ?? '';
+      controllers['Any Other Documents']?.text =
+          data['anyOtherDocuments']?.toString() ?? '';
+      controllers['Deviations Observed on Site with Approved Plan']?.text =
+          data['deviationsObserved']?.toString() ?? '';
+      controllers[
+              'If Approved Plans are not available, Construction done as per Local Bylaws']
+          ?.text = data['constructionDoneAsPerLocalBylaws']?.toString() ?? '';
+      controllers['Permissible FSI']?.text =
+          data['permissibleFSI']?.toString() ?? '';
+      controllers['Is the Property Mortgaged or Disputed?']?.text =
+          data['isPropertyMortgagedOrDisputed']?.toString() ?? '';
+      controllers['Value/ Purchase Price paid as per Sale Deed']?.text =
+          data['valuePurchasePricePaid']?.toString() ?? '';
+      controllers['Present Market Rate of the Property']?.text =
+          data['presentMarketRate']?.toString() ?? '';
+      controllers['Details of recent transaction in the neighborhood, if any']
+          ?.text = data['detailsOfRecentTransaction']?.toString() ?? '';
+
+      // SECTION 9: VALUATION REPORT - Land
+      controllers['Land Area (Cents)_AsPerSite']?.text =
+          data['landAreaAsPerSite']?.toString() ?? '';
+      controllers['Land Area (Cents)_AsPerPlan']?.text =
+          data['landAreaAsPerPlan']?.toString() ?? '';
+      controllers['Land Area (Cents)_AsPerLegalDoc']?.text =
+          data['landAreaAsPerLegalDoc']?.toString() ?? '';
+      controllers['Undivided Share of Land (in Cents)']?.text =
+          data['undividedShareOfLand']?.toString() ?? '';
+      controllers['Adopted Land Area (in Cents)']?.text =
+          data['adoptedLandArea']?.toString() ?? '';
+      controllers['Adopted Land Rate (in Rs./Cents)']?.text =
+          data['adoptedLandRate']?.toString() ?? '';
+      controllers['Guideline Rate for Land']?.text =
+          data['guidelineRateForLand']?.toString() ?? '';
+      controllers['LAND VALUE (in Rs.)']?.text =
+          data['landValue']?.toString() ?? '';
+
+      // SECTION 9: VALUATION REPORT - Building
+      controllers['Basement Floor_Area As per Site']?.text =
+          data['basementFloorAreaAsPerSite']?.toString() ?? '';
+      controllers['Basement Floor_Area As per Documents']?.text =
+          data['basementFloorAreaAsPerDocuments']?.toString() ?? '';
+      controllers['Basement Floor_Deviation']?.text =
+          data['basementFloorDeviation']?.toString() ?? '';
+      controllers['Basement Floor_Adopted Built-up Area']?.text =
+          data['basementFloorAdoptedBuiltUpArea']?.toString() ?? '';
+      controllers['Basement Floor_Adopted Construction Rate']?.text =
+          data['basementFloorAdoptedConstructionRate']?.toString() ?? '';
+      controllers['Basement Floor_Replacement Cost']?.text =
+          data['basementFloorReplacementCost']?.toString() ?? '';
+      controllers['Stilt Floor_Area As per Site']?.text =
+          data['stiltFloorAreaAsPerSite']?.toString() ?? '';
+      controllers['Stilt Floor_Area As per Documents']?.text =
+          data['stiltFloorAreaAsPerDocuments']?.toString() ?? '';
+      controllers['Stilt Floor_Deviation']?.text =
+          data['stiltFloorDeviation']?.toString() ?? '';
+      controllers['Stilt Floor_Adopted Built-up Area']?.text =
+          data['stiltFloorAdoptedBuiltUpArea']?.toString() ?? '';
+      controllers['Stilt Floor_Adopted Construction Rate']?.text =
+          data['stiltFloorAdoptedConstructionRate']?.toString() ?? '';
+      controllers['Stilt Floor_Replacement Cost']?.text =
+          data['stiltFloorReplacementCost']?.toString() ?? '';
+      controllers['Ground Floor_Area As per Site']?.text =
+          data['groundFloorAreaAsPerSite']?.toString() ?? '';
+      controllers['Ground Floor_Area As per Documents']?.text =
+          data['groundFloorAreaAsPerDocuments']?.toString() ?? '';
+      controllers['Ground Floor_Deviation']?.text =
+          data['groundFloorDeviation']?.toString() ?? '';
+      controllers['Ground Floor_Adopted Built-up Area']?.text =
+          data['groundFloorAdoptedBuiltUpArea']?.toString() ?? '';
+      controllers['Ground Floor_Adopted Construction Rate']?.text =
+          data['groundFloorAdoptedConstructionRate']?.toString() ?? '';
+      controllers['Ground Floor_Replacement Cost']?.text =
+          data['groundFloorReplacementCost']?.toString() ?? '';
+      controllers['First Floor_Area As per Site']?.text =
+          data['firstFloorAreaAsPerSite']?.toString() ?? '';
+      controllers['First Floor_Area As per Documents']?.text =
+          data['firstFloorAreaAsPerDocuments']?.toString() ?? '';
+      controllers['First Floor_Deviation']?.text =
+          data['firstFloorDeviation']?.toString() ?? '';
+      controllers['First Floor_Adopted Built-up Area']?.text =
+          data['firstFloorAdoptedBuiltUpArea']?.toString() ?? '';
+      controllers['First Floor_Adopted Construction Rate']?.text =
+          data['firstFloorAdoptedConstructionRate']?.toString() ?? '';
+      controllers['First Floor_Replacement Cost']?.text =
+          data['firstFloorReplacementCost']?.toString() ?? '';
+      controllers['Second Floor_Area As per Site']?.text =
+          data['secondFloorAreaAsPerSite']?.toString() ?? '';
+      controllers['Second Floor_Area As per Documents']?.text =
+          data['secondFloorAreaAsPerDocuments']?.toString() ?? '';
+      controllers['Second Floor_Deviation']?.text =
+          data['secondFloorDeviation']?.toString() ?? '';
+      controllers['Second Floor_Adopted Built-up Area']?.text =
+          data['secondFloorAdoptedBuiltUpArea']?.toString() ?? '';
+      controllers['Second Floor_Adopted Construction Rate']?.text =
+          data['secondFloorAdoptedConstructionRate']?.toString() ?? '';
+      controllers['Second Floor_Replacement Cost']?.text =
+          data['secondFloorReplacementCost']?.toString() ?? '';
+      controllers['Third Floor_Area As per Site']?.text =
+          data['thirdFloorAreaAsPerSite']?.toString() ?? '';
+      controllers['Third Floor_Area As per Documents']?.text =
+          data['thirdFloorAreaAsPerDocuments']?.toString() ?? '';
+      controllers['Third Floor_Deviation']?.text =
+          data['thirdFloorDeviation']?.toString() ?? '';
+      controllers['Third Floor_Adopted Built-up Area']?.text =
+          data['thirdFloorAdoptedBuiltUpArea']?.toString() ?? '';
+      controllers['Third Floor_Adopted Construction Rate']?.text =
+          data['thirdFloorAdoptedConstructionRate']?.toString() ?? '';
+      controllers['Third Floor_Replacement Cost']?.text =
+          data['thirdFloorReplacementCost']?.toString() ?? '';
+      controllers['Fourth Floor_Area As per Site']?.text =
+          data['fourthFloorAreaAsPerSite']?.toString() ?? '';
+      controllers['Fourth Floor_Area As per Documents']?.text =
+          data['fourthFloorAreaAsPerDocuments']?.toString() ?? '';
+      controllers['Fourth Floor_Deviation']?.text =
+          data['fourthFloorDeviation']?.toString() ?? '';
+      controllers['Fourth Floor_Adopted Built-up Area']?.text =
+          data['fourthFloorAdoptedBuiltUpArea']?.toString() ?? '';
+      controllers['Fourth Floor_Adopted Construction Rate']?.text =
+          data['fourthFloorAdoptedConstructionRate']?.toString() ?? '';
+      controllers['Fourth Floor_Replacement Cost']?.text =
+          data['fourthFloorReplacementCost']?.toString() ?? '';
+      controllers['Fifth Floor_Area As per Site']?.text =
+          data['fifthFloorAreaAsPerSite']?.toString() ?? '';
+      controllers['Fifth Floor_Area As per Documents']?.text =
+          data['fifthFloorAreaAsPerDocuments']?.toString() ?? '';
+      controllers['Fifth Floor_Deviation']?.text =
+          data['fifthFloorDeviation']?.toString() ?? '';
+      controllers['Fifth Floor_Adopted Built-up Area']?.text =
+          data['fifthFloorAdoptedBuiltUpArea']?.toString() ?? '';
+      controllers['Fifth Floor_Adopted Construction Rate']?.text =
+          data['fifthFloorAdoptedConstructionRate']?.toString() ?? '';
+      controllers['Fifth Floor_Replacement Cost']?.text =
+          data['fifthFloorReplacementCost']?.toString() ?? '';
+      controllers['Total_Area As per Site']?.text =
+          data['totalAreaAsPerSite']?.toString() ?? '';
+      controllers['Total_Area As per Documents']?.text =
+          data['totalAreaAsPerDocuments']?.toString() ?? '';
+      controllers['Total_Deviation']?.text =
+          data['totalDeviation']?.toString() ?? '';
+      controllers['Total_Adopted Built-up Area']?.text =
+          data['totalAdoptedBuiltUpArea']?.toString() ?? '';
+      controllers['Total_Adopted Construction Rate']?.text =
+          data['totalAdoptedConstructionRate']?.toString() ?? '';
+      controllers['Total_Replacement Cost']?.text =
+          data['totalReplacementCost']?.toString() ?? '';
+      controllers['Depreciation %']?.text =
+          data['depreciationPercent']?.toString() ?? '';
+      controllers['Net Replacement Cost (in Rs.)']?.text =
+          data['netReplacementCost']?.toString() ?? '';
+      controllers['No. of Car Parking']?.text =
+          data['noOfCarParking']?.toString() ?? '';
+      controllers['Value of Parking (in Rs.)']?.text =
+          data['valueOfParking']?.toString() ?? '';
+      controllers['Value of Other Amenities (in Rs.)']?.text =
+          data['valueOfOtherAmenities']?.toString() ?? '';
+      controllers['BUILDING VALUE / Insurable Value (in Rs.)']?.text =
+          data['buildingValueInsurableValue']?.toString() ?? '';
+      controllers['Building Value as per Govt Guideline Rate (in Rs.)']?.text =
+          data['buildingValueAsPerGovtGuidelineRate']?.toString() ?? '';
+
+      // SECTION 9: FINAL VALUES
+      controllers['Estimated Cost to Complete the Property (in Rs.)']?.text =
+          data['estimatedCostToComplete']?.toString() ?? '';
+      controllers['Guideline Value (in Rs.)']?.text =
+          data['guidelineValue']?.toString() ?? '';
+      controllers['Estimated Rental Value of Building']?.text =
+          data['estimatedRentalValue']?.toString() ?? '';
+      controllers['Market Value (in Rs.)']?.text =
+          data['marketValue']?.toString() ?? '';
+      controllers['Market Value (in Words)']?.text =
+          data['marketValueInWords']?.toString() ?? '';
+      controllers['State the Source for Arriving at the Market Value']?.text =
+          data['sourceForMarketValue']?.toString() ?? '';
+      controllers['Realizable value (in Rs.)']?.text =
+          data['realizableValue']?.toString() ?? '';
+      controllers['Realizable value (%)']?.text =
+          data['realizableValuePercent']?.toString() ?? '';
+      controllers['Forced Sale Value (in Rs.)']?.text =
+          data['forcedSaleValue']?.toString() ?? '';
+      controllers['Forced Sale Value (%)']?.text =
+          data['forcedSaleValuePercent']?.toString() ?? '';
+
+      // SECTION 10: REMARKS & DECLARATION
+      controllers['Remarks_PropertyDescription']
+          ?.text = data['remarksPropertyDescription']
+              ?.toString() ??
+          'THE PROPERTY IS A RESIDENTIAL BUILDING WHOSE CONSTRUCTION IS UNDER PROGRESS AND PLASTERING COMPLETED. THE PENDING WORKS ARE SANITARY FITTINGS, ELECTRICAL SWITCHES FINISHING WORKS AND FLOORING';
+      controllers['Declaration_Point1']?.text = data['declarationPoint1']
+              ?.toString() ??
+          'The information furnished in this report is true and correct to the best of my knowledge and belief.';
+      controllers['Declaration_Point2']?.text =
+          data['declarationPoint2']?.toString() ??
+              'I have no direct or indirect interest in the property valued.';
+      controllers['Declaration_Point3']?.text = data['declarationPoint3']
+              ?.toString() ??
+          'I / My representative MYSELF have/ has personally visited the property by going to the site and inspected all items thoroughly.';
+      controllers['Declaration_Point4']?.text = data['declarationPoint4']
+              ?.toString() ??
+          'The legal aspects are out of the scope of this valuation report.';
+      controllers['Declaration_Point5']?.text =
+          data['declarationPoint5']?.toString() ??
+              'I have never been debarred or convicted by any court of law.';
+      controllers['Declaration_Point6']?.text =
+          data['declarationPoint6']?.toString() ??
+              'The valuation report has been prepared for mortgage purpose.';
+
+      // SECTION 11: Annexure I
+      controllers['ConstructionDeviation_ApprovedPlanAvailable']?.text =
+          data['constructionDeviationApprovedPlanAvailable']?.toString() ?? '';
+      controllers['ConstructionDeviation_DeviationOnSecurityProperty']?.text =
+          data['constructionDeviationDeviationOnSecurityProperty']
+                  ?.toString() ??
+              '';
+      controllers['ConstructionDeviation_PropertyTaxPaidReceipts']?.text =
+          data['constructionDeviationPropertyTaxPaidReceipts']?.toString() ??
+              '';
+      controllers['ConstructionDeviation_LatestLandRecordAvailability']?.text =
+          data['constructionDeviationLatestLandRecordAvailability']
+                  ?.toString() ??
+              '';
+      controllers['ConstructionDeviation_FSIRARFAR_LocalAuthority']?.text =
+          data['constructionDeviationFSIRARFARLocalAuthority']?.toString() ??
+              '';
+      controllers['ConstructionDeviation_MaxDeviationPermitted']?.text =
+          data['constructionDeviationMaxDeviationPermitted']?.toString() ?? '';
+      controllers['ConstructionDeviation_FSIRARFAR_Agreement']?.text =
+          data['constructionDeviationFSIRARFARAgreement']?.toString() ?? '';
+      controllers['ConstructionDeviation_FSIRARFAR_ValuerConfirmed']?.text =
+          data['constructionDeviationFSIRARFARValuerConfirmed']?.toString() ??
+              '';
+      controllers['ConstructionDeviation_PropertyAcceptedAsSecurity']?.text =
+          data['constructionDeviationPropertyAcceptedAsSecurity']?.toString() ??
+              '';
+      controllers['ConstructionDeviation_HerebyConfirmCertify']?.text =
+          data['constructionDeviationHerebyConfirmCertify']?.toString() ?? '';
+
+      // Load images if available
+      try {
+        if (data['images'] != null && data['images'] is List) {
+          final List<dynamic> imagesData = data['images'];
+
+          for (var imgData in imagesData) {
+            try {
+              String imageUrl = '$url4${imgData['fileName']}';
+              debugPrint("Fetching image from: $imageUrl");
+
+              Uint8List imageBytes = await fetchImage(imageUrl);
+
+              _images.add(
+                XFile.fromData(
+                  imageBytes,
+                  name: '$url4${imgData['fileName']}.jpg', // Optional filename
+                  mimeType: 'image/jpeg', // Optional MIME type
+                ),
+              );
+            } catch (e) {
+              debugPrint('Error loading image: $e');
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Error initializing images: $e');
+      }
+
+      if (mounted) setState(() {});
+
+      debugPrint('Federal Bank form initialized with property data');
+    } else {
+      debugPrint(
+          'No property data - Federal Bank form will use default values');
+    }
+  }
+
+  Future<void> _getNearbyProperty() async {
+    final latitude = _nearBylatController.text.trim();
+    final longitude = _nearBylonController.text.trim();
+
+    debugPrint(latitude);
+
+    if (latitude.isEmpty || longitude.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Please enter both latitude and longitude')),
+      );
+      return;
+    }
+
+    try {
+      final url = Uri.parse(url2);
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'latitude': latitude,
+          'longitude': longitude,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Decode the JSON response (assuming it's an array)
+        final List<dynamic> responseData = jsonDecode(response.body);
+
+        // Debug print the array
+        debugPrint('Response Data (Array):');
+        for (var item in responseData) {
+          debugPrint(item.toString()); // Print each item in the array
+        }
+
+        if (context.mounted) {
+          // Navigator.of(context).push(
+          //   MaterialPageRoute(
+          //     builder: (ctx) => Nearbydetails(responseData: responseData),
+          //   ),
+          // );
+          showModalBottomSheet(
+              context: context,
+              builder: (ctx) {
+                return Nearbydetails(responseData: responseData);
+              });
+        }
+      }
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Nearby properties fetched successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
   // Helper function to create sub-tables for nested information
   pw.Table createSubTable(List<String> keys,
       {double fontSize = 9, double padding = 1.5}) {
@@ -1133,8 +1804,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
           desiredAccuracy: LocationAccuracy.high);
 
       setState(() {
-        _latController.text = position.latitude.toString();
-        _lonController.text = position.longitude.toString();
+        _nearBylatController.text = position.latitude.toString();
+        _nearBylonController.text = position.longitude.toString();
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -3852,9 +4523,10 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _saveData, 
-        label: Text('Save'),
-        icon: Icon(Icons.save),),
+        onPressed: _saveData,
+        label: const Text('Save'),
+        icon: const Icon(Icons.save),
+      ),
       appBar: AppBar(title: const Text('PDF Generator')),
       body: Padding(
         padding: const EdgeInsets.all(12),
@@ -3873,15 +4545,13 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
-                      controller: _latController,
+                      controller: _nearBylatController,
                       decoration: const InputDecoration(labelText: 'Latitude'),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
-
-                      controller: _lonController,
-                      decoration: InputDecoration(labelText: 'Longitude'),
-
+                      controller: _nearBylonController,
+                      decoration: const InputDecoration(labelText: 'Longitude'),
                     ),
                     const SizedBox(height: 8),
                     Center(
@@ -3898,13 +4568,14 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                                 label: const Text('Get Location'),
                               ),
                             ),
-
-                            SizedBox(
+                            const SizedBox(
                               width: 5,
                             ),
                             Expanded(
                               child: ElevatedButton.icon(
-                                onPressed: (){} /* () {
+                                onPressed: () {
+                                  _getNearbyProperty();
+                                } /* () {
                                   Navigator.of(context)
                                       .push(MaterialPageRoute(builder: (ctx) {
                                     return Nearbydetails(
@@ -3912,11 +4583,10 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                                         longitude: _nearbyLongitude.text);
                                   }));
                                 } */
-                                    ,
-                                label: Text('Search'),
-                                icon: Icon(Icons.search),
+                                ,
+                                label: const Text('Search'),
+                                icon: const Icon(Icons.search),
                               ),
-
                             )
                           ],
                         ),
@@ -3927,16 +4597,20 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(right: 50,left: 50,top: 10,bottom: 10),
+              padding: const EdgeInsets.only(
+                  right: 50, left: 50, top: 10, bottom: 10),
               child: FloatingActionButton.extended(
-              icon: const Icon(Icons.search),
-              label: const Text('Search Saved Drafts'),
-              onPressed: () {
-                // Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-                //   return SavedDrafts();
-                // }));
-              },
-                        ),
+                icon: const Icon(Icons.search),
+                label: const Text('Search Saved Drafts'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SavedDraftsFederal(),
+                    ),
+                  );
+                },
+              ),
             ),
             // Section 1: INTRODUCTION
             ExpansionTile(
@@ -5101,12 +5775,12 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
             const SizedBox(height: 20),
 
             Padding(
-              padding: const EdgeInsets.only(left:50,right: 50,top: 10),
+              padding: const EdgeInsets.only(left: 50, right: 50, top: 10),
               child: FloatingActionButton.extended(
-              onPressed: _generatePdf,
-              icon: const Icon(Icons.picture_as_pdf),
-              label: const Text('Generate PDF'),
-                        ),
+                onPressed: _generatePdf,
+                icon: const Icon(Icons.picture_as_pdf),
+                label: const Text('Generate PDF'),
+              ),
             ),
           ],
         ),
