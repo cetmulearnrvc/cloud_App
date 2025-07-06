@@ -9,6 +9,18 @@ export const saveFlatData = async (req, res) => {
   const flatData = req.body;
   flatData.typo = 'sibFlat';
 
+  if (flatData.valuationDetails) {
+  try {
+    flatData.valuationDetails = JSON.parse(flatData.valuationDetails);
+    console.log('Parsed valuationDetails:', flatData.valuationDetails);
+  } catch (err) {
+    console.error('Failed to parse valuationDetails:', err);
+    return res.status(400).json({
+      success: false,
+      message: "Invalid valuationDetails format"
+    });
+  }
+}
   // Validate images metadata
   let imagesMeta = [];
   try {

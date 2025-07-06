@@ -152,11 +152,10 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
     };
   }
 
-  void _initializeFormWithPropertyData() {
+  void _initializeFormWithPropertyData() async{
     print('PROPERTY DATA: ${widget.propertyData}');
   if (widget.propertyData != null) {
     final data = widget.propertyData!;
-    print('PROPERTY DATA: $data');
 
     // Loop over all controllers and set values if present in data
     _controllers.forEach((key, controller) {
@@ -164,20 +163,20 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
         controller.text = data[key].toString();
       }
     });
-
+    print(data['images']);
+    _loadInitialImages(data);
     // Initialize images if available
-    if (data.containsKey('images') && data['images'] is List) {
-      _valuationImages = (data['images'] as List)
-          .map((img) => ValuationImage(
-                imageFile: Uint8List(0), // Placeholder since images can't be deserialized directly here
-                latitude: img['latitude']?.toString() ?? '',
-                longitude: img['longitude']?.toString() ?? '',
-              ))
-          .toList();
-    }
+    //
+    print('Valuation : ${data['valuationDetails']}');
+    setState(() {
+      if (data.containsKey('valuationDetails') && data['valuationDetails'] is List) {
+        var detailsList = data['valuationDetails'] as List;
+    debugPrint("Received valuation details list with ${detailsList.length} items.");
+    debugPrint("Raw list content: $detailsList");
+    detailsList = detailsList.where((item) => item != null && item is Map<String, dynamic>).toList();
 
-    // Initialize valuationDetails if available
-    if (data.containsKey('valuationDetails') && data['valuationDetails'] is List) {
+    debugPrint("Filtered valuation details list with ${detailsList.length} valid items.");
+
       _valuationDetails = (data['valuationDetails'] as List)
           .map((item) => ValuationDetailItem(
                 description: item['description'] ?? '',
@@ -187,46 +186,104 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
               ))
           .toList();
     }
+    });
 
     // Initialize date fields safely
-    // if (data['dateOfInspection'] != null) {
-    //   try {
-    //     _controllers['p7inspections'].text = DateTime.parse(data['dateOfInspection']);
-    //   } catch (e) {
-    //     debugPrint('Invalid dateOfInspection: $e');
-    //   }
-    // }
+    if (data['dateOfInspection'] != null) {
+      try {
+        _data.dateOfInspection= DateTime.parse(data['dateOfInspection']);
+      } catch (e) {
+        debugPrint('Invalid dateOfInspection: $e');
+      }
+    }
 
-    // if (data['dateOfValuation'] != null) {
-    //   try {
-    //     _valuationDate = DateTime.parse(data['dateOfValuation']);
-    //   } catch (e) {
-    //     debugPrint('Invalid dateOfValuation: $e');
-    //   }
-    // }
+    if (data['dateOfValuation'] != null) {
+      try {
+        _data.dateOfValuation = DateTime.parse(data['dateOfValuation']);
+      } catch (e) {
+        debugPrint('Invalid dateOfValuation: $e');
+      }
+    }
 
-    // if (data['finalValuationDate'] != null) {
-    //   try {
-    //     _finalValuationDate = DateTime.parse(data['finalValuationDate']);
-    //   } catch (e) {
-    //     debugPrint('Invalid finalValuationDate: $e');
-    //   }
-    // }
+  
+      print('dateOfInspection: ${_data.dateOfInspection}');
+print('dateOfValuation: ${_data.dateOfValuation}');
 
-    // if (data['p7reportDate'] != null) {
-    //   try {
-    //     _p7ReportDate = DateTime.parse(data['p7reportDate']);
-    //   } catch (e) {
-    //     debugPrint('Invalid p7reportDate: $e');
-    //   }
-    // }
+    if (data['finalValuationDate'] != null) {
+      try {
+        _data.finalValuationDate = DateTime.parse(data['finalValuationDate']);
+      } catch (e) {
+        debugPrint('Invalid finalValuationDate: $e');
+      }
+    }
+
+    if (data['p7reportDate'] != null) {
+      try {
+        _data.p7reportDate = DateTime.parse(data['p7reportDate']);
+      } catch (e) {
+        debugPrint('Invalid p7reportDate: $e');
+      }
+    }
 
     debugPrint('Form initialized with SIB property data');
   } else {
     debugPrint('No property data - using default values');
   }
 }
+Future<Uint8List> fetchImage(String imageUrl) async {
+    try {
+      debugPrint("Attempting to fetch image from: $imageUrl");
+      final response = await http.get(Uri.parse(imageUrl));
 
+      debugPrint("Response status: ${response.statusCode}");
+      debugPrint("Response headers: ${response.headers}");
+
+      if (response.statusCode == 200) {
+        debugPrint(
+            "Successfully fetched image (bytes length: ${response.bodyBytes.length})");
+        return response.bodyBytes;
+      } else {
+        throw Exception('Failed to load image: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint("Error details: $e");
+      throw Exception('Error fetching image: $e');
+    }
+  }
+    Future<void> _loadInitialImages(Map<String, dynamic> data) async {
+      final List<ValuationImage> loadedImages = [];
+    try {
+        // Check if the property data contains image information
+        if (data['images'] != null && data['images'] is List) {
+          final List<dynamic> imagesData = data['images'];
+
+          for (var imgData in imagesData) {
+            try {
+              // Construct the image URL based on your server configuration
+              String imageUrl = '${url4}${imgData['fileName']}';
+              debugPrint("Fetching image from: $imageUrl");
+              Uint8List imageBytes = await fetchImage(imageUrl);
+
+              
+                 loadedImages.add(ValuationImage(
+            imageFile: imageBytes,
+            latitude: imgData['latitude']?.toString() ?? '',
+            longitude: imgData['longitude']?.toString() ?? '',
+          ));
+            } catch (e) {
+              debugPrint('Error loading image: $e');
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Error initializing images: $e');
+      }
+       if (mounted) { 
+    setState(() {
+      _valuationImages.addAll(loadedImages);
+    });
+  }
+}
   @override
   void dispose() {
     _controllers.forEach((_, controller) => controller.dispose());
@@ -430,6 +487,22 @@ class _SIBValuationFormScreenState extends State<SIBValuationFormScreen> {
       request.fields.addAll(
   _controllers.map((key, controller) => MapEntry(key, controller.text)),
 );
+
+debugPrint('Saving dateOfInspection: ${_data.dateOfInspection}');
+debugPrint('Saving dateOfValuation: ${_data.dateOfValuation}');
+
+request.fields['dateOfInspection'] = DateFormat('yyyy-MM-dd').format(_data.dateOfInspection!);
+request.fields['dateOfValuation'] = DateFormat('yyyy-MM-dd').format(_data.dateOfValuation!);
+request.fields['finalValuationDate'] = DateFormat('yyyy-MM-dd').format(_data.finalValuationDate!);
+request.fields['p7reportDate'] = DateFormat('yyyy-MM-dd').format(_data.p7reportDate!);
+  List<Map<String, String>> valuationDetails = _valuationDetails.map((item) => {
+  'description': item.description,
+  'area': item.area,
+  'ratePerUnit': item.ratePerUnit,
+  'estimatedValue': item.estimatedValue,
+}).toList();
+
+request.fields['valuationDetails'] = jsonEncode(valuationDetails);
 
     List<Map<String, String>> imageMetadata = [];
 

@@ -1020,6 +1020,18 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
                 ),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.only(right: 50,left: 50,top : 10, bottom: 10),
+              child: FloatingActionButton.extended(
+              icon: const Icon(Icons.search),
+              label: const Text('Search Saved Drafts'),
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                  return const SavedDrafts();
+                }));
+              },
+                        ),
+            ),
             _buildSection(title: 'Header', initiallyExpanded: true, children: [
               TextFormField(
                   controller: _valuerNameCtrl,
@@ -1525,42 +1537,26 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
                   ),
               ],
             ),
-            const SizedBox(height: 80), // Space for FAB
-          ],
-        ),
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton.extended(
-            icon: const Icon(Icons.search),
-            label: const Text('Search Saved Drafts'),
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-                return const SavedDrafts();
-              }));
-            },
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          FloatingActionButton.extended(
+            Padding(
+              padding: const EdgeInsets.only(left:50,right: 50,top: 10),
+              child: FloatingActionButton.extended(
               icon: const Icon(Icons.picture_as_pdf),
               label: const Text('Generate PDF'),
               onPressed: () {
                 _generatePdf();
               }),
-          const SizedBox(
-            height: 10,
-          ),
+            ),
+          ],
+          
+        ),
+      ),
+      floatingActionButton: 
           FloatingActionButton.extended(
-              icon: const Icon(Icons.picture_as_pdf),
+              icon: const Icon(Icons.save),
               label: const Text('Save data'),
               onPressed: () {
                 _saveData();
               }),
-        ],
-      ),
     );
   }
 
