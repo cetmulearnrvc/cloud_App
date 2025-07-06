@@ -3851,11 +3851,93 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _saveData, 
+        label: Text('Save'),
+        icon: Icon(Icons.save),),
       appBar: AppBar(title: const Text('PDF Generator')),
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: ListView(
           children: [
+            Card(
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Search for Nearby Property",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _latController,
+                      decoration: const InputDecoration(labelText: 'Latitude'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+
+                      controller: _lonController,
+                      decoration: InputDecoration(labelText: 'Longitude'),
+
+                    ),
+                    const SizedBox(height: 8),
+                    Center(
+                        child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed:
+                                    _getCurrentLocation, // Call our new method
+                                icon: const Icon(Icons.my_location),
+                                label: const Text('Get Location'),
+                              ),
+                            ),
+
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: (){} /* () {
+                                  Navigator.of(context)
+                                      .push(MaterialPageRoute(builder: (ctx) {
+                                    return Nearbydetails(
+                                        latitude: _nearbyLatitude.text,
+                                        longitude: _nearbyLongitude.text);
+                                  }));
+                                } */
+                                    ,
+                                label: Text('Search'),
+                                icon: Icon(Icons.search),
+                              ),
+
+                            )
+                          ],
+                        ),
+                      ],
+                    )),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 50,left: 50,top: 10,bottom: 10),
+              child: FloatingActionButton.extended(
+              icon: const Icon(Icons.search),
+              label: const Text('Search Saved Drafts'),
+              onPressed: () {
+                // Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                //   return SavedDrafts();
+                // }));
+              },
+                        ),
+            ),
             // Section 1: INTRODUCTION
             ExpansionTile(
               title: const Text(
@@ -5018,12 +5100,13 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
             ),
             const SizedBox(height: 20),
 
-            ElevatedButton(
-              onPressed: () {
-                _generatePdf();
-                _saveData();
-              },
-              child: const Text('Generate PDF'),
+            Padding(
+              padding: const EdgeInsets.only(left:50,right: 50,top: 10),
+              child: FloatingActionButton.extended(
+              onPressed: _generatePdf,
+              icon: const Icon(Icons.picture_as_pdf),
+              label: const Text('Generate PDF'),
+                        ),
             ),
           ],
         ),
