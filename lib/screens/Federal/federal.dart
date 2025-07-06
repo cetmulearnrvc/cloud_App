@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart' as pdfLib;
@@ -8,6 +11,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:typed_data';
 import 'package:geolocator/geolocator.dart'; // Import geolocator package
 // Import geolocator package
+import 'package:http/http.dart' as http;
+import 'config.dart';
 
 void main() {
   runApp(const MyApp());
@@ -86,15 +91,19 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
     'Ownership Type': TextEditingController(),
     'Total No. of Blocks/ Buildings': TextEditingController(),
     'No. of Floors': TextEditingController(),
-    'No. of Units_Total Units': TextEditingController(), // Combined for form input
-    'No. of Units_Units on each Floor': TextEditingController(), // Combined for form input
+    'No. of Units_Total Units':
+        TextEditingController(), // Combined for form input
+    'No. of Units_Units on each Floor':
+        TextEditingController(), // Combined for form input
     'Year Built / Age of Property (in Years)': TextEditingController(),
-    'Year Built / Age of the Property (in Years)_Years': TextEditingController(), // For the 'Years' label
+    'Year Built / Age of the Property (in Years)_Years':
+        TextEditingController(), // For the 'Years' label
     'Residual Age of the Property (in Years)': TextEditingController(),
     'Maintenance Level of Building': TextEditingController(),
     'Amenities': TextEditingController(),
     'Amenities_Lifts': TextEditingController(), // For the 'Lifts' label
-    'Whether the Building is constructed strictly according to Plan approved by Government authority? Give details': TextEditingController(),
+    'Whether the Building is constructed strictly according to Plan approved by Government authority? Give details':
+        TextEditingController(),
 
     // SECTION 3: UNIT DETAILS
     'Basement': TextEditingController(),
@@ -112,9 +121,12 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
     'Quality of Infrastructure in the Vicinity': TextEditingController(),
     'Class of Locality': TextEditingController(),
     'Nature of Locality': TextEditingController(),
-    'Details of the Route through which Property can be reached': TextEditingController(),
-    'Has the Property got direct and independent Access?': TextEditingController(),
-    'Is the property accessible by car/ mode of accessibility available?': TextEditingController(),
+    'Details of the Route through which Property can be reached':
+        TextEditingController(),
+    'Has the Property got direct and independent Access?':
+        TextEditingController(),
+    'Is the property accessible by car/ mode of accessibility available?':
+        TextEditingController(),
     'Proximity to Civic Amenities': TextEditingController(),
     'Nearest Railway Station (Distance & Name)': TextEditingController(),
     'Nearest Hospital (Distance & Name)': TextEditingController(),
@@ -122,11 +134,14 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
     'Is this Corner Property?': TextEditingController(),
     'Property Identified Through': TextEditingController(),
     'Property Demarcated': TextEditingController(),
-    'Nature of Land/ Type of Use to which it can be put': TextEditingController(),
+    'Nature of Land/ Type of Use to which it can be put':
+        TextEditingController(),
     'If Others, Give Details': TextEditingController(),
     'General Description of Layout': TextEditingController(),
-    'If Others, Give Details_2': TextEditingController(), // Renamed to avoid key conflict
-    'Other Developments on the Property excluding Building, if any': TextEditingController(),
+    'If Others, Give Details_2':
+        TextEditingController(), // Renamed to avoid key conflict
+    'Other Developments on the Property excluding Building, if any':
+        TextEditingController(),
     'Approach Road Details': TextEditingController(),
     'Approach Road Details_Width': TextEditingController(), // For the width
 
@@ -192,18 +207,22 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
     // SECTION 8: DOCUMENTS AND PERMISSIONS
     'Layout Plans Details': TextEditingController(),
     'Building Plan Details': TextEditingController(),
-    'Construction Permission Number & Date/Commencement Certificate Details': TextEditingController(),
+    'Construction Permission Number & Date/Commencement Certificate Details':
+        TextEditingController(),
     'Occupation/ Completion Certificate Details': TextEditingController(),
     'Title Documents Verification Certificate': TextEditingController(),
-    'Latest Ownership Document with Address and Area under Transaction': TextEditingController(),
+    'Latest Ownership Document with Address and Area under Transaction':
+        TextEditingController(),
     'Any Other Documents': TextEditingController(),
     'Deviations Observed on Site with Approved Plan': TextEditingController(),
-    'If Approved Plans are not available, Construction done as per Local Bylaws': TextEditingController(),
+    'If Approved Plans are not available, Construction done as per Local Bylaws':
+        TextEditingController(),
     'Permissible FSI': TextEditingController(),
     'Is the Property Mortgaged or Disputed?': TextEditingController(),
     'Value/ Purchase Price paid as per Sale Deed': TextEditingController(),
     'Present Market Rate of the Property': TextEditingController(),
-    'Details of recent transaction in the neighborhood, if any': TextEditingController(),
+    'Details of recent transaction in the neighborhood, if any':
+        TextEditingController(),
 
     //SECTION 9: VALUATION REPORT - Land
     'Land Area (Cents)_AsPerSite': TextEditingController(),
@@ -276,7 +295,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
     'Total_Area As per Documents': TextEditingController(),
     'Total_Deviation': TextEditingController(),
     'Total_Adopted Built-up Area': TextEditingController(),
-    'Total_Adopted Construction Rate': TextEditingController(), // Note: this field is not in the image but logically should be
+    'Total_Adopted Construction Rate':
+        TextEditingController(), // Note: this field is not in the image but logically should be
     'Total_Replacement Cost': TextEditingController(),
 
     'Depreciation %': TextEditingController(),
@@ -285,7 +305,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
     'Value of Parking (in Rs.)': TextEditingController(),
     'Value of Other Amenities (in Rs.)': TextEditingController(),
     'BUILDING VALUE / Insurable Value (in Rs.)': TextEditingController(),
-    'Building Value as per Govt Guideline Rate (in Rs.)': TextEditingController(),
+    'Building Value as per Govt Guideline Rate (in Rs.)':
+        TextEditingController(),
 
     // SECTION 9: FINAL VALUES (New additions from screenshot)
     'Estimated Cost to Complete the Property (in Rs.)': TextEditingController(),
@@ -293,26 +314,40 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
     'Estimated Rental Value of Building': TextEditingController(),
     'Market Value (in Rs.)': TextEditingController(),
     'Market Value (in Words)': TextEditingController(),
-    'State the Source for Arriving at the Market Value': TextEditingController(),
+    'State the Source for Arriving at the Market Value':
+        TextEditingController(),
     'Realizable value (in Rs.)': TextEditingController(),
     'Realizable value (%)': TextEditingController(), // For the 90%
     'Forced Sale Value (in Rs.)': TextEditingController(),
     'Forced Sale Value (%)': TextEditingController(), // For the 80%
 
     // SECTION 10: REMARKS & DECLARATION (No corresponding UI input, just for PDF)
-    'Remarks_PropertyDescription': TextEditingController(text: 'THE PROPERTY IS A RESIDENTIAL BUILDING WHOSE CONSTRUCTION IS UNDER PROGRESS AND PLASTERING COMPLETED. THE PENDING WORKS ARE SANITARY FITTINGS, ELECTRICAL SWITCHES FINISHING WORKS AND FLOORING'),
-    'Declaration_Point1': TextEditingController(text: 'The information furnished in this report is true and correct to the best of my knowledge and belief.'),
-    'Declaration_Point2': TextEditingController(text: 'I have no direct or indirect interest in the property valued.'),
-    'Declaration_Point3': TextEditingController(text: 'I / My representative MYSELF have/ has personally visited the property by going to the site and inspected all items thoroughly.'),
-    'Declaration_Point4': TextEditingController(text: 'The legal aspects are out of the scope of this valuation report.'),
-    'Declaration_Point5': TextEditingController(text: 'I have never been debarred or convicted by any court of law.'),
-    'Declaration_Point6': TextEditingController(text: 'The valuation report has been prepared for mortgage purpose.'),
+    'Remarks_PropertyDescription': TextEditingController(
+        text:
+            'THE PROPERTY IS A RESIDENTIAL BUILDING WHOSE CONSTRUCTION IS UNDER PROGRESS AND PLASTERING COMPLETED. THE PENDING WORKS ARE SANITARY FITTINGS, ELECTRICAL SWITCHES FINISHING WORKS AND FLOORING'),
+    'Declaration_Point1': TextEditingController(
+        text:
+            'The information furnished in this report is true and correct to the best of my knowledge and belief.'),
+    'Declaration_Point2': TextEditingController(
+        text: 'I have no direct or indirect interest in the property valued.'),
+    'Declaration_Point3': TextEditingController(
+        text:
+            'I / My representative MYSELF have/ has personally visited the property by going to the site and inspected all items thoroughly.'),
+    'Declaration_Point4': TextEditingController(
+        text:
+            'The legal aspects are out of the scope of this valuation report.'),
+    'Declaration_Point5': TextEditingController(
+        text: 'I have never been debarred or convicted by any court of law.'),
+    'Declaration_Point6': TextEditingController(
+        text: 'The valuation report has been prepared for mortgage purpose.'),
 
     // SECTION 11: Annexure I - Valuer confirmation in case of Construction Deviation
     'ConstructionDeviation_ApprovedPlanAvailable': TextEditingController(),
-    'ConstructionDeviation_DeviationOnSecurityProperty': TextEditingController(),
+    'ConstructionDeviation_DeviationOnSecurityProperty':
+        TextEditingController(),
     'ConstructionDeviation_PropertyTaxPaidReceipts': TextEditingController(),
-    'ConstructionDeviation_LatestLandRecordAvailability': TextEditingController(),
+    'ConstructionDeviation_LatestLandRecordAvailability':
+        TextEditingController(),
     'ConstructionDeviation_FSIRARFAR_LocalAuthority': TextEditingController(),
     'ConstructionDeviation_MaxDeviationPermitted': TextEditingController(),
     'ConstructionDeviation_FSIRARFAR_Agreement': TextEditingController(),
@@ -324,8 +359,515 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
   final ImagePicker _picker = ImagePicker();
   final List<XFile> _images = []; // Changed to store XFile objects
 
+  bool _isNotValidState = false;
+
+  Future<void> _saveData() async {
+    try {
+      // Validate required fields
+      if (controllers['Applicant Name and Branch Details']!.text.isEmpty ||
+          controllers['Owner of the Property']!.text.isEmpty) {
+        debugPrint("Not all required fields are filled");
+        setState(() => _isNotValidState = true);
+        return;
+      }
+
+      if (_images.isEmpty) {
+        debugPrint("No images available");
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please add at least one image')));
+        return;
+      }
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      var request = http.MultipartRequest('POST', Uri.parse(url1));
+
+      // Add all text fields from controllers
+      request.fields.addAll({
+        // SECTION 1: BASIC INFORMATION
+        "applicantNameAndBranchDetails":
+            controllers['Applicant Name and Branch Details']!.text,
+        "ownerOfTheProperty": controllers['Owner of the Property']!.text,
+        "nameOfTheProspectivePurchaser":
+            controllers['Name of the prospective purchaser(s)']!.text,
+        "builderNameAndRERAID": controllers['Builder Name and RERA ID']!.text,
+        "propertyDescription": controllers['Property Description']!.text,
+        "personMetOnSite": controllers[
+                'Person Met on Site and his/ her relationship with the Applicant']!
+            .text,
+        "propertyAddressAsPerSiteVisit":
+            controllers['Property Address as per Site Visit']!.text,
+        "businessName": controllers['Business Name']!.text,
+        "houseDoorUnitFlatShopOfficeGalaNo":
+            controllers['House/ Door / Unit/ Flat/ Shop /Office / Gala No.']!
+                .text,
+        "plotNo": controllers['Plot No.']!.text,
+        "floor": controllers['Floor']!.text,
+        "projectNameBuildingName":
+            controllers['Project Name/ Building Name']!.text,
+        "localitySubLocality": controllers['Locality/ Sub Locality']!.text,
+        "streetNameRoadNo": controllers['Street Name/ Road No']!.text,
+        "nearestLandmark": controllers['Nearest Landmark']!.text,
+        "cityTown": controllers['City/ Town']!.text,
+        "village": controllers['Village']!.text,
+        "pincode": controllers['Pincode']!.text,
+        "plotNoSurveyNoKhasraNo":
+            controllers['Plot No./Survey No./Khasra No.']!.text,
+        "subZone": controllers['Sub-zone (upvibhag)']!.text,
+        "villageTechnical": controllers['Village_Technical']!.text,
+        "subDistrictTaluka": controllers['Sub district (Taluka)']!.text,
+        "district": controllers['District']!.text,
+        "state": controllers['State']!.text,
+        "legalAddressOfProperty":
+            controllers['Legal Address of Property']!.text,
+
+        // SECTION 2: PROPERTY DETAILS
+        "propertyType": controllers['Property Type']!.text,
+        "propertyUsage": controllers['Property Usage']!.text,
+        "permittedUsageOfTheProperty":
+            controllers['Permitted Usage of the Property']!.text,
+        "withinMunicipalLimits": controllers['Within Municipal Limits']!.text,
+        "municipalNumber": controllers['Municipal Number']!.text,
+        "constructionStatus": controllers['Construction Status']!.text,
+        "percentComplete": controllers['% Complete']!.text,
+        "percentRecommended": controllers['% Recommended']!.text,
+        "typeOfOccupancy": controllers['Type of Occupancy']!.text,
+        "tenureIfSelfOccupied": controllers['Tenure (if Self-Occupied)']!.text,
+        "tenureIfVacant": controllers['Tenure (if Vacant)']!.text,
+        "ifRentedTenantDetails": controllers['If rented, Tenant Details']!.text,
+        "customerRelationshipWithOccupant":
+            controllers['Customer Relationship with Occupant']!.text,
+        "ownershipType": controllers['Ownership Type']!.text,
+        "totalNoOfBlocksBuildings":
+            controllers['Total No. of Blocks/ Buildings']!.text,
+        "noOfFloors": controllers['No. of Floors']!.text,
+        "noOfUnitsTotalUnits": controllers['No. of Units_Total Units']!.text,
+        "noOfUnitsUnitsOnEachFloor":
+            controllers['No. of Units_Units on each Floor']!.text,
+        "yearBuiltAgeOfProperty":
+            controllers['Year Built / Age of Property (in Years)']!.text,
+        "yearBuiltAgeOfPropertyYears":
+            controllers['Year Built / Age of the Property (in Years)_Years']!
+                .text,
+        "residualAgeOfTheProperty":
+            controllers['Residual Age of the Property (in Years)']!.text,
+        "maintenanceLevelOfBuilding":
+            controllers['Maintenance Level of Building']!.text,
+        "amenities": controllers['Amenities']!.text,
+        "amenitiesLifts": controllers['Amenities_Lifts']!.text,
+        "buildingConstructedAccordingToPlan": controllers[
+                'Whether the Building is constructed strictly according to Plan approved by Government authority? Give details']!
+            .text,
+
+        // SECTION 3: UNIT DETAILS
+        "basement": controllers['Basement']!.text,
+        "groundFloor": controllers['Ground Floor']!.text,
+        "firstFloor": controllers['First Floor']!.text,
+        "secondFloor": controllers['Second Floor']!.text,
+        "thirdFloor": controllers['Third Floor']!.text,
+        "fourthFloor": controllers['Fourth Floor']!.text,
+        "fifthFloor": controllers['Fifth Floor']!.text,
+
+        // SECTION 4: SURROUNDING LOCALITY DETAILS
+        "typeOfArea": controllers['Type of Area']!.text,
+        "classificationOfArea": controllers['Classification of Area']!.text,
+        "developmentInVicinityPercent":
+            controllers['Development in Vicinity (%)']!.text,
+        "qualityOfInfrastructureInVicinity":
+            controllers['Quality of Infrastructure in the Vicinity']!.text,
+        "classOfLocality": controllers['Class of Locality']!.text,
+        "natureOfLocality": controllers['Nature of Locality']!.text,
+        "detailsOfTheRoute": controllers[
+                'Details of the Route through which Property can be reached']!
+            .text,
+        "hasDirectIndependentAccess":
+            controllers['Has the Property got direct and independent Access?']!
+                .text,
+        "propertyAccessibleByCar": controllers[
+                'Is the property accessible by car/ mode of accessibility available?']!
+            .text,
+        "proximityToCivicAmenities":
+            controllers['Proximity to Civic Amenities']!.text,
+        "nearestRailwayStation":
+            controllers['Nearest Railway Station (Distance & Name)']!.text,
+        "nearestHospital":
+            controllers['Nearest Hospital (Distance & Name)']!.text,
+        "nearestCityCenter":
+            controllers['Nearest City Center (Distance & Name)']!.text,
+        "isCornerProperty": controllers['Is this Corner Property?']!.text,
+        "propertyIdentifiedThrough":
+            controllers['Property Identified Through']!.text,
+        "propertyDemarcated": controllers['Property Demarcated']!.text,
+        "natureOfLandTypeOfUse":
+            controllers['Nature of Land/ Type of Use to which it can be put']!
+                .text,
+        "ifOthersGiveDetails": controllers['If Others, Give Details']!.text,
+        "generalDescriptionOfLayout":
+            controllers['General Description of Layout']!.text,
+        "ifOthersGiveDetails2": controllers['If Others, Give Details_2']!.text,
+        "otherDevelopmentsOnProperty": controllers[
+                'Other Developments on the Property excluding Building, if any']!
+            .text,
+        "approachRoadDetails": controllers['Approach Road Details']!.text,
+        "approachRoadDetailsWidth":
+            controllers['Approach Road Details_Width']!.text,
+        "marketability": controllers['Marketability']!.text,
+        "encroachmentDetails":
+            controllers['Encroachment Details, if any']!.text,
+        "isPropertyProneToDisaster":
+            controllers['Is the Property Prone to any Disaster?']!.text,
+        "anyLocationalAdvantages":
+            controllers['Any Locational Advantages Noted']!.text,
+
+        // SECTION 5: PHYSICAL DETAILS
+        "boundariesNorthSiteVisit":
+            controllers['Boundaries_North_SiteVisit']!.text,
+        "boundariesNorthLegalDocuments":
+            controllers['Boundaries_North_LegalDocuments']!.text,
+        "boundariesSouthSiteVisit":
+            controllers['Boundaries_South_SiteVisit']!.text,
+        "boundariesSouthLegalDocuments":
+            controllers['Boundaries_South_LegalDocuments']!.text,
+        "boundariesEastSiteVisit":
+            controllers['Boundaries_East_SiteVisit']!.text,
+        "boundariesEastLegalDocuments":
+            controllers['Boundaries_East_LegalDocuments']!.text,
+        "boundariesWestSiteVisit":
+            controllers['Boundaries_West_SiteVisit']!.text,
+        "boundariesWestLegalDocuments":
+            controllers['Boundaries_West_LegalDocuments']!.text,
+        "boundariesMatchingWithSite":
+            controllers['Boundaries_MatchingWithSite']!.text,
+
+        // SECTION 6: STRUCTURAL DETAILS
+        "typeOfConstructionStructure":
+            controllers['Type of Construction Structure']!.text,
+        "qualityOfConstruction": controllers['Quality of Construction']!.text,
+        "foundationType": controllers['Foundation Type']!.text,
+        "roofType": controllers['Roof Type']!.text,
+        "masonryType": controllers['Masonry Type']!.text,
+        "walls": controllers['Walls']!.text,
+        "doorsAndWindows": controllers['Doors and Windows']!.text,
+        "finishing": controllers['Finishing']!.text,
+        "flooring": controllers['Flooring']!.text,
+        "anyOtherConstructionSpecifications":
+            controllers['Any Other Construction Specifications']!.text,
+        "doesPropertyFallInDemolitionList":
+            controllers['Does Property fall in Demolition List?']!.text,
+
+        // SECTION 7: PROPERTY STAGE OF CONSTRUCTION
+        "foundationAllottedConstructionStage":
+            controllers['Foundation_AllottedConstructionStage']!.text,
+        "foundationPresentCompletion":
+            controllers['Foundation_PresentCompletion']!.text,
+        "foundationNoOfFloorsCompleted":
+            controllers['Foundation_NoOfFloorsCompleted']!.text,
+        "plinthAllottedConstructionStage":
+            controllers['Plinth_AllottedConstructionStage']!.text,
+        "plinthPresentCompletion":
+            controllers['Plinth_PresentCompletion']!.text,
+        "plinthNoOfFloorsCompleted":
+            controllers['Plinth_NoOfFloorsCompleted']!.text,
+        "brickworkUptoSlabAllottedConstructionStage":
+            controllers['BrickworkUptoSlab_AllottedConstructionStage']!.text,
+        "brickworkUptoSlabPresentCompletion":
+            controllers['BrickworkUptoSlab_PresentCompletion']!.text,
+        "brickworkUptoSlabNoOfFloorsCompleted":
+            controllers['BrickworkUptoSlab_NoOfFloorsCompleted']!.text,
+        "slabRCCCastingAllottedConstructionStage":
+            controllers['SlabRCCCasting_AllottedConstructionStage']!.text,
+        "slabRCCCastingPresentCompletion":
+            controllers['SlabRCCCasting_PresentCompletion']!.text,
+        "slabRCCCastingNoOfFloorsCompleted":
+            controllers['SlabRCCCasting_NoOfFloorsCompleted']!.text,
+        "insideOutsidePlasterAllottedConstructionStage":
+            controllers['InsideOutsidePlaster_AllottedConstructionStage']!.text,
+        "insideOutsidePlasterPresentCompletion":
+            controllers['InsideOutsidePlaster_PresentCompletion']!.text,
+        "insideOutsidePlasterNoOfFloorsCompleted":
+            controllers['InsideOutsidePlaster_NoOfFloorsCompleted']!.text,
+        "flooringWorkAllottedConstructionStage":
+            controllers['FlooringWork_AllottedConstructionStage']!.text,
+        "flooringWorkPresentCompletion":
+            controllers['FlooringWork_PresentCompletion']!.text,
+        "flooringWorkNoOfFloorsCompleted":
+            controllers['FlooringWork_NoOfFloorsCompleted']!.text,
+        "electrificationWorkAllottedConstructionStage":
+            controllers['ElectrificationWork_AllottedConstructionStage']!.text,
+        "electrificationWorkPresentCompletion":
+            controllers['ElectrificationWork_PresentCompletion']!.text,
+        "electrificationWorkNoOfFloorsCompleted":
+            controllers['ElectrificationWork_NoOfFloorsCompleted']!.text,
+        "woodworkPaintingAllottedConstructionStage":
+            controllers['WoodworkPainting_AllottedConstructionStage']!.text,
+        "woodworkPaintingPresentCompletion":
+            controllers['WoodworkPainting_PresentCompletion']!.text,
+        "woodworkPaintingNoOfFloorsCompleted":
+            controllers['WoodworkPainting_NoOfFloorsCompleted']!.text,
+        "totalCompletionAllottedConstructionStage":
+            controllers['TotalCompletion_AllottedConstructionStage']!.text,
+        "totalCompletionPresentCompletion":
+            controllers['TotalCompletion_PresentCompletion']!.text,
+        "totalCompletionNoOfFloorsCompleted":
+            controllers['TotalCompletion_NoOfFloorsCompleted']!.text,
+        "recommendedAmountInPercent":
+            controllers['RecommendedAmountInPercent']!.text,
+
+        // SECTION 8: DOCUMENTS AND PERMISSIONS
+        "layoutPlansDetails": controllers['Layout Plans Details']!.text,
+        "buildingPlanDetails": controllers['Building Plan Details']!.text,
+        "constructionPermissionDetails": controllers[
+                'Construction Permission Number & Date/Commencement Certificate Details']!
+            .text,
+        "occupationCompletionCertificateDetails":
+            controllers['Occupation/ Completion Certificate Details']!.text,
+        "titleDocumentsVerificationCertificate":
+            controllers['Title Documents Verification Certificate']!.text,
+        "latestOwnershipDocument": controllers[
+                'Latest Ownership Document with Address and Area under Transaction']!
+            .text,
+        "anyOtherDocuments": controllers['Any Other Documents']!.text,
+        "deviationsObserved":
+            controllers['Deviations Observed on Site with Approved Plan']!.text,
+        "constructionDoneAsPerLocalBylaws": controllers[
+                'If Approved Plans are not available, Construction done as per Local Bylaws']!
+            .text,
+        "permissibleFSI": controllers['Permissible FSI']!.text,
+        "isPropertyMortgagedOrDisputed":
+            controllers['Is the Property Mortgaged or Disputed?']!.text,
+        "valuePurchasePricePaid":
+            controllers['Value/ Purchase Price paid as per Sale Deed']!.text,
+        "presentMarketRate":
+            controllers['Present Market Rate of the Property']!.text,
+        "detailsOfRecentTransaction": controllers[
+                'Details of recent transaction in the neighborhood, if any']!
+            .text,
+
+        // SECTION 9: VALUATION REPORT - Land
+        "landAreaAsPerSite": controllers['Land Area (Cents)_AsPerSite']!.text,
+        "landAreaAsPerPlan": controllers['Land Area (Cents)_AsPerPlan']!.text,
+        "landAreaAsPerLegalDoc":
+            controllers['Land Area (Cents)_AsPerLegalDoc']!.text,
+        "undividedShareOfLand":
+            controllers['Undivided Share of Land (in Cents)']!.text,
+        "adoptedLandArea": controllers['Adopted Land Area (in Cents)']!.text,
+        "adoptedLandRate":
+            controllers['Adopted Land Rate (in Rs./Cents)']!.text,
+        "guidelineRateForLand": controllers['Guideline Rate for Land']!.text,
+        "landValue": controllers['LAND VALUE (in Rs.)']!.text,
+
+        // SECTION 9: VALUATION REPORT - Building
+        "basementFloorAreaAsPerSite":
+            controllers['Basement Floor_Area As per Site']!.text,
+        "basementFloorAreaAsPerDocuments":
+            controllers['Basement Floor_Area As per Documents']!.text,
+        "basementFloorDeviation": controllers['Basement Floor_Deviation']!.text,
+        "basementFloorAdoptedBuiltUpArea":
+            controllers['Basement Floor_Adopted Built-up Area']!.text,
+        "basementFloorAdoptedConstructionRate":
+            controllers['Basement Floor_Adopted Construction Rate']!.text,
+        "basementFloorReplacementCost":
+            controllers['Basement Floor_Replacement Cost']!.text,
+        "stiltFloorAreaAsPerSite":
+            controllers['Stilt Floor_Area As per Site']!.text,
+        "stiltFloorAreaAsPerDocuments":
+            controllers['Stilt Floor_Area As per Documents']!.text,
+        "stiltFloorDeviation": controllers['Stilt Floor_Deviation']!.text,
+        "stiltFloorAdoptedBuiltUpArea":
+            controllers['Stilt Floor_Adopted Built-up Area']!.text,
+        "stiltFloorAdoptedConstructionRate":
+            controllers['Stilt Floor_Adopted Construction Rate']!.text,
+        "stiltFloorReplacementCost":
+            controllers['Stilt Floor_Replacement Cost']!.text,
+        "groundFloorAreaAsPerSite":
+            controllers['Ground Floor_Area As per Site']!.text,
+        "groundFloorAreaAsPerDocuments":
+            controllers['Ground Floor_Area As per Documents']!.text,
+        "groundFloorDeviation": controllers['Ground Floor_Deviation']!.text,
+        "groundFloorAdoptedBuiltUpArea":
+            controllers['Ground Floor_Adopted Built-up Area']!.text,
+        "groundFloorAdoptedConstructionRate":
+            controllers['Ground Floor_Adopted Construction Rate']!.text,
+        "groundFloorReplacementCost":
+            controllers['Ground Floor_Replacement Cost']!.text,
+        "firstFloorAreaAsPerSite":
+            controllers['First Floor_Area As per Site']!.text,
+        "firstFloorAreaAsPerDocuments":
+            controllers['First Floor_Area As per Documents']!.text,
+        "firstFloorDeviation": controllers['First Floor_Deviation']!.text,
+        "firstFloorAdoptedBuiltUpArea":
+            controllers['First Floor_Adopted Built-up Area']!.text,
+        "firstFloorAdoptedConstructionRate":
+            controllers['First Floor_Adopted Construction Rate']!.text,
+        "firstFloorReplacementCost":
+            controllers['First Floor_Replacement Cost']!.text,
+        "secondFloorAreaAsPerSite":
+            controllers['Second Floor_Area As per Site']!.text,
+        "secondFloorAreaAsPerDocuments":
+            controllers['Second Floor_Area As per Documents']!.text,
+        "secondFloorDeviation": controllers['Second Floor_Deviation']!.text,
+        "secondFloorAdoptedBuiltUpArea":
+            controllers['Second Floor_Adopted Built-up Area']!.text,
+        "secondFloorAdoptedConstructionRate":
+            controllers['Second Floor_Adopted Construction Rate']!.text,
+        "secondFloorReplacementCost":
+            controllers['Second Floor_Replacement Cost']!.text,
+        "thirdFloorAreaAsPerSite":
+            controllers['Third Floor_Area As per Site']!.text,
+        "thirdFloorAreaAsPerDocuments":
+            controllers['Third Floor_Area As per Documents']!.text,
+        "thirdFloorDeviation": controllers['Third Floor_Deviation']!.text,
+        "thirdFloorAdoptedBuiltUpArea":
+            controllers['Third Floor_Adopted Built-up Area']!.text,
+        "thirdFloorAdoptedConstructionRate":
+            controllers['Third Floor_Adopted Construction Rate']!.text,
+        "thirdFloorReplacementCost":
+            controllers['Third Floor_Replacement Cost']!.text,
+        "fourthFloorAreaAsPerSite":
+            controllers['Fourth Floor_Area As per Site']!.text,
+        "fourthFloorAreaAsPerDocuments":
+            controllers['Fourth Floor_Area As per Documents']!.text,
+        "fourthFloorDeviation": controllers['Fourth Floor_Deviation']!.text,
+        "fourthFloorAdoptedBuiltUpArea":
+            controllers['Fourth Floor_Adopted Built-up Area']!.text,
+        "fourthFloorAdoptedConstructionRate":
+            controllers['Fourth Floor_Adopted Construction Rate']!.text,
+        "fourthFloorReplacementCost":
+            controllers['Fourth Floor_Replacement Cost']!.text,
+        "fifthFloorAreaAsPerSite":
+            controllers['Fifth Floor_Area As per Site']!.text,
+        "fifthFloorAreaAsPerDocuments":
+            controllers['Fifth Floor_Area As per Documents']!.text,
+        "fifthFloorDeviation": controllers['Fifth Floor_Deviation']!.text,
+        "fifthFloorAdoptedBuiltUpArea":
+            controllers['Fifth Floor_Adopted Built-up Area']!.text,
+        "fifthFloorAdoptedConstructionRate":
+            controllers['Fifth Floor_Adopted Construction Rate']!.text,
+        "fifthFloorReplacementCost":
+            controllers['Fifth Floor_Replacement Cost']!.text,
+        "totalAreaAsPerSite": controllers['Total_Area As per Site']!.text,
+        "totalAreaAsPerDocuments":
+            controllers['Total_Area As per Documents']!.text,
+        "totalDeviation": controllers['Total_Deviation']!.text,
+        "totalAdoptedBuiltUpArea":
+            controllers['Total_Adopted Built-up Area']!.text,
+        "totalAdoptedConstructionRate":
+            controllers['Total_Adopted Construction Rate']!.text,
+        "totalReplacementCost": controllers['Total_Replacement Cost']!.text,
+        "depreciationPercent": controllers['Depreciation %']!.text,
+        "netReplacementCost":
+            controllers['Net Replacement Cost (in Rs.)']!.text,
+        "noOfCarParking": controllers['No. of Car Parking']!.text,
+        "valueOfParking": controllers['Value of Parking (in Rs.)']!.text,
+        "valueOfOtherAmenities":
+            controllers['Value of Other Amenities (in Rs.)']!.text,
+        "buildingValueInsurableValue":
+            controllers['BUILDING VALUE / Insurable Value (in Rs.)']!.text,
+        "buildingValueAsPerGovtGuidelineRate":
+            controllers['Building Value as per Govt Guideline Rate (in Rs.)']!
+                .text,
+
+        // SECTION 9: FINAL VALUES
+        "estimatedCostToComplete":
+            controllers['Estimated Cost to Complete the Property (in Rs.)']!
+                .text,
+        "guidelineValue": controllers['Guideline Value (in Rs.)']!.text,
+        "estimatedRentalValue":
+            controllers['Estimated Rental Value of Building']!.text,
+        "marketValue": controllers['Market Value (in Rs.)']!.text,
+        "marketValueInWords": controllers['Market Value (in Words)']!.text,
+        "sourceForMarketValue":
+            controllers['State the Source for Arriving at the Market Value']!
+                .text,
+        "realizableValue": controllers['Realizable value (in Rs.)']!.text,
+        "realizableValuePercent": controllers['Realizable value (%)']!.text,
+        "forcedSaleValue": controllers['Forced Sale Value (in Rs.)']!.text,
+        "forcedSaleValuePercent": controllers['Forced Sale Value (%)']!.text,
+
+        // SECTION 10: REMARKS & DECLARATION
+        "remarksPropertyDescription":
+            controllers['Remarks_PropertyDescription']!.text,
+        "declarationPoint1": controllers['Declaration_Point1']!.text,
+        "declarationPoint2": controllers['Declaration_Point2']!.text,
+        "declarationPoint3": controllers['Declaration_Point3']!.text,
+        "declarationPoint4": controllers['Declaration_Point4']!.text,
+        "declarationPoint5": controllers['Declaration_Point5']!.text,
+        "declarationPoint6": controllers['Declaration_Point6']!.text,
+
+        // SECTION 11: Annexure I
+        "constructionDeviationApprovedPlanAvailable":
+            controllers['ConstructionDeviation_ApprovedPlanAvailable']!.text,
+        "constructionDeviationDeviationOnSecurityProperty":
+            controllers['ConstructionDeviation_DeviationOnSecurityProperty']!
+                .text,
+        "constructionDeviationPropertyTaxPaidReceipts":
+            controllers['ConstructionDeviation_PropertyTaxPaidReceipts']!.text,
+        "constructionDeviationLatestLandRecordAvailability":
+            controllers['ConstructionDeviation_LatestLandRecordAvailability']!
+                .text,
+        "constructionDeviationFSIRARFARLocalAuthority":
+            controllers['ConstructionDeviation_FSIRARFAR_LocalAuthority']!.text,
+        "constructionDeviationMaxDeviationPermitted":
+            controllers['ConstructionDeviation_MaxDeviationPermitted']!.text,
+        "constructionDeviationFSIRARFARAgreement":
+            controllers['ConstructionDeviation_FSIRARFAR_Agreement']!.text,
+        "constructionDeviationFSIRARFARValuerConfirmed":
+            controllers['ConstructionDeviation_FSIRARFAR_ValuerConfirmed']!
+                .text,
+        "constructionDeviationPropertyAcceptedAsSecurity":
+            controllers['ConstructionDeviation_PropertyAcceptedAsSecurity']!
+                .text,
+        "constructionDeviationHerebyConfirmCertify":
+            controllers['ConstructionDeviation_HerebyConfirmCertify']!.text,
+        "latitude": _latController.text,
+        "longitude": _lonController.text,
+      });
+
+      for (int i = 0; i < _images.length; i++) {
+        final image = _images[i];
+        final imageBytes = await image.readAsBytes();
+
+        request.files.add(http.MultipartFile.fromBytes(
+          'images', // Field name for array of images
+          imageBytes,
+          filename:
+              'property_${controllers['Applicant Name and Branch Details']!.text}_$i.jpg',
+        ));
+      }
+
+      final response = await request.send();
+
+      debugPrint("send req to backend");
+
+      if (context.mounted) Navigator.of(context).pop();
+
+      if (response.statusCode == 200) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Data saved successfully!')));
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Upload failed: ${response.reasonPhrase}')));
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      }
+    }
+  }
+
   // Helper function to create sub-tables for nested information
-  pw.Table createSubTable(List<String> keys, {double fontSize = 9, double padding = 1.5}) {
+  pw.Table createSubTable(List<String> keys,
+      {double fontSize = 9, double padding = 1.5}) {
     return pw.Table(
       border: pw.TableBorder.all(),
       columnWidths: {
@@ -374,19 +916,26 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(2),
-          child: pw.Text(controllers[allottedConstructionStageKey]?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+          child: pw.Text(controllers[allottedConstructionStageKey]?.text ?? '',
+              style: const pw.TextStyle(fontSize: 9.5)),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(2),
-          child: pw.Text(controllers[presentCompletionKey]?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+          child: pw.Text(controllers[presentCompletionKey]?.text ?? '',
+              style: const pw.TextStyle(fontSize: 9.5)),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(2),
-          child: pw.Text(controllers[noOfFloorsCompletedKey]?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+          child: pw.Text(controllers[noOfFloorsCompletedKey]?.text ?? '',
+              style: const pw.TextStyle(fontSize: 9.5)),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(2),
-          child: pw.Text(recommendedAmountKey != null ? (controllers[recommendedAmountKey]?.text ?? '') : '', style: const pw.TextStyle(fontSize: 9.5)),
+          child: pw.Text(
+              recommendedAmountKey != null
+                  ? (controllers[recommendedAmountKey]?.text ?? '')
+                  : '',
+              style: const pw.TextStyle(fontSize: 9.5)),
         ),
       ],
     );
@@ -402,55 +951,78 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
       String replacementCostKey,
       {bool isTotalRow = false}) {
     return pw.TableRow(
-      decoration: isTotalRow ? const pw.BoxDecoration(color: pdfLib.PdfColors.grey200) : null,
+      decoration: isTotalRow
+          ? const pw.BoxDecoration(color: pdfLib.PdfColors.grey200)
+          : null,
       children: [
         pw.Padding(
           padding: const pw.EdgeInsets.all(2),
           child: pw.Text(
             floor,
-            style: pw.TextStyle(fontWeight: isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal, fontSize: 9.5),
+            style: pw.TextStyle(
+                fontWeight:
+                    isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal,
+                fontSize: 9.5),
           ),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(2),
           child: pw.Text(
             controllers[areaSiteKey]?.text ?? '',
-            style: pw.TextStyle(fontWeight: isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal, fontSize: 9.5),
+            style: pw.TextStyle(
+                fontWeight:
+                    isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal,
+                fontSize: 9.5),
           ),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(2),
           child: pw.Text(
             controllers[areaDocKey]?.text ?? '',
-            style: pw.TextStyle(fontWeight: isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal, fontSize: 9.5),
+            style: pw.TextStyle(
+                fontWeight:
+                    isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal,
+                fontSize: 9.5),
           ),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(2),
           child: pw.Text(
             controllers[deviationKey]?.text ?? '',
-            style: pw.TextStyle(fontWeight: isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal, fontSize: 9.5),
+            style: pw.TextStyle(
+                fontWeight:
+                    isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal,
+                fontSize: 9.5),
           ),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(2),
           child: pw.Text(
             controllers[adoptedAreaKey]?.text ?? '',
-            style: pw.TextStyle(fontWeight: isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal, fontSize: 9.5),
+            style: pw.TextStyle(
+                fontWeight:
+                    isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal,
+                fontSize: 9.5),
           ),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(2),
           child: pw.Text(
             controllers[adoptedRateKey]?.text ?? '',
-            style: pw.TextStyle(fontWeight: isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal, fontSize: 9.5),
+            style: pw.TextStyle(
+                fontWeight:
+                    isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal,
+                fontSize: 9.5),
           ),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(2),
           child: pw.Text(
             controllers[replacementCostKey]?.text ?? '',
-            style: pw.TextStyle(fontWeight: isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal, fontSize: 9.5),
+            style: pw.TextStyle(
+                fontWeight:
+                    isTotalRow ? pw.FontWeight.bold : pw.FontWeight.normal,
+                fontSize: 9.5),
           ),
         ),
       ],
@@ -481,7 +1053,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   title: const Text('Photo Library'),
                   onTap: () async {
                     Navigator.of(context).pop();
-                    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+                    final XFile? image =
+                        await _picker.pickImage(source: ImageSource.gallery);
                     if (image != null) {
                       setState(() {
                         _images.add(image); // Store XFile directly
@@ -494,7 +1067,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   title: const Text('Camera'),
                   onTap: () async {
                     Navigator.of(context).pop();
-                    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+                    final XFile? image =
+                        await _picker.pickImage(source: ImageSource.camera);
                     if (image != null) {
                       setState(() {
                         _images.add(image); // Store XFile directly
@@ -555,7 +1129,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
     try {
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
 
       setState(() {
         _latController.text = position.latitude.toString();
@@ -565,10 +1140,10 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error getting location: $e")),
       );
-      print('Error getting location: $e'); // Keep print for debugging in console
+      print(
+          'Error getting location: $e'); // Keep print for debugging in console
     }
   }
-
 
   Future<void> _generatePdf() async {
     final pdf = pw.Document();
@@ -594,12 +1169,16 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
           pw.SizedBox(height: 6), // Adjusted height
           pw.Text(
             'Date of Valuation: $formattedDate',
-            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10), // Adjusted font size
+            style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 10), // Adjusted font size
           ),
           pw.SizedBox(height: 20), // Adjusted height
           pw.Text(
             '1. INTRODUCTION',
-            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11), // Adjusted font size
+            style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 11), // Adjusted font size
           ),
           pw.SizedBox(height: 20), // Adjusted height
           pw.Table(
@@ -624,14 +1203,16 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                       padding: const pw.EdgeInsets.all(2), // Adjusted padding
                       child: pw.Text(
                         key,
-                        style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                        style: const pw.TextStyle(
+                            fontSize: 9.5), // Adjusted font size
                       ),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(2), // Adjusted padding
                       child: pw.Text(
                         controllers[key]?.text ?? '',
-                        style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                        style: const pw.TextStyle(
+                            fontSize: 9.5), // Adjusted font size
                       ),
                     ),
                   ],
@@ -661,7 +1242,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       'Technical Address of Property',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   createSubTable([
@@ -680,14 +1262,16 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       'Legal Address of Property',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       controllers['Legal Address of Property']?.text ?? '',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                 ],
@@ -697,7 +1281,9 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
           pw.SizedBox(height: 20), // Adjusted height
           pw.Text(
             '2. PROPERTY DETAILS',
-            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11), // Adjusted font size
+            style: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 11), // Adjusted font size
           ),
           pw.SizedBox(height: 20), // Adjusted height
 
@@ -716,14 +1302,16 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       'Property Type',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       controllers['Property Type']?.text ?? '',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.SizedBox(),
@@ -735,14 +1323,16 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       'Property Usage',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       controllers['Property Usage']?.text ?? '',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.SizedBox(),
@@ -754,14 +1344,17 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       'Permitted Usage of the Property',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
-                      controllers['Permitted Usage of the Property']?.text ?? '',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      controllers['Permitted Usage of the Property']?.text ??
+                          '',
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.SizedBox(),
@@ -773,14 +1366,16 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       'Within Municipal Limits? If No, Name of the local body/ Panchayat',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       controllers['Within Municipal Limits']?.text ?? '',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.SizedBox(),
@@ -792,14 +1387,16 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       'Municipal/ Panchayat Number of the Building',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       controllers['Municipal Number']?.text ?? '',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.SizedBox(),
@@ -811,14 +1408,16 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       'Construction Status',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       controllers['Construction Status']?.text ?? '',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.SizedBox(),
@@ -830,21 +1429,26 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
                       'Stage of construction (in %)',
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
-                      controllers['% Complete']?.text ?? '', // Removed the '% Complete' text as it is a header
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      controllers['% Complete']?.text ??
+                          '', // Removed the '% Complete' text as it is a header
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2), // Adjusted padding
                     child: pw.Text(
-                      controllers['% Recommended']?.text ?? '', // Removed the '% Recommended' text as it is a header
-                      style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                      controllers['% Recommended']?.text ??
+                          '', // Removed the '% Recommended' text as it is a header
+                      style: const pw.TextStyle(
+                          fontSize: 9.5), // Adjusted font size
                     ),
                   ),
                 ],
@@ -862,14 +1466,16 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                       padding: const pw.EdgeInsets.all(2), // Adjusted padding
                       child: pw.Text(
                         key,
-                        style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                        style: const pw.TextStyle(
+                            fontSize: 9.5), // Adjusted font size
                       ),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(2), // Adjusted padding
                       child: pw.Text(
                         controllers[key]?.text ?? '',
-                        style: const pw.TextStyle(fontSize: 9.5), // Adjusted font size
+                        style: const pw.TextStyle(
+                            fontSize: 9.5), // Adjusted font size
                       ),
                     ),
                     pw.SizedBox(),
@@ -900,23 +1506,13 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Ownership Type', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Ownership Type',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Ownership Type']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                ],
-              ),
-              pw.TableRow(
-                children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Total No. of Blocks/ Buildings', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Total No. of Blocks/ Buildings']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(controllers['Ownership Type']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                 ],
               ),
@@ -924,11 +1520,15 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('No. of Floors', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Total No. of Blocks/ Buildings',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['No. of Floors']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Total No. of Blocks/ Buildings']?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                 ],
               ),
@@ -936,7 +1536,22 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('No. of Units', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('No. of Floors',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text(controllers['No. of Floors']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                ],
+              ),
+              pw.TableRow(
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text('No. of Units',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Table(
                     border: pw.TableBorder.all(),
@@ -945,11 +1560,13 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                         children: [
                           pw.Padding(
                             padding: const pw.EdgeInsets.all(2),
-                            child: pw.Text('Total Units', style: const pw.TextStyle(fontSize: 9.5)),
+                            child: pw.Text('Total Units',
+                                style: const pw.TextStyle(fontSize: 9.5)),
                           ),
                           pw.Padding(
                             padding: const pw.EdgeInsets.all(2),
-                            child: pw.Text('Units on each Floor', style: const pw.TextStyle(fontSize: 9.5)),
+                            child: pw.Text('Units on each Floor',
+                                style: const pw.TextStyle(fontSize: 9.5)),
                           ),
                         ],
                       ),
@@ -957,11 +1574,18 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                         children: [
                           pw.Padding(
                             padding: const pw.EdgeInsets.all(2),
-                            child: pw.Text(controllers['No. of Units_Total Units']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                            child: pw.Text(
+                                controllers['No. of Units_Total Units']?.text ??
+                                    '',
+                                style: const pw.TextStyle(fontSize: 9.5)),
                           ),
                           pw.Padding(
                             padding: const pw.EdgeInsets.all(2),
-                            child: pw.Text(controllers['No. of Units_Units on each Floor']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                            child: pw.Text(
+                                controllers['No. of Units_Units on each Floor']
+                                        ?.text ??
+                                    '',
+                                style: const pw.TextStyle(fontSize: 9.5)),
                           ),
                         ],
                       ),
@@ -973,7 +1597,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Year Built / Age of Property (in Years)', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Year Built / Age of Property (in Years)',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
@@ -988,23 +1613,16 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Residual Age of the Property (in Years)', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Residual Age of the Property (in Years)',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Residual Age of the Property (in Years)']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                ],
-              ),
-              pw.TableRow(
-                children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Maintenance Level of Building', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Maintenance Level of Building']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Residual Age of the Property (in Years)']
+                                ?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                 ],
               ),
@@ -1012,18 +1630,38 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Amenities', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Maintenance Level of Building',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text(
+                        controllers['Maintenance Level of Building']?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                ],
+              ),
+              pw.TableRow(
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text('Amenities',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(2),
-                        child: pw.Text(controllers['Amenities']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                        child: pw.Text(controllers['Amenities']?.text ?? '',
+                            style: const pw.TextStyle(fontSize: 9.5)),
                       ),
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(2),
-                        child: pw.Text('Lifts: ${controllers['Amenities_Lifts']?.text ?? ''}', style: const pw.TextStyle(fontSize: 9.5)),
+                        child: pw.Text(
+                            'Lifts: ${controllers['Amenities_Lifts']?.text ?? ''}',
+                            style: const pw.TextStyle(fontSize: 9.5)),
                       ),
                     ],
                   ),
@@ -1033,11 +1671,17 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Whether the Building is constructed strictly according to Plan approved by Government authority? Give details', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        'Whether the Building is constructed strictly according to Plan approved by Government authority? Give details',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Whether the Building is constructed strictly according to Plan approved by Government authority? Give details']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Whether the Building is constructed strictly according to Plan approved by Government authority? Give details']
+                                ?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                 ],
               ),
@@ -1158,7 +1802,9 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     children: [
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(2),
-                        child: pw.Text(controllers['Approach Road Details']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                        child: pw.Text(
+                            controllers['Approach Road Details']?.text ?? '',
+                            style: const pw.TextStyle(fontSize: 9.5)),
                       ),
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(2),
@@ -1229,7 +1875,9 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['Is the Property Prone to any Disaster?']?.text ?? '',
+                      controllers['Is the Property Prone to any Disaster?']
+                              ?.text ??
+                          '',
                       style: const pw.TextStyle(fontSize: 9.5),
                     ),
                   ),
@@ -1247,7 +1895,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['Any Locational Advantages Noted']?.text ?? '',
+                      controllers['Any Locational Advantages Noted']?.text ??
+                          '',
                       style: const pw.TextStyle(fontSize: 9.5),
                     ),
                   ),
@@ -1274,31 +1923,21 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Boundaries', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Boundaries',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Site Visit', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Site Visit',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Legal Documents', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
-                  ),
-                ],
-              ),
-              pw.TableRow(
-                children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('North', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Boundaries_North_SiteVisit']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Boundaries_North_LegalDocuments']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Legal Documents',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                 ],
               ),
@@ -1306,31 +1945,22 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('South', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('North',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Boundaries_South_SiteVisit']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Boundaries_North_SiteVisit']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Boundaries_South_LegalDocuments']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                ],
-              ),
-              pw.TableRow(
-                children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('East', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Boundaries_East_SiteVisit']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Boundaries_East_LegalDocuments']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Boundaries_North_LegalDocuments']?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                 ],
               ),
@@ -1338,15 +1968,22 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('West', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('South',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Boundaries_West_SiteVisit']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Boundaries_South_SiteVisit']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Boundaries_West_LegalDocuments']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Boundaries_South_LegalDocuments']?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                 ],
               ),
@@ -1354,11 +1991,60 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Boundaries matching with site?', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('East',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Boundaries_MatchingWithSite']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Boundaries_East_SiteVisit']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text(
+                        controllers['Boundaries_East_LegalDocuments']?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                ],
+              ),
+              pw.TableRow(
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text('West',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text(
+                        controllers['Boundaries_West_SiteVisit']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text(
+                        controllers['Boundaries_West_LegalDocuments']?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                ],
+              ),
+              pw.TableRow(
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text('Boundaries matching with site?',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text(
+                        controllers['Boundaries_MatchingWithSite']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.SizedBox(), // Empty cell for the third column
                 ],
@@ -1436,27 +2122,39 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('S. No', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('S. No',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Activity', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Activity',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Allotted Construction Stage in %', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Allotted Construction Stage in %',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Present Completion in %', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Present Completion in %',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('No. of Floors Completed', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('No. of Floors Completed',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Recommended Amount in %', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Recommended Amount in %',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                 ],
               ),
@@ -1520,41 +2218,52 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('', style: const pw.TextStyle(fontSize: 9.5)),
+                    child:
+                        pw.Text('', style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
                       'Total Completion',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5),
+                      style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold, fontSize: 9.5),
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['TotalCompletion_AllottedConstructionStage']?.text ?? '',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5),
+                      controllers['TotalCompletion_AllottedConstructionStage']
+                              ?.text ??
+                          '',
+                      style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold, fontSize: 9.5),
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['TotalCompletion_PresentCompletion']?.text ?? '',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5),
+                      controllers['TotalCompletion_PresentCompletion']?.text ??
+                          '',
+                      style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold, fontSize: 9.5),
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['TotalCompletion_NoOfFloorsCompleted']?.text ?? '',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5),
+                      controllers['TotalCompletion_NoOfFloorsCompleted']
+                              ?.text ??
+                          '',
+                      style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold, fontSize: 9.5),
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
                       controllers['RecommendedAmountInPercent']?.text ?? '',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5),
+                      style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold, fontSize: 9.5),
                     ),
                   ),
                 ],
@@ -1623,7 +2332,9 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['Construction Permission Number & Date/Commencement Certificate Details']?.text ?? '',
+                      controllers['Construction Permission Number & Date/Commencement Certificate Details']
+                              ?.text ??
+                          '',
                       style: const pw.TextStyle(fontSize: 9.5),
                     ),
                   ),
@@ -1641,7 +2352,9 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['Occupation/ Completion Certificate Details']?.text ?? 'NOT OBTAINED',
+                      controllers['Occupation/ Completion Certificate Details']
+                              ?.text ??
+                          'NOT OBTAINED',
                       style: const pw.TextStyle(fontSize: 9.5),
                     ),
                   ),
@@ -1659,7 +2372,9 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['Title Documents Verification Certificate']?.text ?? 'LEGAL SCRUTINY REPORT VERIFIED',
+                      controllers['Title Documents Verification Certificate']
+                              ?.text ??
+                          'LEGAL SCRUTINY REPORT VERIFIED',
                       style: const pw.TextStyle(fontSize: 9.5),
                     ),
                   ),
@@ -1677,7 +2392,9 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['Latest Ownership Document with Address and Area under Transaction']?.text ?? 'PROVIDED FOR VERIFICATION',
+                      controllers['Latest Ownership Document with Address and Area under Transaction']
+                              ?.text ??
+                          'PROVIDED FOR VERIFICATION',
                       style: const pw.TextStyle(fontSize: 9.5),
                     ),
                   ),
@@ -1713,7 +2430,9 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['Deviations Observed on Site with Approved Plan']?.text ?? 'None (Low)',
+                      controllers['Deviations Observed on Site with Approved Plan']
+                              ?.text ??
+                          'None (Low)',
                       style: const pw.TextStyle(fontSize: 9.5),
                     ),
                   ),
@@ -1731,7 +2450,9 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['If Approved Plans are not available, Construction done as per Local Bylaws']?.text ?? 'Yes',
+                      controllers['If Approved Plans are not available, Construction done as per Local Bylaws']
+                              ?.text ??
+                          'Yes',
                       style: const pw.TextStyle(fontSize: 9.5),
                     ),
                   ),
@@ -1767,7 +2488,9 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['Is the Property Mortgaged or Disputed?']?.text ?? 'No (Low)',
+                      controllers['Is the Property Mortgaged or Disputed?']
+                              ?.text ??
+                          'No (Low)',
                       style: const pw.TextStyle(fontSize: 9.5),
                     ),
                   ),
@@ -1785,7 +2508,9 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['Value/ Purchase Price paid as per Sale Deed']?.text ?? '9,40,000',
+                      controllers['Value/ Purchase Price paid as per Sale Deed']
+                              ?.text ??
+                          '9,40,000',
                       style: const pw.TextStyle(fontSize: 9.5),
                     ),
                   ),
@@ -1803,7 +2528,9 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['Present Market Rate of the Property']?.text ?? '21,04,000',
+                      controllers['Present Market Rate of the Property']
+                              ?.text ??
+                          '21,04,000',
                       style: const pw.TextStyle(fontSize: 9.5),
                     ),
                   ),
@@ -1821,7 +2548,9 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Text(
-                      controllers['Details of recent transaction in the neighborhood, if any']?.text ?? 'NOT OBTAINED',
+                      controllers['Details of recent transaction in the neighborhood, if any']
+                              ?.text ??
+                          'NOT OBTAINED',
                       style: const pw.TextStyle(fontSize: 9.5),
                     ),
                   ),
@@ -1846,11 +2575,14 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
             },
             children: [
               pw.TableRow(
-                decoration: const pw.BoxDecoration(color: pdfLib.PdfColors.grey200),
+                decoration:
+                    const pw.BoxDecoration(color: pdfLib.PdfColors.grey200),
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('LAND', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('LAND',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.SizedBox(),
                   pw.SizedBox(),
@@ -1861,39 +2593,27 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Land Area (Cents)', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Land Area (Cents)',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Land Area (Cents)_AsPerSite']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Land Area (Cents)_AsPerSite']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Land Area (Cents)_AsPerPlan']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Land Area (Cents)_AsPerPlan']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Land Area (Cents)_AsPerLegalDoc']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                ],
-              ),
-              pw.TableRow(
-                children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Land Area (Cents)_AsPerSite']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Land Area (Cents)_AsPerPlan']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Land Area (Cents)_AsPerLegalDoc']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Land Area (Cents)_AsPerLegalDoc']?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                 ],
               ),
@@ -1901,39 +2621,44 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Undivided Share of Land (in Cents)', style: const pw.TextStyle(fontSize: 9.5)),
+                    child:
+                        pw.Text('', style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Undivided Share of Land (in Cents)']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Land Area (Cents)_AsPerSite']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
-                  pw.SizedBox(),
-                  pw.SizedBox(),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text(
+                        controllers['Land Area (Cents)_AsPerPlan']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text(
+                        controllers['Land Area (Cents)_AsPerLegalDoc']?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
                 ],
               ),
               pw.TableRow(
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Adopted Land Area (in Cents)', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Undivided Share of Land (in Cents)',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Adopted Land Area (in Cents)']?.text ?? '', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
-                  ),
-                  pw.SizedBox(),
-                  pw.SizedBox(),
-                ],
-              ),
-              pw.TableRow(
-                children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Adopted Land Rate (in Rs./Cents)', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Adopted Land Rate (in Rs./Cents)']?.text ?? '', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Undivided Share of Land (in Cents)']
+                                ?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.SizedBox(),
                   pw.SizedBox(),
@@ -1943,26 +2668,72 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Guideline Rate for Land', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Adopted Land Area (in Cents)',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Guideline Rate for Land']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Adopted Land Area (in Cents)']?.text ?? '',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.SizedBox(),
                   pw.SizedBox(),
                 ],
               ),
               pw.TableRow(
-                decoration: const pw.BoxDecoration(color: pdfLib.PdfColors.grey200),
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('LAND VALUE: (in Rs.)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Adopted Land Rate (in Rs./Cents)',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['LAND VALUE (in Rs.)']?.text ?? '', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Adopted Land Rate (in Rs./Cents)']?.text ??
+                            '',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                  ),
+                  pw.SizedBox(),
+                  pw.SizedBox(),
+                ],
+              ),
+              pw.TableRow(
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text('Guideline Rate for Land',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text(
+                        controllers['Guideline Rate for Land']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                  pw.SizedBox(),
+                  pw.SizedBox(),
+                ],
+              ),
+              pw.TableRow(
+                decoration:
+                    const pw.BoxDecoration(color: pdfLib.PdfColors.grey200),
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text('LAND VALUE: (in Rs.)',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text(
+                        controllers['LAND VALUE (in Rs.)']?.text ?? '',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.SizedBox(),
                   pw.SizedBox(),
@@ -1985,11 +2756,14 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
             },
             children: [
               pw.TableRow(
-                decoration: const pw.BoxDecoration(color: pdfLib.PdfColors.grey200),
+                decoration:
+                    const pw.BoxDecoration(color: pdfLib.PdfColors.grey200),
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('BUILDING', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('BUILDING',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.SizedBox(),
                   pw.SizedBox(),
@@ -2003,97 +2777,122 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Floor', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Floor',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Area As per Site\n(in Sq Feet)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Area As per Site\n(in Sq Feet)',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Area As per Documents\n(in Sq Feet)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Area As per Documents\n(in Sq Feet)',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Deviation', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Deviation',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Adopted Built-up Area\n(in Sq Feet)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Adopted Built-up Area\n(in Sq Feet)',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Adopted Construction Rate\n(in Rs/ Sq Feet)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text(
+                        'Adopted Construction Rate\n(in Rs/ Sq Feet)',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Replacement Cost (in Rs.)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Replacement Cost (in Rs.)',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                 ],
               ),
-              _buildBuildingPdfTableRow('Basement Floor',
+              _buildBuildingPdfTableRow(
+                  'Basement Floor',
                   'Basement Floor_Area As per Site',
                   'Basement Floor_Area As per Documents',
                   'Basement Floor_Deviation',
                   'Basement Floor_Adopted Built-up Area',
                   'Basement Floor_Adopted Construction Rate',
                   'Basement Floor_Replacement Cost'),
-              _buildBuildingPdfTableRow('Stilt Floor',
+              _buildBuildingPdfTableRow(
+                  'Stilt Floor',
                   'Stilt Floor_Area As per Site',
                   'Stilt Floor_Area As per Documents',
                   'Stilt Floor_Deviation',
                   'Stilt Floor_Adopted Built-up Area',
                   'Stilt Floor_Adopted Construction Rate',
                   'Stilt Floor_Replacement Cost'),
-              _buildBuildingPdfTableRow('Ground Floor',
+              _buildBuildingPdfTableRow(
+                  'Ground Floor',
                   'Ground Floor_Area As per Site',
                   'Ground Floor_Area As per Documents',
                   'Ground Floor_Deviation',
                   'Ground Floor_Adopted Built-up Area',
                   'Ground Floor_Adopted Construction Rate',
                   'Ground Floor_Replacement Cost'),
-              _buildBuildingPdfTableRow('First Floor',
+              _buildBuildingPdfTableRow(
+                  'First Floor',
                   'First Floor_Area As per Site',
                   'First Floor_Area As per Documents',
                   'First Floor_Deviation',
                   'First Floor_Adopted Built-up Area',
                   'First Floor_Adopted Construction Rate',
                   'First Floor_Replacement Cost'),
-              _buildBuildingPdfTableRow('Second Floor',
+              _buildBuildingPdfTableRow(
+                  'Second Floor',
                   'Second Floor_Area As per Site',
                   'Second Floor_Area As per Documents',
                   'Second Floor_Deviation',
                   'Second Floor_Adopted Built-up Area',
                   'Second Floor_Adopted Construction Rate',
                   'Second Floor_Replacement Cost'),
-              _buildBuildingPdfTableRow('Third Floor',
+              _buildBuildingPdfTableRow(
+                  'Third Floor',
                   'Third Floor_Area As per Site',
                   'Third Floor_Area As per Documents',
                   'Third Floor_Deviation',
                   'Third Floor_Adopted Built-up Area',
                   'Third Floor_Adopted Construction Rate',
                   'Third Floor_Replacement Cost'),
-              _buildBuildingPdfTableRow('Fourth Floor',
+              _buildBuildingPdfTableRow(
+                  'Fourth Floor',
                   'Fourth Floor_Area As per Site',
                   'Fourth Floor_Area As per Documents',
                   'Fourth Floor_Deviation',
                   'Fourth Floor_Adopted Built-up Area',
                   'Fourth Floor_Adopted Construction Rate',
                   'Fourth Floor_Replacement Cost'),
-              _buildBuildingPdfTableRow('Fifth Floor',
+              _buildBuildingPdfTableRow(
+                  'Fifth Floor',
                   'Fifth Floor_Area As per Site',
                   'Fifth Floor_Area As per Documents',
                   'Fifth Floor_Deviation',
                   'Fifth Floor_Adopted Built-up Area',
                   'Fifth Floor_Adopted Construction Rate',
                   'Fifth Floor_Replacement Cost'),
-              _buildBuildingPdfTableRow('Total',
+              _buildBuildingPdfTableRow(
+                  'Total',
                   'Total_Area As per Site',
                   'Total_Area As per Documents',
                   'Total_Deviation',
                   'Total_Adopted Built-up Area',
                   'Total_Adopted Construction Rate',
-                  'Total_Replacement Cost', isTotalRow: true),
+                  'Total_Replacement Cost',
+                  isTotalRow: true),
             ],
           ),
           pw.SizedBox(height: 10),
@@ -2108,11 +2907,13 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Depreciation %', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Depreciation %',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Depreciation %']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(controllers['Depreciation %']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                 ],
               ),
@@ -2120,11 +2921,17 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Net Replacement Cost (in Rs.)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Net Replacement Cost (in Rs.)',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Net Replacement Cost (in Rs.)']?.text ?? '', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Net Replacement Cost (in Rs.)']?.text ??
+                            '',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                 ],
               ),
@@ -2146,60 +2953,88 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('No. of Car Parking', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('No. of Car Parking',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['No. of Car Parking']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['No. of Car Parking']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Value of Parking (in Rs.)', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Value of Parking (in Rs.)',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Value of Parking (in Rs.)']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Value of Parking (in Rs.)']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Value of Other Amenities (in Rs.)', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Value of Other Amenities (in Rs.)',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Value of Other Amenities (in Rs.)']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Value of Other Amenities (in Rs.)']
+                                ?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                 ],
               ),
               pw.TableRow(
-                decoration: const pw.BoxDecoration(color: pdfLib.PdfColors.grey200),
+                decoration:
+                    const pw.BoxDecoration(color: pdfLib.PdfColors.grey200),
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('BUILDING VALUE / Insurable Value (in Rs.)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('BUILDING VALUE / Insurable Value (in Rs.)',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.SizedBox(width: 0), // To occupy space and align next cell
                   pw.SizedBox(width: 0),
                   pw.SizedBox(width: 0),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['BUILDING VALUE / Insurable Value (in Rs.)']?.text ?? '', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['BUILDING VALUE / Insurable Value (in Rs.)']
+                                ?.text ??
+                            '',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.SizedBox(width: 0),
                 ],
               ),
               pw.TableRow(
-                decoration: const pw.BoxDecoration(color: pdfLib.PdfColors.grey200),
+                decoration:
+                    const pw.BoxDecoration(color: pdfLib.PdfColors.grey200),
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Building Value as per Govt Guideline Rate (in Rs.)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text(
+                        'Building Value as per Govt Guideline Rate (in Rs.)',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.SizedBox(width: 0),
                   pw.SizedBox(width: 0),
                   pw.SizedBox(width: 0),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Building Value as per Govt Guideline Rate (in Rs.)']?.text ?? '', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Building Value as per Govt Guideline Rate (in Rs.)']
+                                ?.text ??
+                            '',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.SizedBox(width: 0),
                 ],
@@ -2234,24 +3069,17 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Estimated Cost to Complete the Property (in Rs.)', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        'Estimated Cost to Complete the Property (in Rs.)',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Estimated Cost to Complete the Property (in Rs.)']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                  pw.SizedBox(), // Empty cell
-                ],
-              ),
-              pw.TableRow(
-                children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Guideline Value (in Rs.)', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Guideline Value (in Rs.)']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Estimated Cost to Complete the Property (in Rs.)']
+                                ?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.SizedBox(), // Empty cell
                 ],
@@ -2260,25 +3088,14 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Estimated Rental Value of Building', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Guideline Value (in Rs.)',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Estimated Rental Value of Building']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
-                  ),
-                  pw.SizedBox(), // Empty cell
-                ],
-              ),
-              pw.TableRow(
-                decoration: const pw.BoxDecoration(color: pdfLib.PdfColors.grey200),
-                children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Market Value (in Rs.)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Market Value (in Rs.)']?.text ?? '', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Guideline Value (in Rs.)']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.SizedBox(), // Empty cell
                 ],
@@ -2287,11 +3104,36 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Market Value (in Words)', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Estimated Rental Value of Building',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Market Value (in Words)']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Estimated Rental Value of Building']
+                                ?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                  pw.SizedBox(), // Empty cell
+                ],
+              ),
+              pw.TableRow(
+                decoration:
+                    const pw.BoxDecoration(color: pdfLib.PdfColors.grey200),
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text('Market Value (in Rs.)',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text(
+                        controllers['Market Value (in Rs.)']?.text ?? '',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.SizedBox(), // Empty cell
                 ],
@@ -2300,11 +3142,14 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('State the Source for Arriving at the Market Value', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Market Value (in Words)',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['State the Source for Arriving at the Market Value']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Market Value (in Words)']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.SizedBox(), // Empty cell
                 ],
@@ -2313,15 +3158,39 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Realizable value (in Rs.)', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        'State the Source for Arriving at the Market Value',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Realizable value (in Rs.)']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['State the Source for Arriving at the Market Value']
+                                ?.text ??
+                            '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                  pw.SizedBox(), // Empty cell
+                ],
+              ),
+              pw.TableRow(
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text('Realizable value (in Rs.)',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Realizable value (%)']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Realizable value (in Rs.)']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(2),
+                    child: pw.Text(
+                        controllers['Realizable value (%)']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                 ],
               ),
@@ -2329,15 +3198,20 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Forced Sale Value (in Rs.)', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text('Forced Sale Value (in Rs.)',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Forced Sale Value (in Rs.)']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Forced Sale Value (in Rs.)']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text(controllers['Forced Sale Value (%)']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                    child: pw.Text(
+                        controllers['Forced Sale Value (%)']?.text ?? '',
+                        style: const pw.TextStyle(fontSize: 9.5)),
                   ),
                 ],
               ),
@@ -2346,48 +3220,58 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
           pw.SizedBox(height: 30),
 
           // New GEOLOCATION DETAILS section in PDF
-          if (_latController.text.isNotEmpty || _lonController.text.isNotEmpty)
-            ...[
-              pw.Text(
-                '10. GEOLOCATION DETAILS', // Renumbered
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
-              ),
-              pw.SizedBox(height: 10),
-              pw.Table(
-                border: pw.TableBorder.all(),
-                columnWidths: {
-                  0: const pw.FlexColumnWidth(3),
-                  1: const pw.FlexColumnWidth(5),
-                },
-                children: [
-                  pw.TableRow(
-                    children: [
-                      pw.Padding(
-                        padding: const pw.EdgeInsets.all(2),
-                        child: pw.Text('Latitude', style: const pw.TextStyle(fontSize: 9.5)),
-                      ),
-                      pw.Padding(
-                        padding: const pw.EdgeInsets.all(2),
-                        child: pw.Text(_latController.text.isNotEmpty ? _latController.text : 'N/A', style: const pw.TextStyle(fontSize: 9.5)),
-                      ),
-                    ],
-                  ),
-                  pw.TableRow(
-                    children: [
-                      pw.Padding(
-                        padding: const pw.EdgeInsets.all(2),
-                        child: pw.Text('Longitude', style: const pw.TextStyle(fontSize: 9.5)),
-                      ),
-                      pw.Padding(
-                        padding: const pw.EdgeInsets.all(2),
-                        child: pw.Text(_lonController.text.isNotEmpty ? _lonController.text : 'N/A', style: const pw.TextStyle(fontSize: 9.5)),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 20),
-            ],
+          if (_latController.text.isNotEmpty ||
+              _lonController.text.isNotEmpty) ...[
+            pw.Text(
+              '10. GEOLOCATION DETAILS', // Renumbered
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
+            ),
+            pw.SizedBox(height: 10),
+            pw.Table(
+              border: pw.TableBorder.all(),
+              columnWidths: {
+                0: const pw.FlexColumnWidth(3),
+                1: const pw.FlexColumnWidth(5),
+              },
+              children: [
+                pw.TableRow(
+                  children: [
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text('Latitude',
+                          style: const pw.TextStyle(fontSize: 9.5)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          _latController.text.isNotEmpty
+                              ? _latController.text
+                              : 'N/A',
+                          style: const pw.TextStyle(fontSize: 9.5)),
+                    ),
+                  ],
+                ),
+                pw.TableRow(
+                  children: [
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text('Longitude',
+                          style: const pw.TextStyle(fontSize: 9.5)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          _lonController.text.isNotEmpty
+                              ? _lonController.text
+                              : 'N/A',
+                          style: const pw.TextStyle(fontSize: 9.5)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 20),
+          ],
 
           // SECTION 11: REMARKS (Renumbered)
           pw.Text(
@@ -2409,17 +3293,23 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text('(I) ${controllers['Declaration_Point1']?.text ?? ''}', style: const pw.TextStyle(fontSize: 9.5)),
+              pw.Text('(I) ${controllers['Declaration_Point1']?.text ?? ''}',
+                  style: const pw.TextStyle(fontSize: 9.5)),
               pw.SizedBox(height: 5),
-              pw.Text('(II) ${controllers['Declaration_Point2']?.text ?? ''}', style: const pw.TextStyle(fontSize: 9.5)),
+              pw.Text('(II) ${controllers['Declaration_Point2']?.text ?? ''}',
+                  style: const pw.TextStyle(fontSize: 9.5)),
               pw.SizedBox(height: 5),
-              pw.Text('(III) ${controllers['Declaration_Point3']?.text ?? ''}', style: const pw.TextStyle(fontSize: 9.5)),
+              pw.Text('(III) ${controllers['Declaration_Point3']?.text ?? ''}',
+                  style: const pw.TextStyle(fontSize: 9.5)),
               pw.SizedBox(height: 5),
-              pw.Text('(IV) ${controllers['Declaration_Point4']?.text ?? ''}', style: const pw.TextStyle(fontSize: 9.5)),
+              pw.Text('(IV) ${controllers['Declaration_Point4']?.text ?? ''}',
+                  style: const pw.TextStyle(fontSize: 9.5)),
               pw.SizedBox(height: 5),
-              pw.Text('(V) ${controllers['Declaration_Point5']?.text ?? ''}', style: const pw.TextStyle(fontSize: 9.5)),
+              pw.Text('(V) ${controllers['Declaration_Point5']?.text ?? ''}',
+                  style: const pw.TextStyle(fontSize: 9.5)),
               pw.SizedBox(height: 5),
-              pw.Text('(VI) ${controllers['Declaration_Point6']?.text ?? ''}', style: const pw.TextStyle(fontSize: 9.5)),
+              pw.Text('(VI) ${controllers['Declaration_Point6']?.text ?? ''}',
+                  style: const pw.TextStyle(fontSize: 9.5)),
             ],
           ),
           pw.SizedBox(height: 40),
@@ -2480,43 +3370,84 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('S No.', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('S No.',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Description', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Description',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
-                    child: pw.Text('Details', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    child: pw.Text('Details',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
                   ),
                 ],
               ),
               pw.TableRow(
                 children: [
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('1', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('Whether approved plan copy is available?', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text(controllers['ConstructionDeviation_ApprovedPlanAvailable']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text('1',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text('Whether approved plan copy is available?',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          controllers['ConstructionDeviation_ApprovedPlanAvailable']
+                                  ?.text ??
+                              '',
+                          style: const pw.TextStyle(fontSize: 9.5))),
                 ],
               ),
               pw.TableRow(
                 children: [
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('1(a)', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('If Yes - What is the deviation on security property?', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text(controllers['ConstructionDeviation_DeviationOnSecurityProperty']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text('1(a)',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          'If Yes - What is the deviation on security property?',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          controllers['ConstructionDeviation_DeviationOnSecurityProperty']
+                                  ?.text ??
+                              '',
+                          style: const pw.TextStyle(fontSize: 9.5))),
                 ],
               ),
               pw.TableRow(
                 children: [
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('1(b)', style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text('1(b)',
+                          style: const pw.TextStyle(fontSize: 9.5))),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(2),
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('If no - whether the following additional documents are made available -', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
-                        pw.Text('Property Tax paid receipts over the last 3-4 years to confirm payment of taxes.', style: const pw.TextStyle(fontSize: 9.5)),
-                        pw.Text('Latest land record availability in present owner\'s name.', style: const pw.TextStyle(fontSize: 9.5)),
+                        pw.Text(
+                            'If no - whether the following additional documents are made available -',
+                            style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                        pw.Text(
+                            'Property Tax paid receipts over the last 3-4 years to confirm payment of taxes.',
+                            style: const pw.TextStyle(fontSize: 9.5)),
+                        pw.Text(
+                            'Latest land record availability in present owner\'s name.',
+                            style: const pw.TextStyle(fontSize: 9.5)),
                       ],
                     ),
                   ),
@@ -2525,8 +3456,16 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text(controllers['ConstructionDeviation_PropertyTaxPaidReceipts']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
-                        pw.Text(controllers['ConstructionDeviation_LatestLandRecordAvailability']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5)),
+                        pw.Text(
+                            controllers['ConstructionDeviation_PropertyTaxPaidReceipts']
+                                    ?.text ??
+                                '',
+                            style: const pw.TextStyle(fontSize: 9.5)),
+                        pw.Text(
+                            controllers['ConstructionDeviation_LatestLandRecordAvailability']
+                                    ?.text ??
+                                '',
+                            style: const pw.TextStyle(fontSize: 9.5)),
                       ],
                     ),
                   ),
@@ -2534,37 +3473,102 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
               ),
               pw.TableRow(
                 children: [
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('2', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('FSI/RAR/FAR prescribed by the local Authority/Town planning', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text(controllers['ConstructionDeviation_FSIRARFAR_LocalAuthority']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text('2',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          'FSI/RAR/FAR prescribed by the local Authority/Town planning',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          controllers['ConstructionDeviation_FSIRARFAR_LocalAuthority']
+                                  ?.text ??
+                              '',
+                          style: const pw.TextStyle(fontSize: 9.5))),
                 ],
               ),
               pw.TableRow(
                 children: [
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('3', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('Max deviation permitted from prescribed FSI/RAR/FAR', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text(controllers['ConstructionDeviation_MaxDeviationPermitted']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text('3',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          'Max deviation permitted from prescribed FSI/RAR/FAR',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          controllers['ConstructionDeviation_MaxDeviationPermitted']
+                                  ?.text ??
+                              '',
+                          style: const pw.TextStyle(fontSize: 9.5))),
                 ],
               ),
               pw.TableRow(
                 children: [
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('4', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('FSI/RAR/FAR of the security property as per the agreement', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text(controllers['ConstructionDeviation_FSIRARFAR_Agreement']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text('4',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          'FSI/RAR/FAR of the security property as per the agreement',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          controllers['ConstructionDeviation_FSIRARFAR_Agreement']
+                                  ?.text ??
+                              '',
+                          style: const pw.TextStyle(fontSize: 9.5))),
                 ],
               ),
               pw.TableRow(
                 children: [
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('FSI/RAR/FAR of the security property as confirmed by the valuer', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text(controllers['ConstructionDeviation_FSIRARFAR_ValuerConfirmed']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text('',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          'FSI/RAR/FAR of the security property as confirmed by the valuer',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          controllers['ConstructionDeviation_FSIRARFAR_ValuerConfirmed']
+                                  ?.text ??
+                              '',
+                          style: const pw.TextStyle(fontSize: 9.5))),
                 ],
               ),
               pw.TableRow(
                 children: [
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('5', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text('Whether property can be accepted as security for the loan\n(Views/Remarks)', style: const pw.TextStyle(fontSize: 9.5))),
-                  pw.Padding(padding: const pw.EdgeInsets.all(2), child: pw.Text(controllers['ConstructionDeviation_PropertyAcceptedAsSecurity']?.text ?? '', style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text('5',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          'Whether property can be accepted as security for the loan\n(Views/Remarks)',
+                          style: const pw.TextStyle(fontSize: 9.5))),
+                  pw.Padding(
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Text(
+                          controllers['ConstructionDeviation_PropertyAcceptedAsSecurity']
+                                  ?.text ??
+                              '',
+                          style: const pw.TextStyle(fontSize: 9.5))),
                 ],
               ),
             ],
@@ -2578,21 +3582,24 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
       ),
     );
 
-
     // --- PAGE 7 onwards: ATTACHED PHOTOS ---
     if (_images.isNotEmpty) {
-      final double pageWidth = pdfLib.PdfPageFormat.a4.availableWidth - (2 * 22); // Subtract margins
-      final double pageHeight = pdfLib.PdfPageFormat.a4.availableHeight - (2 * 22); // Subtract margins
+      final double pageWidth =
+          pdfLib.PdfPageFormat.a4.availableWidth - (2 * 22); // Subtract margins
+      final double pageHeight = pdfLib.PdfPageFormat.a4.availableHeight -
+          (2 * 22); // Subtract margins
 
       // Calculate desired image dimensions for 3 images per row, 2 rows (6 images total)
       // Allow for some padding between images
       const double imageHorizontalPadding = 10;
       const double imageVerticalPadding = 10;
       // Width for 3 images: (pageWidth - 2 * padding) / 3
-      final double targetImageWidth = (pageWidth - 2 * imageHorizontalPadding) / 3;
+      final double targetImageWidth =
+          (pageWidth - 2 * imageHorizontalPadding) / 3;
       // Height for 2 rows: (pageHeight - padding for title - 2 * vertical padding) / 2
       // Assuming 30 for title and its padding, and 20 for row spacing
-      final double targetImageHeight = (pageHeight - 30 - 2 * imageVerticalPadding) / 2;
+      final double targetImageHeight =
+          (pageHeight - 30 - 2 * imageVerticalPadding) / 2;
 
       for (int i = 0; i < _images.length; i += 6) {
         final List<pw.Widget> pageImages = [];
@@ -2621,7 +3628,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
               pw.SizedBox(
                 width: targetImageWidth, // Allocate full cell width
                 height: targetImageHeight, // Allocate full cell height
-                child: pw.Center( // Center the image within its allocated space
+                child: pw.Center(
+                  // Center the image within its allocated space
                   child: pw.Image(
                     pwImage,
                     width: finalWidth,
@@ -2663,7 +3671,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
             ),
           );
           if (k + 3 < pageImages.length) {
-            rows.add(pw.SizedBox(height: imageVerticalPadding)); // Space between rows
+            rows.add(pw.SizedBox(
+                height: imageVerticalPadding)); // Space between rows
           }
         }
 
@@ -2695,7 +3704,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
   }
 
-  Widget _buildTableHeaderCell(String text, {TextAlign textAlign = TextAlign.center}) {
+  Widget _buildTableHeaderCell(String text,
+      {TextAlign textAlign = TextAlign.center}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Text(
@@ -2726,21 +3736,33 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
         _buildTableCell(Text(activity)),
         _buildTableCell(TextField(
           controller: controllers[allottedConstructionStageKey],
-          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+          decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              isDense: true,
+              contentPadding: EdgeInsets.all(8)),
         )),
         _buildTableCell(TextField(
           controller: controllers[presentCompletionKey],
-          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+          decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              isDense: true,
+              contentPadding: EdgeInsets.all(8)),
         )),
         _buildTableCell(TextField(
           controller: controllers[noOfFloorsCompletedKey],
-          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+          decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              isDense: true,
+              contentPadding: EdgeInsets.all(8)),
         )),
         _buildTableCell(
           recommendedAmountKey != null
               ? TextField(
                   controller: controllers[recommendedAmountKey],
-                  decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      contentPadding: EdgeInsets.all(8)),
                 )
               : Container(),
         ),
@@ -2763,38 +3785,64 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
         _buildTableCell(
           Text(
             floor,
-            style: isTotalRow ? const TextStyle(fontWeight: FontWeight.bold) : null,
+            style: isTotalRow
+                ? const TextStyle(fontWeight: FontWeight.bold)
+                : null,
           ),
         ),
         _buildTableCell(TextField(
           controller: controllers[areaSiteKey],
-          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
-          style: isTotalRow ? const TextStyle(fontWeight: FontWeight.bold) : null,
+          decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              isDense: true,
+              contentPadding: EdgeInsets.all(8)),
+          style:
+              isTotalRow ? const TextStyle(fontWeight: FontWeight.bold) : null,
         )),
         _buildTableCell(TextField(
           controller: controllers[areaDocKey],
-          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
-          style: isTotalRow ? const TextStyle(fontWeight: FontWeight.bold) : null,
+          decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              isDense: true,
+              contentPadding: EdgeInsets.all(8)),
+          style:
+              isTotalRow ? const TextStyle(fontWeight: FontWeight.bold) : null,
         )),
         _buildTableCell(TextField(
           controller: controllers[deviationKey],
-          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
-          style: isTotalRow ? const TextStyle(fontWeight: FontWeight.bold) : null,
+          decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              isDense: true,
+              contentPadding: EdgeInsets.all(8)),
+          style:
+              isTotalRow ? const TextStyle(fontWeight: FontWeight.bold) : null,
         )),
         _buildTableCell(TextField(
           controller: controllers[adoptedAreaKey],
-          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
-          style: isTotalRow ? const TextStyle(fontWeight: FontWeight.bold) : null,
+          decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              isDense: true,
+              contentPadding: EdgeInsets.all(8)),
+          style:
+              isTotalRow ? const TextStyle(fontWeight: FontWeight.bold) : null,
         )),
         _buildTableCell(TextField(
           controller: controllers[adoptedRateKey],
-          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
-          style: isTotalRow ? const TextStyle(fontWeight: FontWeight.bold) : null,
+          decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              isDense: true,
+              contentPadding: EdgeInsets.all(8)),
+          style:
+              isTotalRow ? const TextStyle(fontWeight: FontWeight.bold) : null,
         )),
         _buildTableCell(TextField(
           controller: controllers[replacementCostKey],
-          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
-          style: isTotalRow ? const TextStyle(fontWeight: FontWeight.bold) : null,
+          decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              isDense: true,
+              contentPadding: EdgeInsets.all(8)),
+          style:
+              isTotalRow ? const TextStyle(fontWeight: FontWeight.bold) : null,
         )),
       ],
     );
@@ -2991,7 +4039,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     child: TextField(
                       controller: controllers[key],
                       decoration: InputDecoration(
-                        labelText: key.replaceAll('_2', ''), // Remove '_2' for display
+                        labelText:
+                            key.replaceAll('_2', ''), // Remove '_2' for display
                         border: const OutlineInputBorder(),
                       ),
                     ),
@@ -3033,15 +4082,18 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     children: [
                       Expanded(
                         flex: 2,
-                        child: Text('Boundaries', style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: Text('Boundaries',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                       Expanded(
                         flex: 3,
-                        child: Text('Site Visit', style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: Text('Site Visit',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                       Expanded(
                         flex: 3,
-                        child: Text('Legal Documents', style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: Text('Legal Documents',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -3115,7 +4167,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                       children: [
                         _buildTableHeaderCell('S. No'),
                         _buildTableHeaderCell('Activity'),
-                        _buildTableHeaderCell('Allotted Construction Stage in %'),
+                        _buildTableHeaderCell(
+                            'Allotted Construction Stage in %'),
                         _buildTableHeaderCell('Present Completion in %'),
                         _buildTableHeaderCell('No. of Floors Completed'),
                         _buildTableHeaderCell('Recommended Amount in %'),
@@ -3180,22 +4233,38 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     TableRow(
                       children: [
                         _buildTableCell(const Text('')),
-                        _buildTableCell(const Text('Total Completion', style: TextStyle(fontWeight: FontWeight.bold))),
+                        _buildTableCell(const Text('Total Completion',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
                         _buildTableCell(TextField(
-                          controller: controllers['TotalCompletion_AllottedConstructionStage'],
-                          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                          controller: controllers[
+                              'TotalCompletion_AllottedConstructionStage'],
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              contentPadding: EdgeInsets.all(8)),
                         )),
                         _buildTableCell(TextField(
-                          controller: controllers['TotalCompletion_PresentCompletion'],
-                          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                          controller:
+                              controllers['TotalCompletion_PresentCompletion'],
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              contentPadding: EdgeInsets.all(8)),
                         )),
                         _buildTableCell(TextField(
-                          controller: controllers['TotalCompletion_NoOfFloorsCompleted'],
-                          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                          controller: controllers[
+                              'TotalCompletion_NoOfFloorsCompleted'],
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              contentPadding: EdgeInsets.all(8)),
                         )),
                         _buildTableCell(TextField(
                           controller: controllers['RecommendedAmountInPercent'],
-                          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              contentPadding: EdgeInsets.all(8)),
                         )),
                       ],
                     ),
@@ -3259,7 +4328,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                       padding: EdgeInsets.symmetric(vertical: 8.0),
                       child: Text(
                         'LAND',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                     ),
                     Table(
@@ -3281,27 +4351,45 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                         ),
                         TableRow(
                           children: [
-                            _buildTableCell(const Text('')), // Empty cell for "Land Area (Cents)" row
+                            _buildTableCell(const Text(
+                                '')), // Empty cell for "Land Area (Cents)" row
                             _buildTableCell(TextField(
-                              controller: controllers['Land Area (Cents)_AsPerSite'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                              controller:
+                                  controllers['Land Area (Cents)_AsPerSite'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
                             )),
                             _buildTableCell(TextField(
-                              controller: controllers['Land Area (Cents)_AsPerPlan'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                              controller:
+                                  controllers['Land Area (Cents)_AsPerPlan'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
                             )),
                             _buildTableCell(TextField(
-                              controller: controllers['Land Area (Cents)_AsPerLegalDoc'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                              controller: controllers[
+                                  'Land Area (Cents)_AsPerLegalDoc'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
                             )),
                           ],
                         ),
                         TableRow(
                           children: [
-                            _buildTableCell(const Text('Undivided Share of Land (in Cents)')),
+                            _buildTableCell(const Text(
+                                'Undivided Share of Land (in Cents)')),
                             _buildTableCell(TextField(
-                              controller: controllers['Undivided Share of Land (in Cents)'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                              controller: controllers[
+                                  'Undivided Share of Land (in Cents)'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
                             )),
                             _buildTableCell(Container()), // Empty cells
                             _buildTableCell(Container()),
@@ -3309,11 +4397,17 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                         ),
                         TableRow(
                           children: [
-                            _buildTableCell(const Text('Adopted Land Area (in Cents)')),
+                            _buildTableCell(
+                                const Text('Adopted Land Area (in Cents)')),
                             _buildTableCell(TextField(
-                              controller: controllers['Adopted Land Area (in Cents)'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              controller:
+                                  controllers['Adopted Land Area (in Cents)'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             )),
                             _buildTableCell(Container()), // Empty cells
                             _buildTableCell(Container()),
@@ -3321,11 +4415,17 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                         ),
                         TableRow(
                           children: [
-                            _buildTableCell(const Text('Adopted Land Rate (in Rs./Cents)')),
+                            _buildTableCell(
+                                const Text('Adopted Land Rate (in Rs./Cents)')),
                             _buildTableCell(TextField(
-                              controller: controllers['Adopted Land Rate (in Rs./Cents)'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              controller: controllers[
+                                  'Adopted Land Rate (in Rs./Cents)'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             )),
                             _buildTableCell(Container()), // Empty cells
                             _buildTableCell(Container()),
@@ -3333,10 +4433,15 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                         ),
                         TableRow(
                           children: [
-                            _buildTableCell(const Text('Guideline Rate for Land')),
+                            _buildTableCell(
+                                const Text('Guideline Rate for Land')),
                             _buildTableCell(TextField(
-                              controller: controllers['Guideline Rate for Land'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                              controller:
+                                  controllers['Guideline Rate for Land'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
                             )),
                             _buildTableCell(Container()), // Empty cells
                             _buildTableCell(Container()),
@@ -3344,11 +4449,16 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                         ),
                         TableRow(
                           children: [
-                            _buildTableCell(const Text('LAND VALUE: (in Rs.)', style: TextStyle(fontWeight: FontWeight.bold))),
+                            _buildTableCell(const Text('LAND VALUE: (in Rs.)',
+                                style: TextStyle(fontWeight: FontWeight.bold))),
                             _buildTableCell(TextField(
                               controller: controllers['LAND VALUE (in Rs.)'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             )),
                             _buildTableCell(Container()), // Empty cells
                             _buildTableCell(Container()),
@@ -3361,7 +4471,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                       padding: EdgeInsets.symmetric(vertical: 8.0),
                       child: Text(
                         'BUILDING',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                     ),
                     Table(
@@ -3378,78 +4489,93 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                       children: [
                         TableRow(
                           children: [
-                            _buildTableHeaderCell('Floor', textAlign: TextAlign.start),
-                            _buildTableHeaderCell('Area As per Site\n(in Sq Feet)'),
-                            _buildTableHeaderCell('Area As per Documents\n(in Sq Feet)'),
+                            _buildTableHeaderCell('Floor',
+                                textAlign: TextAlign.start),
+                            _buildTableHeaderCell(
+                                'Area As per Site\n(in Sq Feet)'),
+                            _buildTableHeaderCell(
+                                'Area As per Documents\n(in Sq Feet)'),
                             _buildTableHeaderCell('Deviation'),
-                            _buildTableHeaderCell('Adopted Built-up Area\n(in Sq Feet)'),
-                            _buildTableHeaderCell('Adopted Construction Rate\n(in Rs/ Sq Feet)'),
+                            _buildTableHeaderCell(
+                                'Adopted Built-up Area\n(in Sq Feet)'),
+                            _buildTableHeaderCell(
+                                'Adopted Construction Rate\n(in Rs/ Sq Feet)'),
                             _buildTableHeaderCell('Replacement Cost (in Rs.)'),
                           ],
                         ),
-                        _buildBuildingInputRow('Basement Floor',
+                        _buildBuildingInputRow(
+                            'Basement Floor',
                             'Basement Floor_Area As per Site',
                             'Basement Floor_Area As per Documents',
                             'Basement Floor_Deviation',
                             'Basement Floor_Adopted Built-up Area',
                             'Basement Floor_Adopted Construction Rate',
                             'Basement Floor_Replacement Cost'),
-                        _buildBuildingInputRow('Stilt Floor',
+                        _buildBuildingInputRow(
+                            'Stilt Floor',
                             'Stilt Floor_Area As per Site',
                             'Stilt Floor_Area As per Documents',
                             'Stilt Floor_Deviation',
                             'Stilt Floor_Adopted Built-up Area',
                             'Stilt Floor_Adopted Construction Rate',
                             'Stilt Floor_Replacement Cost'),
-                        _buildBuildingInputRow('Ground Floor',
+                        _buildBuildingInputRow(
+                            'Ground Floor',
                             'Ground Floor_Area As per Site',
                             'Ground Floor_Area As per Documents',
                             'Ground Floor_Deviation',
                             'Ground Floor_Adopted Built-up Area',
                             'Ground Floor_Adopted Construction Rate',
                             'Ground Floor_Replacement Cost'),
-                        _buildBuildingInputRow('First Floor',
+                        _buildBuildingInputRow(
+                            'First Floor',
                             'First Floor_Area As per Site',
                             'First Floor_Area As per Documents',
                             'First Floor_Deviation',
                             'First Floor_Adopted Built-up Area',
                             'First Floor_Adopted Construction Rate',
                             'First Floor_Replacement Cost'),
-                        _buildBuildingInputRow('Second Floor',
+                        _buildBuildingInputRow(
+                            'Second Floor',
                             'Second Floor_Area As per Site',
                             'Second Floor_Area As per Documents',
                             'Second Floor_Deviation',
                             'Second Floor_Adopted Built-up Area',
                             'Second Floor_Adopted Construction Rate',
                             'Second Floor_Replacement Cost'),
-                        _buildBuildingInputRow('Third Floor',
+                        _buildBuildingInputRow(
+                            'Third Floor',
                             'Third Floor_Area As per Site',
                             'Third Floor_Area As per Documents',
                             'Third Floor_Deviation',
                             'Third Floor_Adopted Built-up Area',
                             'Third Floor_Adopted Construction Rate',
                             'Third Floor_Replacement Cost'),
-                        _buildBuildingInputRow('Fourth Floor',
+                        _buildBuildingInputRow(
+                            'Fourth Floor',
                             'Fourth Floor_Area As per Site',
                             'Fourth Floor_Area As per Documents',
                             'Fourth Floor_Deviation',
                             'Fourth Floor_Adopted Built-up Area',
                             'Fourth Floor_Adopted Construction Rate',
                             'Fourth Floor_Replacement Cost'),
-                        _buildBuildingInputRow('Fifth Floor',
+                        _buildBuildingInputRow(
+                            'Fifth Floor',
                             'Fifth Floor_Area As per Site',
                             'Fifth Floor_Area As per Documents',
                             'Fifth Floor_Deviation',
                             'Fifth Floor_Adopted Built-up Area',
                             'Fifth Floor_Adopted Construction Rate',
                             'Fifth Floor_Replacement Cost'),
-                        _buildBuildingInputRow('Total',
+                        _buildBuildingInputRow(
+                            'Total',
                             'Total_Area As per Site',
                             'Total_Area As per Documents',
                             'Total_Deviation',
                             'Total_Adopted Built-up Area',
                             'Total_Adopted Construction Rate',
-                            'Total_Replacement Cost', isTotalRow: true),
+                            'Total_Replacement Cost',
+                            isTotalRow: true),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -3461,17 +4587,27 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                             _buildTableCell(const Text('Depreciation %')),
                             _buildTableCell(TextField(
                               controller: controllers['Depreciation %'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
                             )),
                           ],
                         ),
                         TableRow(
                           children: [
-                            _buildTableCell(const Text('Net Replacement Cost (in Rs.)', style: TextStyle(fontWeight: FontWeight.bold))),
+                            _buildTableCell(const Text(
+                                'Net Replacement Cost (in Rs.)',
+                                style: TextStyle(fontWeight: FontWeight.bold))),
                             _buildTableCell(TextField(
-                              controller: controllers['Net Replacement Cost (in Rs.)'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              controller:
+                                  controllers['Net Replacement Cost (in Rs.)'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             )),
                           ],
                         ),
@@ -3494,44 +4630,71 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                             _buildTableCell(const Text('No. of Car Parking')),
                             _buildTableCell(TextField(
                               controller: controllers['No. of Car Parking'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
                             )),
-                            _buildTableCell(const Text('Value of Parking (in Rs.)')),
+                            _buildTableCell(
+                                const Text('Value of Parking (in Rs.)')),
                             _buildTableCell(TextField(
-                              controller: controllers['Value of Parking (in Rs.)'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                              controller:
+                                  controllers['Value of Parking (in Rs.)'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
                             )),
-                            _buildTableCell(const Text('Value of Other Amenities (in Rs.)')),
+                            _buildTableCell(const Text(
+                                'Value of Other Amenities (in Rs.)')),
                             _buildTableCell(TextField(
-                              controller: controllers['Value of Other Amenities (in Rs.)'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                              controller: controllers[
+                                  'Value of Other Amenities (in Rs.)'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
                             )),
                           ],
                         ),
                         TableRow(
                           children: [
-                            _buildTableCell(const Text('BUILDING VALUE / Insurable Value (in Rs.)', style: TextStyle(fontWeight: FontWeight.bold))),
+                            _buildTableCell(const Text(
+                                'BUILDING VALUE / Insurable Value (in Rs.)',
+                                style: TextStyle(fontWeight: FontWeight.bold))),
                             _buildTableCell(Container()),
                             _buildTableCell(Container()),
                             _buildTableCell(Container()),
                             _buildTableCell(TextField(
-                              controller: controllers['BUILDING VALUE / Insurable Value (in Rs.)'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              controller: controllers[
+                                  'BUILDING VALUE / Insurable Value (in Rs.)'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             )),
                             _buildTableCell(Container()),
                           ],
                         ),
                         TableRow(
                           children: [
-                            _buildTableCell(const Text('Building Value as per Govt Guideline Rate (in Rs.)', style: TextStyle(fontWeight: FontWeight.bold))),
+                            _buildTableCell(const Text(
+                                'Building Value as per Govt Guideline Rate (in Rs.)',
+                                style: TextStyle(fontWeight: FontWeight.bold))),
                             _buildTableCell(Container()),
                             _buildTableCell(Container()),
                             _buildTableCell(Container()),
                             _buildTableCell(TextField(
-                              controller: controllers['Building Value as per Govt Guideline Rate (in Rs.)'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              controller: controllers[
+                                  'Building Value as per Govt Guideline Rate (in Rs.)'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             )),
                             _buildTableCell(Container()),
                           ],
@@ -3540,7 +4703,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 30), // Added spacing below Valuation Report
+                const SizedBox(
+                    height: 30), // Added spacing below Valuation Report
 
                 // SECTION 9: FINAL VALUES (Flutter UI input fields)
                 const Padding(
@@ -3609,20 +4773,30 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     TableRow(
                       children: [
                         _buildTableCell(const Text('1')),
-                        _buildTableCell(const Text('Whether approved plan copy is available?')),
+                        _buildTableCell(const Text(
+                            'Whether approved plan copy is available?')),
                         _buildTableCell(TextField(
-                          controller: controllers['ConstructionDeviation_ApprovedPlanAvailable'],
-                          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                          controller: controllers[
+                              'ConstructionDeviation_ApprovedPlanAvailable'],
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              contentPadding: EdgeInsets.all(8)),
                         )),
                       ],
                     ),
                     TableRow(
                       children: [
                         _buildTableCell(const Text('1(a)')),
-                        _buildTableCell(const Text('If Yes - What is the deviation on security property?')),
+                        _buildTableCell(const Text(
+                            'If Yes - What is the deviation on security property?')),
                         _buildTableCell(TextField(
-                          controller: controllers['ConstructionDeviation_DeviationOnSecurityProperty'],
-                          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                          controller: controllers[
+                              'ConstructionDeviation_DeviationOnSecurityProperty'],
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              contentPadding: EdgeInsets.all(8)),
                         )),
                       ],
                     ),
@@ -3632,21 +4806,33 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                         _buildTableCell(const Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('If no - whether the following additional documents are made available -', style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text('Property Tax paid receipts over the last 3-4 years to confirm payment of taxes.'),
-                            Text('Latest land record availability in present owner\'s name.'),
+                            Text(
+                                'If no - whether the following additional documents are made available -',
+                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text(
+                                'Property Tax paid receipts over the last 3-4 years to confirm payment of taxes.'),
+                            Text(
+                                'Latest land record availability in present owner\'s name.'),
                           ],
                         )),
                         _buildTableCell(Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             TextField(
-                              controller: controllers['ConstructionDeviation_PropertyTaxPaidReceipts'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                              controller: controllers[
+                                  'ConstructionDeviation_PropertyTaxPaidReceipts'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
                             ),
                             TextField(
-                              controller: controllers['ConstructionDeviation_LatestLandRecordAvailability'],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                              controller: controllers[
+                                  'ConstructionDeviation_LatestLandRecordAvailability'],
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8)),
                             ),
                           ],
                         )),
@@ -3655,50 +4841,75 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     TableRow(
                       children: [
                         _buildTableCell(const Text('2')),
-                        _buildTableCell(const Text('FSI/RAR/FAR prescribed by the local Authority/Town planning')),
+                        _buildTableCell(const Text(
+                            'FSI/RAR/FAR prescribed by the local Authority/Town planning')),
                         _buildTableCell(TextField(
-                          controller: controllers['ConstructionDeviation_FSIRARFAR_LocalAuthority'],
-                          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                          controller: controllers[
+                              'ConstructionDeviation_FSIRARFAR_LocalAuthority'],
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              contentPadding: EdgeInsets.all(8)),
                         )),
                       ],
                     ),
                     TableRow(
                       children: [
                         _buildTableCell(const Text('3')),
-                        _buildTableCell(const Text('Max deviation permitted from prescribed FSI/RAR/FAR')),
+                        _buildTableCell(const Text(
+                            'Max deviation permitted from prescribed FSI/RAR/FAR')),
                         _buildTableCell(TextField(
-                          controller: controllers['ConstructionDeviation_MaxDeviationPermitted'],
-                          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                          controller: controllers[
+                              'ConstructionDeviation_MaxDeviationPermitted'],
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              contentPadding: EdgeInsets.all(8)),
                         )),
                       ],
                     ),
                     TableRow(
                       children: [
                         _buildTableCell(const Text('4')),
-                        _buildTableCell(const Text('FSI/RAR/FAR of the security property as per the agreement')),
+                        _buildTableCell(const Text(
+                            'FSI/RAR/FAR of the security property as per the agreement')),
                         _buildTableCell(TextField(
-                          controller: controllers['ConstructionDeviation_FSIRARFAR_Agreement'],
-                          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                          controller: controllers[
+                              'ConstructionDeviation_FSIRARFAR_Agreement'],
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              contentPadding: EdgeInsets.all(8)),
                         )),
                       ],
                     ),
                     TableRow(
                       children: [
                         _buildTableCell(const Text('')),
-                        _buildTableCell(const Text('FSI/RAR/FAR of the security property as confirmed by the valuer')),
+                        _buildTableCell(const Text(
+                            'FSI/RAR/FAR of the security property as confirmed by the valuer')),
                         _buildTableCell(TextField(
-                          controller: controllers['ConstructionDeviation_FSIRARFAR_ValuerConfirmed'],
-                          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                          controller: controllers[
+                              'ConstructionDeviation_FSIRARFAR_ValuerConfirmed'],
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              contentPadding: EdgeInsets.all(8)),
                         )),
                       ],
                     ),
                     TableRow(
                       children: [
                         _buildTableCell(const Text('5')),
-                        _buildTableCell(const Text('Whether property can be accepted as security for the loan\n(Views/Remarks)')),
+                        _buildTableCell(const Text(
+                            'Whether property can be accepted as security for the loan\n(Views/Remarks)')),
                         _buildTableCell(TextField(
-                          controller: controllers['ConstructionDeviation_PropertyAcceptedAsSecurity'],
-                          decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8)),
+                          controller: controllers[
+                              'ConstructionDeviation_PropertyAcceptedAsSecurity'],
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              contentPadding: EdgeInsets.all(8)),
                         )),
                       ],
                     ),
@@ -3706,7 +4917,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                 ),
                 const SizedBox(height: 20),
                 TextField(
-                  controller: controllers['ConstructionDeviation_HerebyConfirmCertify'],
+                  controller:
+                      controllers['ConstructionDeviation_HerebyConfirmCertify'],
                   decoration: const InputDecoration(
                     labelText: 'I hereby confirm/ certify that',
                     border: OutlineInputBorder(),
@@ -3766,7 +4978,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                     : GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
@@ -3779,8 +4992,11 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                               FutureBuilder<Uint8List>(
                                 future: _images[index].readAsBytes(),
                                 builder: (context, snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                                    return Image.memory(snapshot.data!, fit: BoxFit.cover);
+                                  if (snapshot.connectionState ==
+                                          ConnectionState.done &&
+                                      snapshot.hasData) {
+                                    return Image.memory(snapshot.data!,
+                                        fit: BoxFit.cover);
                                   }
                                   return const CircularProgressIndicator(); // Or a placeholder
                                 },
@@ -3789,7 +5005,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
                                 right: 0,
                                 top: 0,
                                 child: IconButton(
-                                  icon: const Icon(Icons.cancel, color: Colors.red),
+                                  icon: const Icon(Icons.cancel,
+                                      color: Colors.red),
                                   onPressed: () => _removeImage(index),
                                 ),
                               ),
@@ -3802,7 +5019,10 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
             const SizedBox(height: 20),
 
             ElevatedButton(
-              onPressed: _generatePdf,
+              onPressed: () {
+                _generatePdf();
+                _saveData();
+              },
               child: const Text('Generate PDF'),
             ),
           ],
@@ -3818,7 +5038,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
         children: [
           Expanded(
             flex: 2,
-            child: Text(direction, style: const TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(direction,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
           Expanded(
             flex: 3,
@@ -3837,7 +5058,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: TextField(
-                controller: controllers['Boundaries_${direction}_LegalDocuments'],
+                controller:
+                    controllers['Boundaries_${direction}_LegalDocuments'],
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                 ),
