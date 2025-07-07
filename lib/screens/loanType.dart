@@ -46,6 +46,7 @@ class LoanType extends StatelessWidget {
 
   Widget LIC(BuildContext ctx) {
     final List<Map<String, String>> loanTypes = [
+      {'title': '---SELECT---'},
       {'title': 'HOUSE CONSTRUCTION (PVR - 1)'},
       {'title': 'HOUSE RENOVATION (PVR - 3)'},
     ];
@@ -77,7 +78,7 @@ class LoanType extends StatelessWidget {
                 return ValuationFormScreen();
               }));
               }
-              else
+              else if(value?['title']=='HOUSE CONSTRUCTION (PVR - 1)')
               {
                 Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
                 return ValuationFormScreenPVR1();
@@ -90,7 +91,8 @@ class LoanType extends StatelessWidget {
 
   Widget IDBI(BuildContext ctx) {
     final List<Map<String, String>> loanTypes = [
-      {'title': 'Valuation Report'},
+      {'title': '---SELECT---'},
+      {'title': 'VALUATION REPORT'},
     ];
 
     return Column(
@@ -114,9 +116,12 @@ class LoanType extends StatelessWidget {
               );
             }).toList(),
             onChanged: (value) {
-              Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
+              if(value?['title']=='VALUATION REPORT')
+              {
+                Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
                 return ValuationFormScreenIDBI();
               }));
+              }
             }),
       ],
     );
@@ -124,6 +129,7 @@ class LoanType extends StatelessWidget {
 
   Widget Federal(BuildContext ctx) {
     final List<Map<String, String>> loanTypes = [
+      {'title': '---SELECT---'},
       {'title': 'LAND AND BUILDING'},
     ];
 
@@ -148,9 +154,13 @@ class LoanType extends StatelessWidget {
               );
             }).toList(),
             onChanged: (value) {
+              if(value?['title']=='LAND AND BUILDING')
+
+             { 
               Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
                 return PdfGeneratorScreen();
               }));
+              }
             }),
       ],
     );
@@ -158,6 +168,7 @@ class LoanType extends StatelessWidget {
 
   Widget Canara(BuildContext ctx) {
     final List<Map<String, String>> loanTypes = [
+      {'title': '---SELECT---'},
       {'title': 'Plant And Machinery'},
       {'title': 'Property (Land & BUILDING)'},
       {
@@ -204,6 +215,7 @@ class LoanType extends StatelessWidget {
 
   Widget SIB(BuildContext ctx) {
     final List<Map<String, String>> loanTypes = [
+      {'title': '---SELECT---'},
       {'title': 'VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)'},
       {'title': 'VALUATION REPORT (IN RESPECT OF FLATS)'},
       {'title': 'VALUATION REPORT (IN RESPECT OF VACANT LAND / SITE)'},
