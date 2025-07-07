@@ -535,8 +535,9 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
                         initialDate: _inspectionDate,
                         firstDate: DateTime(2000),
                         lastDate: DateTime(2100));
-                    if (picked != null)
+                    if (picked != null) {
                       setState(() => _inspectionDate = picked);
+                    }
                   }),
             ]),
             _buildSection(title: '1. Property Details', children: [

@@ -260,7 +260,7 @@ Future<Uint8List> fetchImage(String imageUrl) async {
           for (var imgData in imagesData) {
             try {
               // Construct the image URL based on your server configuration
-              String imageUrl = '${url4}${imgData['fileName']}';
+              String imageUrl = '$url4${imgData['fileName']}';
               debugPrint("Fetching image from: $imageUrl");
               Uint8List imageBytes = await fetchImage(imageUrl);
 
@@ -728,7 +728,7 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                     TextFormField(
 
                       controller: _controllers['nearbyLongitude'],
-                      decoration: InputDecoration(labelText: 'Longitude'),
+                      decoration: const InputDecoration(labelText: 'Longitude'),
 
                     ),
                     const SizedBox(height: 8),
@@ -747,7 +747,7 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                               ),
                             ),
 
-                            SizedBox(
+                            const SizedBox(
                               width: 5,
                             ),
                             Expanded(
@@ -761,8 +761,8 @@ Future<void> _getCurrentLocation(int imageIndex) async {
                                   }));
                                 } */
                                     _getNearbyProperty,
-                                label: Text('Search'),
-                                icon: Icon(Icons.search),
+                                label: const Text('Search'),
+                                icon: const Icon(Icons.search),
                               ),
 
                             )
@@ -781,7 +781,7 @@ Future<void> _getCurrentLocation(int imageIndex) async {
               label: const Text('Search Saved Drafts'),
               onPressed: () {
                 Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-                  return SavedDrafts();
+                  return const SavedDrafts();
                 }));
               },
                         ),
