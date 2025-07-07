@@ -251,7 +251,7 @@ class LoanType extends StatelessWidget {
               }));
               }
 
-              if(value?['title']=='VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)')
+              else if(value?['title']=='VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)')
               {
                 Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
                 return ValuationFormPage();
