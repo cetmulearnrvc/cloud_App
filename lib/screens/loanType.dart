@@ -5,6 +5,8 @@ import 'package:login_screen/screens/LIC/pvr1/valuation_form_screen_pvr1.dart';
 import 'package:login_screen/screens/LIC/pvr3/valuation_form_screen.dart';
 import 'package:login_screen/screens/SIB/Flat/valuation_form.dart';
 import 'package:login_screen/screens/location.dart';
+import 'package:login_screen/screens/SIB/land_and_building/land_and_building.dart';
+
 
 //ignore_for_file:prefer_const_constructors
 class LoanType extends StatelessWidget {
@@ -234,6 +236,13 @@ class LoanType extends StatelessWidget {
               {
                 Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
                 return SIBValuationFormScreen();
+              }));
+              }
+
+              if(value?['title']=='VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)')
+              {
+                Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
+                return ValuationFormPage();
               }));
               }
               
