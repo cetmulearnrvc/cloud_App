@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     primarySwatch: Colors.deepPurple,
     scaffoldBackgroundColor: Colors.black,
   ),
-  themeMode: ThemeMode.dark,
+  themeMode: ThemeMode.dark,//ThemeMode.system
       title: 'Login',
       home : const SplashScreen()
     );

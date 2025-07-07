@@ -4,10 +4,15 @@ import 'package:login_screen/screens/splash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore_for_file: prefer_const_constructors
-class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
-   final List<Map<String, dynamic>> banks = [
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final List<Map<String, dynamic>> banks = [
     {
       'name': 'Canara Bank',
       'icon': 'assets/images/canara.jpeg',
@@ -24,7 +29,6 @@ class HomeScreen extends StatelessWidget {
       'name': 'Federal Bank',
       'icon': 'assets/images/federal.jpeg',
     },
-
     {
       'name': 'South Indian Bank',
       'icon': 'assets/images/south indian.jpeg',
@@ -32,11 +36,12 @@ class HomeScreen extends StatelessWidget {
   ];
 
   Map<String, dynamic>? selectedData;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Home Screen'),
+          title: Text('HOME SCREEN', style: TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: Colors.blue,
           actions: [
             IconButton(
@@ -49,54 +54,51 @@ class HomeScreen extends StatelessWidget {
         ),
         body: SafeArea(
           child: Center(
-              child: ListView.separated(
-                  itemBuilder: ((context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
+              child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Text(
+                  'SELECT A BANK',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25,decoration: TextDecoration.underline),
+                  
+                ),
+                const SizedBox(height: 15),
+                Image.asset('assets/images/bank.png'),
+                const SizedBox(height: 15),
+                DropdownButtonFormField<Map<String, dynamic>>(
+                  decoration: InputDecoration(border: OutlineInputBorder()),
+                  hint: Text('Select a Bank'),
+                  value: selectedData,  // ✅ Fix: Set current value
+                  items: banks.map((e) {
+                    return DropdownMenuItem<Map<String, dynamic>>(
+                      value: e,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Select Bank',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 25),
-                          ),
-                          DropdownButtonFormField(
-                            decoration: InputDecoration(border: OutlineInputBorder()),
-                            autofocus: true,
-                              hint: Text('Select a Bank'),
-                              items: banks.map((e) {
-                                return DropdownMenuItem(
-                                  value: e,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(e['name']),
-                                      Image.asset(
-                                        e['icon'],
-                                      height: 50,
-                                      width: 50,)
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                              // onTap: ()  {
-                              //   print(selectedData);
-                              // },
-                              onChanged: (value) {
-                                selectedData=value;
-                                //print(selectedData);
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (ctx) => LoanType(selectedBank: selectedData,)));
-                              }),
+                          Text(e['name']),
+                          Image.asset(
+                            e['icon'],
+                            height: 50,
+                            width: 50,
+                          )
                         ],
                       ),
                     );
-                  }),
-                  separatorBuilder: ((context, index) {
-                    return Divider();
-                  }),
-                  itemCount: 1)),
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedData = value;  // ✅ Fix: Update state
+                    });
+                    if (selectedData != null) {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => LoanType(selectedBank: selectedData)));
+                    }
+                  },
+                ),
+              ],
+            ),
+          )),
         ));
   }
 

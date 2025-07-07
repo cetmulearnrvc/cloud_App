@@ -7,13 +7,11 @@ import 'package:login_screen/screens/SIB/Flat/valuation_form.dart';
 import 'package:login_screen/screens/location.dart';
 import 'package:login_screen/screens/SIB/land_and_building/land_and_building.dart';
 
-
 //ignore_for_file:prefer_const_constructors
 class LoanType extends StatelessWidget {
   final selectedBank;
 
   const LoanType({super.key, required this.selectedBank});
-  // const LoanType({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +30,7 @@ class LoanType extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
-        title: Text('Select Loan Type'),
+        title: Text('SELECT VALUATION TYPE',style: TextStyle(fontWeight: FontWeight.bold),),
         leading: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
@@ -47,11 +45,13 @@ class LoanType extends StatelessWidget {
   }
 
   Widget LIC(BuildContext ctx) {
-    final List<Map<String, String>> loanTypes = [
-      {'title': '---SELECT---'},
-      {'title': 'HOUSE CONSTRUCTION (PVR - 1)'},
-      {'title': 'HOUSE RENOVATION (PVR - 3)'},
+    final List<String> loanTypes = [
+      '---SELECT---',
+      'HOUSE CONSTRUCTION (PVR - 1)',
+      'HOUSE RENOVATION (PVR - 3)',
     ];
+
+    String? selectedValue = loanTypes[0];
 
     return Column(
       children: [
@@ -60,42 +60,53 @@ class LoanType extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
                 decoration: TextDecoration.underline)),
-        SizedBox(
-          height: 100,
-        ),
-        DropdownButtonFormField(
-            decoration: InputDecoration(border: OutlineInputBorder()),
-            hint: Text('Select the valuation type'),
-            isExpanded: true,
-            items: loanTypes.map((e) {
-              return DropdownMenuItem(
-                value: e,
-                child: Text(e['title']!),
+        SizedBox(height: 10,),
+        Image.asset('assets/images/lic.jpeg'),
+        SizedBox(height: 50),
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return DropdownButtonFormField<String>(
+                value: selectedValue,
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                hint: Text('Select the valuation type'),
+                isExpanded: true,
+                items: loanTypes.map((e) {
+                  return DropdownMenuItem<String>(
+                    value: e,
+                    child: Text(e),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedValue = value;
+                  });
+                  if (value == 'HOUSE RENOVATION (PVR - 3)') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
+                      return ValuationFormScreen();
+                    }));
+                  } else if (value == 'HOUSE CONSTRUCTION (PVR - 1)') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
+                      return ValuationFormScreenPVR1();
+                    }));
+                  }
+                },
               );
-            }).toList(),
-            onChanged: (value) {
-              if(value?['title']=='HOUSE RENOVATION (PVR - 3)')
-              {
-                Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                return ValuationFormScreen();
-              }));
-              }
-              else if(value?['title']=='HOUSE CONSTRUCTION (PVR - 1)')
-              {
-                Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                return ValuationFormScreenPVR1();
-              }));
-              }
-            }),
+            },
+          ),
+        ),
       ],
     );
   }
 
   Widget IDBI(BuildContext ctx) {
-    final List<Map<String, String>> loanTypes = [
-      {'title': '---SELECT---'},
-      {'title': 'VALUATION REPORT'},
+    final List<String> loanTypes = [
+      '---SELECT---',
+      'VALUATION REPORT',
     ];
+
+    String? selectedValue = loanTypes[0];
 
     return Column(
       children: [
@@ -104,161 +115,202 @@ class LoanType extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
                 decoration: TextDecoration.underline)),
-        SizedBox(
-          height: 100,
-        ),
-        DropdownButtonFormField(
-            decoration: InputDecoration(border: OutlineInputBorder()),
-            hint: Text('Select the valuation type'),
-            isExpanded: true,
-            items: loanTypes.map((e) {
-              return DropdownMenuItem(
-                value: e,
-                child: Text(e['title']!),
+        SizedBox(height: 10,),
+        Image.asset('assets/images/idbi.jpeg'),
+        SizedBox(height: 50),
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return DropdownButtonFormField<String>(
+                value: selectedValue,
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                hint: Text('Select the valuation type'),
+                isExpanded: true,
+                items: loanTypes.map((e) {
+                  return DropdownMenuItem<String>(
+                    value: e,
+                    child: Text(e),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedValue = value;
+                  });
+                  if (value == 'VALUATION REPORT') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
+                      return ValuationFormScreenIDBI();
+                    }));
+                  }
+                },
               );
-            }).toList(),
-            onChanged: (value) {
-              if(value?['title']=='VALUATION REPORT')
-              {
-                Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                return ValuationFormScreenIDBI();
-              }));
-              }
-            }),
+            },
+          ),
+        ),
       ],
     );
   }
 
   Widget Federal(BuildContext ctx) {
-    final List<Map<String, String>> loanTypes = [
-      {'title': '---SELECT---'},
-      {'title': 'LAND AND BUILDING'},
+    final List<String> loanTypes = [
+      '---SELECT---',
+      'LAND AND BUILDING',
     ];
+
+    String? selectedValue = loanTypes[0];
 
     return Column(
       children: [
-        Text('Federal Bank',
+        Text('FEDERAL BANK',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
                 decoration: TextDecoration.underline)),
-        SizedBox(
-          height: 100,
-        ),
-        DropdownButtonFormField(
-            decoration: InputDecoration(border: OutlineInputBorder()),
-            hint: Text('Select the valuation type'),
-            isExpanded: true,
-            items: loanTypes.map((e) {
-              return DropdownMenuItem(
-                value: e,
-                child: Text(e['title']!),
+        SizedBox(height: 10,),
+        Image.asset('assets/images/federal.jpeg'),
+        SizedBox(height: 50),
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return DropdownButtonFormField<String>(
+                value: selectedValue,
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                hint: Text('Select the valuation type'),
+                isExpanded: true,
+                items: loanTypes.map((e) {
+                  return DropdownMenuItem<String>(
+                    value: e,
+                    child: Text(e),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedValue = value;
+                  });
+                  if (value == 'LAND AND BUILDING') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
+                      return PdfGeneratorScreen();
+                    }));
+                  }
+                },
               );
-            }).toList(),
-            onChanged: (value) {
-              if(value?['title']=='LAND AND BUILDING')
-
-             { 
-              Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                return PdfGeneratorScreen();
-              }));
-              }
-            }),
+            },
+          ),
+        ),
       ],
     );
   }
 
   Widget Canara(BuildContext ctx) {
-    final List<Map<String, String>> loanTypes = [
-      {'title': '---SELECT---'},
-      {'title': 'Plant And Machinery'},
-      {'title': 'Property (Land & BUILDING)'},
-      {
-        'title':
-            'VALUATION OF COMMERCIAL BUILDING BY RENT CAPITALISATION METHOD'
-      },
-      {'title': 'VALUATION OF FLAT BY COMPOSITE RATE METHOD'},
-      {'title': 'GENERAL FORMAT VALUATION REPORT OTHER PROPERTIES'},
-      {
-        'title':
-            'VALUATION OF VACANT SITES/ RESIDENTIAL PLOT / COMMERCIAL SITE / LAND'
-      },
-      {'title': 'VALUATION REPORT (IN RESPECT OF AGRICULTURAL LANDS)'},
+    final List<String> loanTypes = [
+      '---SELECT---',
+      'Plant And Machinery',
+      'Property (Land & BUILDING)',
+      'VALUATION OF COMMERCIAL BUILDING BY RENT CAPITALISATION METHOD',
+      'VALUATION OF FLAT BY COMPOSITE RATE METHOD',
+      'GENERAL FORMAT VALUATION REPORT OTHER PROPERTIES',
+      'VALUATION OF VACANT SITES/ RESIDENTIAL PLOT / COMMERCIAL SITE / LAND',
+      'VALUATION REPORT (IN RESPECT OF AGRICULTURAL LANDS)',
     ];
+
+    String? selectedValue = loanTypes[0];
 
     return Column(
       children: [
-        Text('Canara Bank',
+        Text('CANARA BANK',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
                 decoration: TextDecoration.underline)),
-        SizedBox(
-          height: 100,
-        ),
-        DropdownButtonFormField(
-            decoration: InputDecoration(border: OutlineInputBorder()),
-            hint: Text('Select the valuation type'),
-            isExpanded: true,
-            items: loanTypes.map((e) {
-              return DropdownMenuItem(
-                value: e,
-                child: Text(e['title']!),
+                const SizedBox(height: 15,),
+        Image.asset('assets/images/canara.jpeg'),
+        SizedBox(height: 50),
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return DropdownButtonFormField<String>(
+                value: selectedValue,
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                hint: Text('Select the valuation type'),
+                isExpanded: true,
+                items: loanTypes.map((e) {
+                  return DropdownMenuItem<String>(
+                    value: e,
+                    child: Text(e),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedValue = value;
+                  });
+                  Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
+                    return LocationScreen();
+                  }));
+                },
               );
-            }).toList(),
-            onChanged: (value) {
-              Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                return LocationScreen();
-              }));
-            }),
+            },
+          ),
+        ),
       ],
     );
   }
 
   Widget SIB(BuildContext ctx) {
-    final List<Map<String, String>> loanTypes = [
-      {'title': '---SELECT---'},
-      {'title': 'VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)'},
-      {'title': 'VALUATION REPORT (IN RESPECT OF FLATS)'},
-      {'title': 'VALUATION REPORT (IN RESPECT OF VACANT LAND / SITE)'},
+    final List<String> loanTypes = [
+      '---SELECT---',
+      'VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)',
+      'VALUATION REPORT (IN RESPECT OF FLATS)',
+      'VALUATION REPORT (IN RESPECT OF VACANT LAND / SITE)',
     ];
+
+    String? selectedValue = loanTypes[0];
 
     return Column(
       children: [
-        Text('South Indian Bank',
+        Text('SOUTH INDIAN BANK',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
                 decoration: TextDecoration.underline)),
-        SizedBox(
-          height: 100,
-        ),
-        DropdownButtonFormField(
-            decoration: InputDecoration(border: OutlineInputBorder()),
-            hint: Text('Select the valuation type'),
-            isExpanded: true,
-            items: loanTypes.map((e) {
-              return DropdownMenuItem(
-                value: e,
-                child: Text(e['title']!),
+        SizedBox(height: 10,),
+        Image.asset('assets/images/south indian.jpeg'),
+        SizedBox(height: 50),
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return DropdownButtonFormField<String>(
+                value: selectedValue,
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                hint: Text('Select the valuation type'),
+                isExpanded: true,
+                items: loanTypes.map((e) {
+                  return DropdownMenuItem<String>(
+                    value: e,
+                    child: Text(e),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedValue = value;
+                  });
+                  if (value == 'VALUATION REPORT (IN RESPECT OF FLATS)') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
+                      return SIBValuationFormScreen();
+                    }));
+                  } else if (value ==
+                      'VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
+                      return ValuationFormPage();
+                    }));
+                  }
+                },
               );
-            }).toList(),
-            onChanged: (value) {
-              if(value?['title']=='VALUATION REPORT (IN RESPECT OF FLATS)')
-              {
-                Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                return SIBValuationFormScreen();
-              }));
-              }
-
-              else if(value?['title']=='VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)')
-              {
-                Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                return ValuationFormPage();
-              }));
-              }
-              
-            }),
+            },
+          ),
+        ),
       ],
     );
   }
