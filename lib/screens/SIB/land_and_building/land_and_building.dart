@@ -233,7 +233,7 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
+      child: TextField( // Changed from TextFormField to TextField
         controller: controller,
         readOnly: isDate, // Make date fields read-only to use date picker
         onTap: isDate ? () => _selectDate(context, controller) : null,
@@ -242,7 +242,7 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
           labelText: labelText,
           hintText: hintText,
           border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            borderRadius: BorderRadius.all(Radius.circular(20)), // Applied new styling
           ),
           filled: true,
           fillColor: Colors.white,
@@ -1216,19 +1216,16 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
           padding: cellPadding,
           alignment: pw.Alignment.center,
           child: pw.Text('SI No.', style: headerTextStyle),
-          decoration: pw.BoxDecoration(border: pw.Border.all(color: pdfLib.PdfColors.black, width: 0.5)),
         ),
         pw.Container(
           padding: cellPadding,
           alignment: pw.Alignment.center,
           child: pw.Text('Particulars', style: headerTextStyle),
-          decoration: pw.BoxDecoration(border: pw.Border.all(color: pdfLib.PdfColors.black, width: 0.5)),
         ),
         pw.Container(
           padding: cellPadding,
           alignment: pw.Alignment.center,
           child: pw.Text('Valuer comment', style: headerTextStyle),
-          decoration: pw.BoxDecoration(border: pw.Border.all(color: pdfLib.PdfColors.black, width: 0.5)),
         ),
       ],
     ));
@@ -1240,17 +1237,14 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
           pw.Container(
             padding: cellPadding,
             child: pw.Text(item['siNo'], style: contentTextStyle),
-            decoration: pw.BoxDecoration(border: pw.Border.all(color: pdfLib.PdfColors.black, width: 0.5)),
           ),
           pw.Container(
             padding: cellPadding,
             child: pw.Text(item['particulars'], style: contentTextStyle),
-            decoration: pw.BoxDecoration(border: pw.Border.all(color: pdfLib.PdfColors.black, width: 0.5)),
           ),
           pw.Container(
             padding: cellPadding,
             child: pw.Text(item['controller'].text, style: contentTextStyle),
-            decoration: pw.BoxDecoration(border: pw.Border.all(color: pdfLib.PdfColors.black, width: 0.5)),
           ),
         ],
       ));
@@ -2088,11 +2082,11 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                   padding: const EdgeInsets.all(20),
                   margin: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Color(0xFFF5F5F5), // Light background color
+                    color: Color.fromARGB(255, 244, 238, 238), // Light background color
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
+                        color: const Color.fromARGB(255, 204, 200, 200).withOpacity(0.3),
                         spreadRadius: 4,
                         blurRadius: 8,
                         offset: Offset(0, 4), // Shadow position
@@ -2102,18 +2096,18 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      TextFormField(
+                      TextField( // Changed from TextFormField to TextField
                         controller: _latController,
                         decoration: const InputDecoration(
-                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
                           hintText: 'Latitude',
                         ),
                       ),
                       const SizedBox(height: 20),
-                      TextFormField(
+                      TextField( // Changed from TextFormField to TextField
                         controller: _lonController,
                         decoration: const InputDecoration(
-                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
                           hintText: 'Longitude',
                         ),
                       ),
@@ -2175,13 +2169,17 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 ),
               ),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-              _buildTextField(
+              TextField(
+                decoration: const InputDecoration(
+                  hintText: "Reference ID",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                ),
                 controller: _refId,
-                labelText: "Reference ID",
               ),
 
+              const SizedBox(height: 20),
               // Collapsible Section: I. PROPERTY DETAILS
               ExpansionTile(
                 title: const Text(
@@ -2191,19 +2189,30 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 initiallyExpanded: false, // You can set this to false to start collapsed
                 children: <Widget>[
                   const Divider(),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _purposeController,
-                    labelText: '1. Purpose for which the valuation is made',
+                    decoration: const InputDecoration(
+                      labelText: '1. Purpose for which the valuation is made',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _dateOfInspectionController,
-                    labelText: '2. a) Date of inspection',
-                    isDate: true,
+                    readOnly: true,
+                    onTap: () => _selectDate(context, _dateOfInspectionController),
+                    decoration: const InputDecoration(
+                      labelText: '2. a) Date of inspection',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _dateOfValuationController,
-                    labelText: '2. b) Date on which the valuation is made',
-                    isDate: true,
+                    readOnly: true,
+                    onTap: () => _selectDate(context, _dateOfValuationController),
+                    decoration: const InputDecoration(
+                      labelText: '2. b) Date on which the valuation is made',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -2222,41 +2231,62 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                     );
                   }),
                   const SizedBox(height: 16),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _ownerNameController,
-                    labelText: '4. Name of the owner(s)',
+                    decoration: const InputDecoration(
+                      labelText: '4. Name of the owner(s)',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _applicantNameController,
-                    labelText: '5. Name of the applicant(s)',
+                    decoration: const InputDecoration(
+                      labelText: '5. Name of the applicant(s)',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const Text(
                     '6. The address of the property (including pin code)',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _addressDocController,
-                    labelText: '  As Per Documents',
+                    decoration: const InputDecoration(
+                      labelText: '  As Per Documents',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _addressActualController,
-                    labelText: '  As per actual/postal',
+                    decoration: const InputDecoration(
+                      labelText: '  As per actual/postal',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _deviationsController,
-                    labelText: '7. Deviations if any',
-                    hintText: 'Enter any deviations (e.g., "None")',
+                    decoration: const InputDecoration(
+                      labelText: '7. Deviations if any',
+                      hintText: 'Enter any deviations (e.g., "None")',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _propertyTypeController,
-                    labelText: '8. The property type (Leasehold/ Freehold)',
-                    hintText: 'e.g., Leasehold or Freehold',
+                    decoration: const InputDecoration(
+                      labelText: '8. The property type (Leasehold/ Freehold)',
+                      hintText: 'e.g., Leasehold or Freehold',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _propertyZoneController,
-                    labelText: '9. Property Zone (Residential/ Commercial/ Industrial/ Agricultural)',
-                    hintText: 'e.g., Residential',
+                    decoration: const InputDecoration(
+                      labelText: '9. Property Zone (Residential/ Commercial/ Industrial/ Agricultural)',
+                      hintText: 'e.g., Residential',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                 ],
               ),
@@ -2271,30 +2301,45 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 initiallyExpanded: false,
                 children: <Widget>[
                   const Divider(),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _classificationAreaController,
-                    labelText: '10. i) Classification of the area (High / Middle / Poor)',
-                    hintText: 'e.g., Middle',
+                    decoration: const InputDecoration(
+                      labelText: '10. i) Classification of the area (High / Middle / Poor)',
+                      hintText: 'e.g., Middle',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _urbanSemiUrbanRuralController,
-                    labelText: '10. ii) Urban / Semi Urban / Rural',
-                    hintText: 'e.g., Urban',
+                    decoration: const InputDecoration(
+                      labelText: '10. ii) Urban / Semi Urban / Rural',
+                      hintText: 'e.g., Urban',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _comingUnderCorporationController,
-                    labelText: '11. Coming under Corporation limit / Village Panchayat / Municipality',
-                    hintText: 'e.g., Corporation limit',
+                    decoration: const InputDecoration(
+                      labelText: '11. Coming under Corporation limit / Village Panchayat / Municipality',
+                      hintText: 'e.g., Corporation limit',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _coveredUnderStateCentralGovtController,
-                    labelText: '12. Whether covered under any State / Central Govt. enactments',
-                    hintText: 'e.g., No',
+                    decoration: const InputDecoration(
+                      labelText: '12. Whether covered under any State / Central Govt. enactments',
+                      hintText: 'e.g., No',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _agriculturalLandConversionController,
-                    labelText: '13. In case it is an agricultural land, any conversion to house site plots is contemplated',
-                    hintText: 'e.g., Not applicable / Yes / No',
+                    decoration: const InputDecoration(
+                      labelText: '13. In case it is an agricultural land, any conversion to house site plots is contemplated',
+                      hintText: 'e.g., Not applicable / Yes / No',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                   const SizedBox(height: 30),
                   const Text(
@@ -2320,10 +2365,13 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                       ],
                     ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _boundaryDeviationsController,
-                    labelText: 'Deviations if any',
-                    hintText: 'Enter any deviations (e.g., "None")',
+                    decoration: const InputDecoration(
+                      labelText: 'Deviations if any',
+                      hintText: 'Enter any deviations (e.g., "None")',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                   const SizedBox(height: 30),
                   const Text(
@@ -2350,10 +2398,13 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                       ],
                     ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _dimDeviationsController,
-                    labelText: 'Deviations if any',
-                    hintText: 'Enter any deviations (e.g., "None")',
+                    decoration: const InputDecoration(
+                      labelText: 'Deviations if any',
+                      hintText: 'Enter any deviations (e.g., "None")',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                 ],
               ),
@@ -2368,10 +2419,13 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 initiallyExpanded: false,
                 children: <Widget>[
                   const Divider(),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _latitudeLongitudeController,
-                    labelText: '16. Latitude, Longitude and Coordinates of the site',
-                    hintText: 'e.g., 9.1234, 76.5678',
+                    decoration: const InputDecoration(
+                      labelText: '16. Latitude, Longitude and Coordinates of the site',
+                      hintText: 'e.g., 9.1234, 76.5678',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
@@ -2389,20 +2443,29 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                       ),
                     ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _occupiedBySelfTenantController,
-                    labelText: '17. Whether occupied by the Self /tenant?',
-                    hintText: 'e.g., Self or Tenant',
+                    decoration: const InputDecoration(
+                      labelText: '17. Whether occupied by the Self /tenant?',
+                      hintText: 'e.g., Self or Tenant',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _occupiedByTenantSinceController,
-                    labelText: '  If occupied by tenant, since how long?',
-                    hintText: 'e.g., 5 years (leave blank if Self occupied)',
+                    decoration: const InputDecoration(
+                      labelText: '  If occupied by tenant, since how long?',
+                      hintText: 'e.g., 5 years (leave blank if Self occupied)',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _rentReceivedPerMonthController,
-                    labelText: '  Rent received per month',
-                    hintText: 'e.g., 10000 (leave blank if Self occupied)',
+                    decoration: const InputDecoration(
+                      labelText: '  Rent received per month',
+                      hintText: 'e.g., 10000 (leave blank if Self occupied)',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                   const SizedBox(height: 30),
                   const Text(
@@ -2457,15 +2520,21 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 initiallyExpanded: false,
                 children: <Widget>[
                   const Divider(),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _typeOfRoadController,
-                    labelText: '19. Type of road available at present (Bitumen/Mud/CC/Private)',
-                    hintText: 'e.g., Bitumen',
+                    decoration: const InputDecoration(
+                      labelText: '19. Type of road available at present (Bitumen/Mud/CC/Private)',
+                      hintText: 'e.g., Bitumen',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _widthOfRoadController,
-                    labelText: '20. Width of road - in feet',
-                    hintText: 'e.g., 20',
+                    decoration: const InputDecoration(
+                      labelText: '20. Width of road - in feet',
+                      hintText: 'e.g., 20',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                 ],
               ),
@@ -2480,10 +2549,13 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 initiallyExpanded: false,
                 children: <Widget>[
                   const Divider(),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _isLandLockedController,
-                    labelText: '21. Is it a land - locked land?',
-                    hintText: 'Yes/No',
+                    decoration: const InputDecoration(
+                      labelText: '21. Is it a land - locked land?',
+                      hintText: 'Yes/No',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                 ],
               ),
@@ -2498,40 +2570,61 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 initiallyExpanded: false,
                 children: <Widget>[
                   const Divider(),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _landAreaDetailsController,
-                    labelText: '1. Land area in Sq Ft (Details)',
-                    hintText: 'e.g., 1500',
+                    decoration: const InputDecoration(
+                      labelText: '1. Land area in Sq Ft (Details)',
+                      hintText: 'e.g., 1500',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _landAreaGuidelineController,
-                    labelText: '2. Guideline rate (Land area in Sq Ft)',
-                    hintText: 'e.g., 1400',
+                    decoration: const InputDecoration(
+                      labelText: '2. Guideline rate (Land area in Sq Ft)',
+                      hintText: 'e.g., 1400',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _ratePerSqFtGuidelineController,
-                    labelText: '   Guideline rate (Rate per Sq ft)',
-                    hintText: 'e.g., 2000',
+                    decoration: const InputDecoration(
+                      labelText: '   Guideline rate (Rate per Sq ft)',
+                      hintText: 'e.g., 2000',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _valueInRsGuidelineController,
-                    labelText: '   Guideline rate (Value in Rs.)',
-                    hintText: 'e.g., 2800000',
+                    decoration: const InputDecoration(
+                      labelText: '   Guideline rate (Value in Rs.)',
+                      hintText: 'e.g., 2800000',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _landAreaPrevailingController,
-                    labelText: '3. Prevailing market value (Land area in Sq Ft)',
-                    hintText: 'e.g., 1500',
+                    decoration: const InputDecoration(
+                      labelText: '3. Prevailing market value (Land area in Sq Ft)',
+                      hintText: 'e.g., 1500',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _ratePerSqFtPrevailingController,
-                    labelText: '   Prevailing market value (Rate per Sq ft)',
-                    hintText: 'e.g., 2500',
+                    decoration: const InputDecoration(
+                      labelText: '   Prevailing market value (Rate per Sq ft)',
+                      hintText: 'e.g., 2500',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _valueInRsPrevailingController,
-                    labelText: '   Prevailing market value (Value in Rs.)',
-                    hintText: 'e.g., 3750000',
+                    decoration: const InputDecoration(
+                      labelText: '   Prevailing market value (Value in Rs.)',
+                      hintText: 'e.g., 3750000',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                 ],
               ),
@@ -2546,41 +2639,62 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 initiallyExpanded: false,
                 children: <Widget>[
                   const Divider(),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _typeOfBuildingController,
-                    labelText: '1. a) Type of Building (Residential / Commercial / Industrial)',
-                    hintText: 'e.g., Residential',
+                    decoration: const InputDecoration(
+                      labelText: '1. a) Type of Building (Residential / Commercial / Industrial)',
+                      hintText: 'e.g., Residential',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _typeOfConstructionController,
-                    labelText: '   b) Type of construction (Load bearing / RCC / Steel Framed)',
-                    hintText: 'e.g., RCC',
+                    decoration: const InputDecoration(
+                      labelText: '   b) Type of construction (Load bearing / RCC / Steel Framed)',
+                      hintText: 'e.g., RCC',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _ageOfTheBuildingController,
-                    labelText: '   c) Age of the building',
-                    hintText: 'e.g., 10 years',
+                    decoration: const InputDecoration(
+                      labelText: '   c) Age of the building',
+                      hintText: 'e.g., 10 years',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _residualAgeOfTheBuildingController,
-                    labelText: '   d) Residual age of the building',
-                    hintText: 'e.g., 40 years',
+                    decoration: const InputDecoration(
+                      labelText: '   d) Residual age of the building',
+                      hintText: 'e.g., 40 years',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _approvedMapAuthorityController,
-                    labelText: '   e) Approved map / plan issuing authority',
-                    hintText: 'e.g., Local Municipality',
+                    decoration: const InputDecoration(
+                      labelText: '   e) Approved map / plan issuing authority',
+                      hintText: 'e.g., Local Municipality',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _genuinenessVerifiedController,
-                    labelText: '   f) Whether genuineness or authenticity of approved map / plan is verified',
-                    hintText: 'YES / NO',
+                    decoration: const InputDecoration(
+                      labelText: '   f) Whether genuineness or authenticity of approved map / plan is verified',
+                      hintText: 'YES / NO',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _otherCommentsController,
-                    labelText: '   g) Any other comments by our empanelled valuers on authentic of approved plan',
-                    hintText: 'e.g., None',
                     maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: '   g) Any other comments by our empanelled valuers on authentic of approved plan',
+                      hintText: 'e.g., None',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                 ],
               ),
@@ -2651,25 +2765,37 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 initiallyExpanded: false,
                 children: <Widget>[
                   const Divider(),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _wardrobesController,
-                    labelText: '1. Wardrobes (Amount in Rs.)',
-                    hintText: 'e.g., 50000',
+                    decoration: const InputDecoration(
+                      labelText: '1. Wardrobes (Amount in Rs.)',
+                      hintText: 'e.g., 50000',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _amenitiesController,
-                    labelText: '2. Amenities (Amount in Rs.)',
-                    hintText: 'e.g., 20000',
+                    decoration: const InputDecoration(
+                      labelText: '2. Amenities (Amount in Rs.)',
+                      hintText: 'e.g., 20000',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _anyOtherAdditionalController,
-                    labelText: '3. Any other Additional (Amount in Rs.)',
-                    hintText: 'e.g., 10000',
+                    decoration: const InputDecoration(
+                      labelText: '3. Any other Additional (Amount in Rs.)',
+                      hintText: 'e.g., 10000',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _amenitiesTotalController,
-                    labelText: 'Total Amenities (Amount in Rs.)',
-                    hintText: 'e.g., 80000',
+                    decoration: const InputDecoration(
+                      labelText: 'Total Amenities (Amount in Rs.)',
+                      hintText: 'e.g., 80000',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                 ],
               ),
@@ -2684,30 +2810,45 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 initiallyExpanded: false,
                 children: <Widget>[
                   const Divider(),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _totalAbstractLandController,
-                    labelText: 'Part- A Land (Amount in Rs.)',
-                    hintText: 'e.g., 3750000',
+                    decoration: const InputDecoration(
+                      labelText: 'Part- A Land (Amount in Rs.)',
+                      hintText: 'e.g., 3750000',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _totalAbstractBuildingController,
-                    labelText: 'Part- B Building (Amount in Rs.)',
-                    hintText: 'e.g., 2500000',
+                    decoration: const InputDecoration(
+                      labelText: 'Part- B Building (Amount in Rs.)',
+                      hintText: 'e.g., 2500000',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _totalAbstractAmenitiesController,
-                    labelText: 'Part- C Amenities (Amount in Rs.)',
-                    hintText: 'e.g., 80000',
+                    decoration: const InputDecoration(
+                      labelText: 'Part- C Amenities (Amount in Rs.)',
+                      hintText: 'e.g., 80000',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _totalAbstractTotalController,
-                    labelText: 'Total (Amount in Rs.)',
-                    hintText: 'e.g., 6330000',
+                    decoration: const InputDecoration(
+                      labelText: 'Total (Amount in Rs.)',
+                      hintText: 'e.g., 6330000',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _totalAbstractSayController,
-                    labelText: 'Say (Amount in Rs.)',
-                    hintText: 'e.g., 6330000',
+                    decoration: const InputDecoration(
+                      labelText: 'Say (Amount in Rs.)',
+                      hintText: 'e.g., 6330000',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                 ],
               ),
@@ -2722,25 +2863,37 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 initiallyExpanded: false,
                 children: <Widget>[
                   const Divider(),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _remark1Controller,
-                    labelText: '1.',
                     maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: '1.',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _remark2Controller,
-                    labelText: '2.',
                     maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: '2.',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _remark3Controller,
-                    labelText: '3.',
                     maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: '3.',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _remark4Controller,
-                    labelText: '4.',
                     maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: '4.',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                 ],
               ),
@@ -2755,25 +2908,37 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 initiallyExpanded: false,
                 children: <Widget>[
                   const Divider(),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _presentMarketValueController,
-                    labelText: 'Present Market Value of The Property',
-                    hintText: 'Enter value',
+                    decoration: const InputDecoration(
+                      labelText: 'Present Market Value of The Property',
+                      hintText: 'Enter value',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _realizableValueController,
-                    labelText: 'Realizable Value of the Property',
-                    hintText: 'Enter value',
+                    decoration: const InputDecoration(
+                      labelText: 'Realizable Value of the Property',
+                      hintText: 'Enter value',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _distressValueController,
-                    labelText: 'Distress Value of the Property',
-                    hintText: 'Enter value',
+                    decoration: const InputDecoration(
+                      labelText: 'Distress Value of the Property',
+                      hintText: 'Enter value',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _insurableValueController,
-                    labelText: 'Insurable Value of the property',
-                    hintText: 'Enter value',
+                    decoration: const InputDecoration(
+                      labelText: 'Insurable Value of the property',
+                      hintText: 'Enter value',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                 ],
               ),
@@ -2788,15 +2953,23 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 initiallyExpanded: false,
                 children: <Widget>[
                   const Divider(),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _declarationDateAController,
-                    labelText: 'Valuation report date in Declaration (FORMAT E)',
-                    isDate: true,
+                    readOnly: true,
+                    onTap: () => _selectDate(context, _declarationDateAController),
+                    decoration: const InputDecoration(
+                      labelText: 'Valuation report date in Declaration (FORMAT E)',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
-                  _buildTextField(
+                  TextField( // Changed from _buildTextField
                     controller: _declarationDateCController,
-                    labelText: 'Property inspection date in Declaration (FORMAT E)',
-                    isDate: true,
+                    readOnly: true,
+                    onTap: () => _selectDate(context, _declarationDateCController),
+                    decoration: const InputDecoration(
+                      labelText: 'Property inspection date in Declaration (FORMAT E)',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                    ),
                   ),
                 ],
               ),
@@ -3001,27 +3174,24 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              Align(
-                alignment: Alignment.center,
-                child: ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(Icons.save),
-                  label: Text('Save', style: TextStyle(fontSize: 15.5),),
-                  style: ButtonStyle(
-                    fixedSize: MaterialStateProperty.all(Size(100, 40)),
-                    shape: MaterialStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(3), // 👈 Small border radius
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
       ),
+      floatingActionButton: ElevatedButton.icon(
+        onPressed: () {},
+        icon: Icon(Icons.save),
+        label: Text('Save', style: TextStyle(fontSize: 15.5)),
+        style: ButtonStyle(
+          fixedSize: MaterialStateProperty.all(Size(100, 50)),
+          shape: MaterialStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // Bottom-right
     );
   }
 
@@ -3035,19 +3205,25 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
           const Expanded(flex: 1, child: Text(':')), // Separated colon
           Expanded(
             flex: 3,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: titleController,
-              labelText: '', // No label for internal table fields
-              hintText: 'As per Title Deed',
+              decoration: const InputDecoration(
+                labelText: '', // No label for internal table fields
+                hintText: 'As per Title Deed',
+                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
             flex: 3,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: sketchController,
-              labelText: '', // No label for internal table fields
-              hintText: 'As per Location Sketch',
+              decoration: const InputDecoration(
+                labelText: '', // No label for internal table fields
+                hintText: 'As per Location Sketch',
+                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
         ],
@@ -3064,28 +3240,37 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
           Expanded(flex: 2, child: Text(direction)),
           Expanded(
             flex: 3,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: actualsController,
-              labelText: '',
-              hintText: 'As per Actuals',
+              decoration: const InputDecoration(
+                labelText: '',
+                hintText: 'As per Actuals',
+                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
             flex: 3,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: documentsController,
-              labelText: '',
-              hintText: 'As per Documents',
+              decoration: const InputDecoration(
+                labelText: '',
+                hintText: 'As per Documents',
+                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
             flex: 3,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: adoptedController,
-              labelText: '',
-              hintText: 'Adopted area in Sft',
+              decoration: const InputDecoration(
+                labelText: '',
+                hintText: 'Adopted area in Sft',
+                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
         ],
@@ -3113,47 +3298,62 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
           )),
           Expanded(
             flex: 2,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: occupancyController,
-              labelText: '',
-              hintText: 'Self/Rented',
+              decoration: const InputDecoration(
+                labelText: '',
+                hintText: 'Self/Rented',
+                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
           const SizedBox(width: 5),
           Expanded(
             flex: 1,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: roomController,
-              labelText: '',
-              hintText: '#Rooms',
+              decoration: const InputDecoration(
+                labelText: '',
+                hintText: '#Rooms',
+                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
           const SizedBox(width: 5),
           Expanded(
             flex: 1,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: kitchenController,
-              labelText: '',
-              hintText: '#Kitchen',
+              decoration: const InputDecoration(
+                labelText: '',
+                hintText: '#Kitchen',
+                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
           const SizedBox(width: 5),
           Expanded(
             flex: 1,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: bathroomController,
-              labelText: '',
-              hintText: '#Bathroom',
+              decoration: const InputDecoration(
+                labelText: '',
+                hintText: '#Bathroom',
+                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
           const SizedBox(width: 5),
           Expanded(
             flex: 2,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: remarksController,
-              labelText: '',
-              hintText: 'Resi/Comm Remarks',
               maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: '',
+                hintText: 'Resi/Comm Remarks',
+                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
         ],
@@ -3186,55 +3386,73 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
           )),
           Expanded(
             flex: 2,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: approvedPlanController,
-              labelText: '',
-              hintText: isTotal ? 'Total Approved' : 'Approved Plan/FSI',
+              decoration: InputDecoration(
+                labelText: '',
+                hintText: isTotal ? 'Total Approved' : 'Approved Plan/FSI',
+                border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
           const SizedBox(width: 5),
           Expanded(
             flex: 2,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: actualController,
-              labelText: '',
-              hintText: isTotal ? 'Total Actual' : 'Actual',
+              decoration: InputDecoration(
+                labelText: '',
+                hintText: isTotal ? 'Total Actual' : 'Actual',
+                border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
           const SizedBox(width: 5),
           Expanded(
             flex: 2,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: consideredValuationController,
-              labelText: '',
-              hintText: isTotal ? 'Total Considered' : 'Considered for Valuation',
+              decoration: InputDecoration(
+                labelText: '',
+                hintText: isTotal ? 'Total Considered' : 'Considered for Valuation',
+                border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
           const SizedBox(width: 5),
           Expanded(
             flex: 2,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: replacementCostController,
-              labelText: '',
-              hintText: isTotal ? 'Total Replacement' : 'Replacement Cost',
+              decoration: InputDecoration(
+                labelText: '',
+                hintText: isTotal ? 'Total Replacement' : 'Replacement Cost',
+                border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
           const SizedBox(width: 5),
           Expanded(
             flex: 2,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: depreciationController,
-              labelText: '',
-              hintText: isTotal ? 'Total Depreciation' : 'Depreciation',
+              decoration: InputDecoration(
+                labelText: '',
+                hintText: isTotal ? 'Total Depreciation' : 'Depreciation',
+                border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
           const SizedBox(width: 5),
           Expanded(
             flex: 2,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: netValueController,
-              labelText: '',
-              hintText: isTotal ? 'Total Net Value' : 'Net Value',
+              decoration: InputDecoration(
+                labelText: '',
+                hintText: isTotal ? 'Total Net Value' : 'Net Value',
+                border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
         ],
@@ -3259,11 +3477,14 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
           )),
           Expanded(
             flex: 4,
-            child: _buildTextField(
+            child: TextField( // Changed from _buildTextField
               controller: controller,
-              labelText: '',
-              hintText: hintText,
               maxLines: maxLines,
+              decoration: InputDecoration(
+                labelText: '',
+                hintText: hintText,
+                border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))), // Applied new styling
+              ),
             ),
           ),
         ],

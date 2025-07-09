@@ -18,12 +18,14 @@ class MyApp extends StatelessWidget {
     primarySwatch: Colors.blue,
     scaffoldBackgroundColor: Colors.white,
   ),
-  darkTheme: ThemeData(
-    brightness: Brightness.dark,
-    primarySwatch: Colors.deepPurple,
-    scaffoldBackgroundColor: Colors.black,
-  ),
-  themeMode: ThemeMode.dark,//ThemeMode.system
+
+  // darkTheme: ThemeData(
+  //   brightness: Brightness.dark,
+  //   primarySwatch: Colors.deepPurple,
+  //   scaffoldBackgroundColor: Colors.black,
+  // ),
+  
+  themeMode: ThemeMode.light,//ThemeMode.system
       title: 'Login',
       home : const SplashScreen()
     );
