@@ -48,9 +48,6 @@ export const savePVR1Data = async(req,res)=>{
     }
 
     /* const newPVR1Data=new pvr1(pvr1Data); */
-
-    
-
     try{
         const newPVR1Data = await pvr1.findOneAndUpdate(
           { fileNo: pvr1Data.fileNo },
