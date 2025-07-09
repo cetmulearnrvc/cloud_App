@@ -13,19 +13,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-    brightness: Brightness.light,
-    primarySwatch: Colors.blue,
-    scaffoldBackgroundColor: Colors.white,
-  ),
-
-  // darkTheme: ThemeData(
-  //   brightness: Brightness.dark,
-  //   primarySwatch: Colors.deepPurple,
-  //   scaffoldBackgroundColor: Colors.black,
-  // ),
-  
-  themeMode: ThemeMode.light,//ThemeMode.system
       title: 'Login',
       home : const SplashScreen()
     );
