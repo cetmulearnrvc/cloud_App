@@ -471,6 +471,68 @@ Future<Uint8List> fetchImage(String imageUrl) async {
     }
   }
 
+  // In lib/valuation_form_sib.dart, inside the _SIBValuationFormScreenState class
+
+// In lib/valuation_form_sib.dart, inside the _SIBValuationFormScreenState class
+
+Future<void> _saveToNearbyCollection() async {
+  try {
+    // --- STEP 1: Find the first image with valid coordinates ---
+    ValuationImage? firstImageWithLocation;
+    try {
+      // Use .firstWhere to find the first image that satisfies the condition.
+      firstImageWithLocation = _valuationImages.firstWhere(
+        (img) => img.latitude.isNotEmpty && img.longitude.isNotEmpty,
+      );
+    } catch (e) {
+      // .firstWhere throws an error if no element is found. We catch it here.
+      firstImageWithLocation = null;
+    }
+
+    // --- STEP 2: Handle the case where no image has location data ---
+    if (firstImageWithLocation == null) {
+      debugPrint('No image with location data found. Skipping save to nearby collection.');
+      return; // Exit the function early.
+    }
+
+    final ownerName = _controllers['nameOfOwner']?.text ?? '[is null]';
+    final marketValue = _controllers['presentMarketValue']?.text ?? '[is null]';
+
+    debugPrint('------------------------------------------');
+    debugPrint('DEBUGGING SAVE TO NEARBY COLLECTION:');
+    debugPrint('Owner Name from Controller: "$ownerName"');
+    debugPrint('Market Value from Controller: "$marketValue"');
+    debugPrint('------------------------------------------');
+    // --- STEP 3: Build the payload with the correct data ---
+    final dataToSave = {
+      // Use the coordinates from the image we found
+       'refNo': _controllers['refNo']?.text ?? '',
+      'latitude': firstImageWithLocation.latitude,
+      'longitude': firstImageWithLocation.longitude,
+      
+      'landValue': marketValue, // Use the variable we just created
+      'nameOfOwner': ownerName,
+      'bankName': _controllers['bankName']?.text ?? '',
+    };
+    
+    // --- STEP 4: Send the data to your dedicated server endpoint ---
+    final response = await http.post(
+      Uri.parse(url5), // Use your dedicated URL for saving this data
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(dataToSave),
+    );
+
+    if (response.statusCode == 201) {
+      debugPrint('Successfully saved data to nearby collection.');
+    } else {
+      debugPrint('Failed to save to nearby collection: ${response.statusCode}');
+      debugPrint('Response body: ${response.body}');
+    }
+  } catch (e) {
+    debugPrint('Error in _saveToNearbyCollection: $e');
+  }
+}
+
 
   Future<void> _saveData() async{
 
@@ -537,6 +599,7 @@ request.fields['valuationDetails'] = jsonEncode(valuationDetails);
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Data saved successfully!')));
         }
+        await _saveToNearbyCollection();
       }
       else {
         if (context.mounted) {
@@ -544,6 +607,7 @@ request.fields['valuationDetails'] = jsonEncode(valuationDetails);
               content: Text('Upload failed: ${response.statusCode}')));
         }
       }
+      
     }
     catch(e)
     {
@@ -1042,7 +1106,9 @@ GridView.builder(
       
       floatingActionButton: 
           FloatingActionButton.extended(
-        onPressed: _saveData,
+        onPressed: () 
+        {_saveData();
+        },
         icon: const Icon(Icons.save),
         label: const Text('Save'),),
 

@@ -4,13 +4,19 @@ class DataModel {
   final double longitude;
   final double latitude;
   final double distance;
-  final double marketValue;
+  final double landValue;
+  final String nameOfOwner;
+  final String bankName;
+  final String refNo;
 
   DataModel({
     required this.longitude,
     required this.latitude,
     required this.distance,
-    required this.marketValue,
+    required this.landValue,
+    required this.nameOfOwner,
+    required this.bankName,
+    required this.refNo,
   });
 
   factory DataModel.fromJson(Map<String, dynamic> json) {
@@ -18,7 +24,10 @@ class DataModel {
       longitude: _parseDouble(json['longitude']),
       latitude: _parseDouble(json['latitude']),
       distance: _parseDouble(json['distance']),
-      marketValue: _parseDouble(json['marketValue']),
+      landValue: _parseDouble(json['landValue']),
+      nameOfOwner: json['nameOfOwner'] ?? 'Unknown Owner',
+      bankName : json['bankName']?? 'Unknown Bank',
+      refNo: json['refNo']?? 'Unknown ref no./appln no.',
     );
   }
 
@@ -32,7 +41,7 @@ class DataModel {
 
   @override
   String toString() {
-    return 'DataModel{longitude: $longitude, latitude: $latitude, distance: $distance, marketValue: $marketValue}';
+    return 'DataModel{longitude: $longitude, latitude: $latitude, distance: $distance, marketValue: $landValue, nameOfOwner: $nameOfOwner, bankName : $bankName, refNo : $refNo}';
   }
 }
 
@@ -82,7 +91,7 @@ class _NearbydetailsState extends State<Nearbydetails> {
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     child: ListTile(
                       title: Text(
-                        '₹${item.marketValue.toStringAsFixed(2)}',
+                        '₹${item.landValue.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
@@ -94,8 +103,18 @@ class _NearbydetailsState extends State<Nearbydetails> {
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              const Icon(Icons.location_on, size: 16),
+                              const Icon(Icons.tag),
                               const SizedBox(width: 4),
+                              Text(
+                                '${item.refNo}',
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(Icons.location_on, size: 18),
+                              const SizedBox(width: 9),
                               Text(
                                 '${item.latitude.toStringAsFixed(6)}, ${item.longitude.toStringAsFixed(6)}',
                               ),
@@ -105,9 +124,25 @@ class _NearbydetailsState extends State<Nearbydetails> {
                           Row(
                             children: [
                               const Icon(Icons.linear_scale, size: 16),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 10),
                               Text(
                                   '${item.distance.toStringAsFixed(2)} meters'),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(Icons.person),
+                              const SizedBox(width: 2,),
+                              Text('${item.nameOfOwner}',style: TextStyle(fontWeight: FontWeight.bold),),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                             children: [
+                             Image.asset('assets/images/bank.png', height: 25,width: 25,),
+                             const SizedBox(width: 2,),
+                            Text('${item.bankName}',style: TextStyle(fontWeight: FontWeight.bold),),
                             ],
                           ),
                         ],
