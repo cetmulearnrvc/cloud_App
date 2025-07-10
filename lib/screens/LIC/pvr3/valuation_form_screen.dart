@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:login_screen/screens/LIC/pvr3/savedDraftsPVR3.dart';
+import 'package:login_screen/screens/nearbyDetails.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'valuation_data_model.dart';
@@ -61,6 +62,8 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
   ];
 
   // --- ALL CONTROLLERS ---
+  final _nearbyLatitude=TextEditingController();
+  final _nearbyLongitude=TextEditingController();
   final _fileNoCtrl = TextEditingController(text: '5002050002910');
   final _valuerNameCtrl = TextEditingController(text: 'VIGNESH S');
   final _valuerCodeCtrl = TextEditingController(text: 'TVV0001');
@@ -587,7 +590,7 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
     }
   }
 
-  /* Future<void> _getNearbyProperty() async {
+   Future<void> _getNearbyProperty() async {
     final latitude = _nearbyLatitude.text.trim();
     final longitude = _nearbyLongitude.text.trim();
 
@@ -651,9 +654,54 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
         SnackBar(content: Text('Error: $e')),
       );
     }
-  } */
+  } 
 
   // Helper methods for enum parsing
+Future<void> _getNearbytLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      await Geolocator.openLocationSettings();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content:
+                Text("Location services are disabled. Please enable them.")),
+      );
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Location permissions are denied.")),
+        );
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text(
+                "Location permissions are permanently denied, we cannot request permissions.")),
+      );
+      return;
+    }
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      setState(() {
+        _nearbyLatitude.text = position.latitude.toString();
+        _nearbyLongitude.text = position.longitude.toString();
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error getting location: $e")),
+      );
+    }
+  }
 
   void _addFloor() => setState(() => _floors.add(FloorData(name: 'New Floor')));
   void _removeFloor(int index) {
@@ -851,6 +899,80 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
+            Card(
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Search for Nearby Property",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _nearbyLatitude,
+                      decoration: const InputDecoration(labelText: 'Latitude'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _nearbyLongitude,
+                      decoration: const InputDecoration(labelText: 'Longitude'),
+                    ),
+                    const SizedBox(height: 8),
+                    Center(
+                        child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed:
+                                    _getNearbytLocation, // Call our new method
+                                icon: const Icon(Icons.my_location),
+                                label: const Text('Get Location'),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 4,
+                            ),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: /* () {
+                                  Navigator.of(context)
+                                      .push(MaterialPageRoute(builder: (ctx) {
+                                    return Nearbydetails(
+                                        latitude: _nearbyLatitude.text,
+                                        longitude: _nearbyLongitude.text);
+                                  }));
+                                } */
+                                    _getNearbyProperty,
+                                label: const Text('Search'),
+                                icon: const Icon(Icons.search),
+                              ),
+                            )
+                          ],
+                        ),
+                      ],
+                    )),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 40,left: 40,top: 10, bottom: 10),
+              child: FloatingActionButton.extended(
+              icon: const Icon(Icons.search),
+              label: const Text('Search Saved Drafts'),
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                  return const SavedDraftsPVR3();
+                }));
+              },
+                        ),
+            ),
             _buildSection(title: 'Header Information', children: [
               TextFormField(
                   controller: _fileNoCtrl,
@@ -1212,43 +1334,22 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
                       },
                     ),
                 ]),
-            const SizedBox(height: 80),
+            const SizedBox(height: 15),
+            FloatingActionButton.extended(
+              icon: const Icon(Icons.picture_as_pdf),
+              label: const Text('Generate PDF'),
+              onPressed: _generatePdf),
           ],
         ),
       ),
-//       floatingActionButton: FloatingActionButton.extended(
-//           icon: const Icon(Icons.picture_as_pdf),
-//           label: const Text('Generate PDF'),
-//           onPressed: () {
-//             _generatePdf();
-
-//           }),
+      
 
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton.extended(
-            icon: const Icon(Icons.search),
-            label: const Text('Search Saved Drafts'),
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-                return const SavedDraftsPVR3();
-              }));
-            },
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          FloatingActionButton.extended(
-              icon: const Icon(Icons.picture_as_pdf),
-              label: const Text('Generate PDF'),
-              onPressed: _generatePdf),
-          const SizedBox(
-            height: 10,
-          ),
-          FloatingActionButton.extended(
-            icon: const Icon(Icons.search),
-            label: const Text('Save Data'),
+            icon: const Icon(Icons.save),
+            label: const Text('Save'),
             onPressed: _saveData,
           ),
         ],
