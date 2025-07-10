@@ -114,11 +114,19 @@ const pvr3Schema = new mongoose.Schema({
     remarksProcedures: String,
     remarksMethodology: String,
     remarksFactors: String,
+
+    selectedPropertyType:String,
     
     // Images (if needed)
     images: [{
-        fileName: String,
-        filePath: String,
+        fileName: {
+        type: String,
+        required: true
+    },
+        filePath: {
+        type: String,
+        required: true
+    },
         latitude: Number,
         longitude: Number
     }]

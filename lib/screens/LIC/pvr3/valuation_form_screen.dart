@@ -1,11 +1,13 @@
 // lib/valuation_form_screen.dart
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:login_screen/screens/LIC/pvr3/savedDraftsPVR3.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'valuation_data_model.dart';
@@ -14,12 +16,29 @@ import 'package:http/http.dart' as http;
 import 'config.dart';
 
 class ValuationFormScreen extends StatefulWidget {
-  const ValuationFormScreen({super.key});
+  final Map<String, dynamic>? propertyData;
+
+  const ValuationFormScreen({super.key, this.propertyData});
   @override
   _ValuationFormScreenState createState() => _ValuationFormScreenState();
 }
 
 class _ValuationFormScreenState extends State<ValuationFormScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.propertyData != null) {
+      // Use the passed data to initialize your form only if it exists
+      debugPrint('Received property data: ${widget.propertyData}');
+      // Example:
+      // _fileNoController.text = widget.propertyData!['fileNo'].toString();
+    } else {
+      debugPrint('No property data received - creating new valuation');
+      // Initialize with empty/default values
+    }
+    _initializeFormWithPropertyData();
+  }
+
   final _formKey = GlobalKey<FormState>();
   final _picker = ImagePicker();
 
@@ -163,6 +182,8 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
         builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
+      final formattedDate = DateFormat('yyyy-MM-dd').format(_inspectionDate);
+
       var request = http.MultipartRequest('POST', Uri.parse(url1));
 
       // Add text fields
@@ -172,7 +193,7 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
         "valuerName": _valuerNameCtrl.text,
         "valuerCode": _valuerCodeCtrl.text,
         "appointingAuthority": _appointingAuthorityCtrl.text,
-        "inspectionDate": _inspectionDate.toString(),
+        "inspectionDate": formattedDate.toString(),
         "reraNo": _reraNoCtrl.text,
         "scheme": _schemeCtrl.text,
         "applicantName": _applicantNameCtrl.text,
@@ -256,6 +277,9 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
         "remarksProcedures": _remarksProceduresCtrl.text,
         "remarksMethodology": _remarksMethodologyCtrl.text,
         "remarksFactors": _remarksFactorsCtrl.text,
+
+        "selectedPropertyType":
+            _selectedPropertyType.toString().split('.').last,
       });
 
       // Handle image uploads
@@ -306,6 +330,330 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
       }
     }
   }
+
+  Future<Uint8List> fetchImage(String imageUrl) async {
+    try {
+      debugPrint("Attempting to fetch image from: $imageUrl");
+      final response = await http.get(Uri.parse(imageUrl));
+
+      debugPrint("Response status: ${response.statusCode}");
+      debugPrint("Response headers: ${response.headers}");
+
+      if (response.statusCode == 200) {
+        debugPrint(
+            "Successfully fetched image (bytes length: ${response.bodyBytes.length})");
+        return response.bodyBytes;
+      } else {
+        throw Exception('Failed to load image: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint("Error details: $e");
+      throw Exception('Error fetching image: $e');
+    }
+  }
+
+  OccupantStatus _parseOccupantStatus(String? status) {
+    if (status == null) return OccupantStatus.Occupied;
+    switch (status.toLowerCase()) {
+      case 'rented':
+        return OccupantStatus.Rented;
+      default:
+        return OccupantStatus.Occupied;
+    }
+  }
+
+  DeviationNature _parseDeviationNature(String? nature) {
+    if (nature == null) return DeviationNature.NIL;
+    switch (nature.toLowerCase()) {
+      case 'major':
+        return DeviationNature.Major;
+      case 'minor':
+        return DeviationNature.Minor;
+      default:
+        return DeviationNature.NIL;
+    }
+  }
+
+  PropertyType _parsePropertyType(String? type) {
+    if (type == null) return PropertyType.House;
+    switch (type.toLowerCase()) {
+      case 'flat':
+        return PropertyType.Flat;
+      default:
+        return PropertyType.House;
+    }
+  }
+
+  void _initializeFormWithPropertyData() async {
+    if (widget.propertyData != null) {
+      final data = widget.propertyData!;
+
+      // Basic Information
+      _fileNoCtrl.text = data['fileNo']?.toString() ?? _fileNoCtrl.text;
+      _valuerNameCtrl.text =
+          data['valuerName']?.toString() ?? _valuerNameCtrl.text;
+      _valuerCodeCtrl.text =
+          data['valuerCode']?.toString() ?? _valuerCodeCtrl.text;
+      _appointingAuthorityCtrl.text = data['appointingAuthority']?.toString() ??
+          _appointingAuthorityCtrl.text;
+      _reraNoCtrl.text = data['reraNo']?.toString() ?? _reraNoCtrl.text;
+      _schemeCtrl.text = data['scheme']?.toString() ?? _schemeCtrl.text;
+      _applicantNameCtrl.text =
+          data['applicantName']?.toString() ?? _applicantNameCtrl.text;
+      _documentPerusedCtrl.text =
+          data['documentPerused']?.toString() ?? _documentPerusedCtrl.text;
+      _addressCtrl.text = data['address']?.toString() ?? _addressCtrl.text;
+
+      // Location Details
+      _locationSketchVerified =
+          data['locationSketchVerified'] as bool? ?? _locationSketchVerified;
+      _northBoundaryCtrl.text =
+          data['northBoundary']?.toString() ?? _northBoundaryCtrl.text;
+      _northDimCtrl.text = data['northDim']?.toString() ?? _northDimCtrl.text;
+      _southBoundaryCtrl.text =
+          data['southBoundary']?.toString() ?? _southBoundaryCtrl.text;
+      _southDimCtrl.text = data['southDim']?.toString() ?? _southDimCtrl.text;
+      _eastBoundaryCtrl.text =
+          data['eastBoundary']?.toString() ?? _eastBoundaryCtrl.text;
+      _eastDimCtrl.text = data['eastDim']?.toString() ?? _eastDimCtrl.text;
+      _westBoundaryCtrl.text =
+          data['westBoundary']?.toString() ?? _westBoundaryCtrl.text;
+      _westDimCtrl.text = data['westDim']?.toString() ?? _westDimCtrl.text;
+      _extent1Ctrl.text = data['extent1']?.toString() ?? _extent1Ctrl.text;
+      _extent2Ctrl.text = data['extent2']?.toString() ?? _extent2Ctrl.text;
+
+      // Property Details
+      _propertyTypeCtrl.text =
+          data['propertyType']?.toString() ?? _propertyTypeCtrl.text;
+      _occupantStatus =
+          _parseOccupantStatus(data['occupantStatus']?.toString());
+      _occupantNameCtrl.text =
+          data['occupantName']?.toString() ?? _occupantNameCtrl.text;
+      _usageOfBuildingCtrl.text =
+          data['usageOfBuilding']?.toString() ?? _usageOfBuildingCtrl.text;
+      _nearbyLandmarkCtrl.text =
+          data['nearbyLandmark']?.toString() ?? _nearbyLandmarkCtrl.text;
+      _surroundingAreaDevCtrl.text = data['surroundingAreaDev']?.toString() ??
+          _surroundingAreaDevCtrl.text;
+      _basicAmenitiesAvailable =
+          data['basicAmenitiesAvailable'] as bool? ?? _basicAmenitiesAvailable;
+      _negativesToLocalityCtrl.text = data['negativesToLocality']?.toString() ??
+          _negativesToLocalityCtrl.text;
+      _favourableConsiderationsCtrl.text =
+          data['favourableConsiderations']?.toString() ??
+              _favourableConsiderationsCtrl.text;
+      _otherFeaturesCtrl.text =
+          data['otherFeatures']?.toString() ?? _otherFeaturesCtrl.text;
+
+      // Construction Details
+      _approvedDrawingAvailable = data['approvedDrawingAvailable'] as bool? ??
+          _approvedDrawingAvailable;
+      _approvalNoAndDateCtrl.text =
+          data['approvalNoAndDate']?.toString() ?? _approvalNoAndDateCtrl.text;
+      _constructionAsPerPlan =
+          data['constructionAsPerPlan'] as bool? ?? _constructionAsPerPlan;
+      _drawingDeviationsCtrl.text =
+          data['drawingDeviations']?.toString() ?? _drawingDeviationsCtrl.text;
+      _deviationNature =
+          _parseDeviationNature(data['deviationNature']?.toString());
+      _marketabilityCtrl.text =
+          data['marketability']?.toString() ?? _marketabilityCtrl.text;
+      _buildingAgeCtrl.text =
+          data['buildingAge']?.toString() ?? _buildingAgeCtrl.text;
+      _residualLifeCtrl.text =
+          data['residualLife']?.toString() ?? _residualLifeCtrl.text;
+      _fsiApprovedCtrl.text =
+          data['fsiApproved']?.toString() ?? _fsiApprovedCtrl.text;
+      _fsiActualCtrl.text =
+          data['fsiActual']?.toString() ?? _fsiActualCtrl.text;
+      _specFoundationCtrl.text =
+          data['specFoundation']?.toString() ?? _specFoundationCtrl.text;
+      _specRoofCtrl.text = data['specRoof']?.toString() ?? _specRoofCtrl.text;
+      _specFlooringCtrl.text =
+          data['specFlooring']?.toString() ?? _specFlooringCtrl.text;
+      _qualityOfConstructionCtrl.text =
+          data['qualityOfConstruction']?.toString() ??
+              _qualityOfConstructionCtrl.text;
+      _adheresToSafetySpecs =
+          data['adheresToSafetySpecs'] as bool? ?? _adheresToSafetySpecs;
+      _highTensionLineImpact =
+          data['highTensionLineImpact'] as bool? ?? _highTensionLineImpact;
+
+      // Valuation Details
+      _landAreaCtrl.text = data['landArea']?.toString() ?? _landAreaCtrl.text;
+      _landUnitRateCtrl.text =
+          data['landUnitRate']?.toString() ?? _landUnitRateCtrl.text;
+      _landGuidelineRateCtrl.text =
+          data['landGuidelineRate']?.toString() ?? _landGuidelineRateCtrl.text;
+      _amenitiesAreaCtrl.text =
+          data['amenitiesArea']?.toString() ?? _amenitiesAreaCtrl.text;
+      _amenitiesUnitRateCtrl.text =
+          data['amenitiesUnitRate']?.toString() ?? _amenitiesUnitRateCtrl.text;
+      _amenitiesGuidelineRateCtrl.text =
+          data['amenitiesGuidelineRate']?.toString() ??
+              _amenitiesGuidelineRateCtrl.text;
+      _marketValueSourceHouseCtrl.text =
+          data['marketValueSourceHouse']?.toString() ??
+              _marketValueSourceHouseCtrl.text;
+
+      // Flat Details
+      _flatUndividedShareCtrl.text = data['flatUndividedShare']?.toString() ??
+          _flatUndividedShareCtrl.text;
+      _flatBuiltUpAreaCtrl.text =
+          data['flatBuiltUpArea']?.toString() ?? _flatBuiltUpAreaCtrl.text;
+      _flatCompositeRateCtrl.text =
+          data['flatCompositeRate']?.toString() ?? _flatCompositeRateCtrl.text;
+      _flatValueUnitRateCtrl.text =
+          data['flatValueUnitRate']?.toString() ?? _flatValueUnitRateCtrl.text;
+      _flatValueMarketCtrl.text =
+          data['flatValueMarket']?.toString() ?? _flatValueMarketCtrl.text;
+      _flatValueGuidelineRateCtrl.text =
+          data['flatValueGuidelineRate']?.toString() ??
+              _flatValueGuidelineRateCtrl.text;
+      _flatValueGuidelineCtrl.text = data['flatValueGuideline']?.toString() ??
+          _flatValueGuidelineCtrl.text;
+      _marketValueSourceFlatCtrl.text =
+          data['marketValueSourceFlat']?.toString() ??
+              _marketValueSourceFlatCtrl.text;
+      _flatExtraAmenitiesCtrl.text = data['flatExtraAmenities']?.toString() ??
+          _flatExtraAmenitiesCtrl.text;
+
+      // Improvement Details
+      _improvementDescriptionCtrl.text =
+          data['improvementDescription']?.toString() ??
+              _improvementDescriptionCtrl.text;
+      _improvementAmountCtrl.text =
+          data['improvementAmount']?.toString() ?? _improvementAmountCtrl.text;
+      _improvementEstimateReasonable =
+          data['improvementEstimateReasonable'] as bool? ??
+              _improvementEstimateReasonable;
+      _improvementReasonableEstimateCtrl.text =
+          data['improvementReasonableEstimate']?.toString() ??
+              _improvementReasonableEstimateCtrl.text;
+
+      // Remarks
+      _remarksBackgroundCtrl.text =
+          data['remarksBackground']?.toString() ?? _remarksBackgroundCtrl.text;
+      _remarksSourcesCtrl.text =
+          data['remarksSources']?.toString() ?? _remarksSourcesCtrl.text;
+      _remarksProceduresCtrl.text =
+          data['remarksProcedures']?.toString() ?? _remarksProceduresCtrl.text;
+      _remarksMethodologyCtrl.text = data['remarksMethodology']?.toString() ??
+          _remarksMethodologyCtrl.text;
+      _remarksFactorsCtrl.text =
+          data['remarksFactors']?.toString() ?? _remarksFactorsCtrl.text;
+
+      // Property Type
+      _selectedPropertyType =
+          _parsePropertyType(data['selectedPropertyType']?.toString());
+
+      // Date fields
+      if (data['inspectionDate'] != null) {
+        try {
+          debugPrint(data['inspectionDate']);
+          _inspectionDate = DateTime.parse(data['inspectionDate']);
+        } catch (e) {
+          debugPrint('Error parsing inspection date: $e');
+        }
+      }
+
+      // Handle images if they exist
+      try {
+        if (data['images'] != null && data['images'] is List) {
+          final List<dynamic> imagesData = data['images'];
+          for (var imgData in imagesData) {
+            try {
+              String imageUrl = '$url4${imgData['fileName']}';
+              debugPrint("Fetching image from: $imageUrl");
+              Uint8List imageBytes = await fetchImage(imageUrl);
+              _valuationImages.add(ValuationImage(
+                imageFile: imageBytes,
+                latitude: imgData['latitude']?.toString() ?? '',
+                longitude: imgData['longitude']?.toString() ?? '',
+              ));
+            } catch (e) {
+              debugPrint('Error loading image: $e');
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Error initializing images: $e');
+      }
+
+      if (mounted) setState(() {});
+      debugPrint('PVR3 Form initialized with property data');
+    } else {
+      debugPrint('No property data - PVR3 form will use default values');
+    }
+  }
+
+  /* Future<void> _getNearbyProperty() async {
+    final latitude = _nearbyLatitude.text.trim();
+    final longitude = _nearbyLongitude.text.trim();
+
+    debugPrint(latitude);
+
+    if (latitude.isEmpty || longitude.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Please enter both latitude and longitude')),
+      );
+      return;
+    }
+
+    try {
+      final url = Uri.parse(url2);
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'latitude': latitude,
+          'longitude': longitude,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Decode the JSON response (assuming it's an array)
+        final List<dynamic> responseData = jsonDecode(response.body);
+
+        // Debug print the array
+        debugPrint('Response Data (Array):');
+        for (var item in responseData) {
+          debugPrint(item.toString()); // Print each item in the array
+        }
+
+        if (context.mounted) {
+          // Navigator.of(context).push(
+          //   MaterialPageRoute(
+          //     builder: (ctx) => Nearbydetails(responseData: responseData),
+          //   ),
+          // );
+          showModalBottomSheet(
+              context: context,
+              builder: (ctx) {
+                return Nearbydetails(responseData: responseData);
+              });
+        }
+      }
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Nearby properties fetched successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  } */
+
+  // Helper methods for enum parsing
 
   void _addFloor() => setState(() => _floors.add(FloorData(name: 'New Floor')));
   void _removeFloor(int index) {
@@ -873,7 +1221,7 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
 //           label: const Text('Generate PDF'),
 //           onPressed: () {
 //             _generatePdf();
-           
+
 //           }),
 
       floatingActionButton: Column(
@@ -882,12 +1230,19 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
           FloatingActionButton.extended(
             icon: const Icon(Icons.search),
             label: const Text('Search Saved Drafts'),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                return const SavedDraftsPVR3();
+              }));
+            },
           ),
           const SizedBox(
             height: 10,
           ),
-          FloatingActionButton.extended(icon: const Icon(Icons.picture_as_pdf), label: const Text('Generate PDF'), onPressed: _generatePdf),
+          FloatingActionButton.extended(
+              icon: const Icon(Icons.picture_as_pdf),
+              label: const Text('Generate PDF'),
+              onPressed: _generatePdf),
           const SizedBox(
             height: 10,
           ),
