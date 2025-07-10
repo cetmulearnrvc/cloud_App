@@ -38,12 +38,12 @@ class _SplashScreenState extends State<SplashScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
-                height: 600, // Bigger logo height
-                width: 600,  // Bigger logo width
+                height: 470, // Bigger logo height
+                width: 470,  // Bigger logo width
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(150),
                   child: Image.asset(
-                    'assets/images/app_logo.png',
+                    'assets/images/ValuMate_logo.png',
                     fit: BoxFit.contain, // Keep full image visible
                   ),
                 ),
