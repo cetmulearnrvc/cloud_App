@@ -7,6 +7,7 @@ import pvr3_router from "./router/pvr3router.js";
 import federal_router from "./router/federalrouter.js"
 
 import flat_router from "./router/sib_flat_router.js";
+import land_router from "./router/sib_land_router.js";
 
 import nearby_router from "./router/nearbyRouter.js";
 
@@ -22,6 +23,8 @@ app.use('/api/v2',nearby_router)
 app.use('/api/v1',pvr3_router);
 
 app.use('/api/v1',federal_router)
+app.use('/api/v1',land_router)
+
 
 app.listen(3000,()=>
 {
