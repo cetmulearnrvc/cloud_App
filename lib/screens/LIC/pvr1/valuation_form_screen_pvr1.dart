@@ -195,6 +195,8 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
         builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
+      
+
       var request = http.MultipartRequest('POST', Uri.parse(url));
 
       // Add text fields
@@ -395,10 +397,11 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
           //     builder: (ctx) => Nearbydetails(responseData: responseData),
           //   ),
           // );
-          showModalBottomSheet(context: context, builder: (ctx)
-          {
-            return Nearbydetails(responseData: responseData);
-          });
+          showModalBottomSheet(
+              context: context,
+              builder: (ctx) {
+                return Nearbydetails(responseData: responseData);
+              });
         }
       }
 
@@ -678,6 +681,7 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
       // Date fields
       if (data['inspectionDate'] != null) {
         try {
+          debugPrint(data['inspectionDate']);
           _inspectionDate = DateTime.parse(data['inspectionDate']);
         } catch (e) {
           debugPrint('Error parsing inspection date: $e');
@@ -996,7 +1000,9 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
                                 label: const Text('Get Location'),
                               ),
                             ),
-                            const SizedBox(width: 4,),
+                            const SizedBox(
+                              width: 4,
+                            ),
                             Expanded(
                               child: ElevatedButton.icon(
                                 onPressed: /* () {
@@ -1021,16 +1027,17 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(right: 50,left: 50,top : 10, bottom: 10),
+              padding: const EdgeInsets.only(
+                  right: 50, left: 50, top: 10, bottom: 10),
               child: FloatingActionButton.extended(
-              icon: const Icon(Icons.search),
-              label: const Text('Search Saved Drafts'),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-                  return const SavedDrafts();
-                }));
-              },
-                        ),
+                icon: const Icon(Icons.search),
+                label: const Text('Search Saved Drafts'),
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                    return const SavedDrafts();
+                  }));
+                },
+              ),
             ),
             _buildSection(title: 'Header', initiallyExpanded: true, children: [
               TextFormField(
@@ -1538,25 +1545,23 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.only(left:50,right: 50,top: 10),
+              padding: const EdgeInsets.only(left: 50, right: 50, top: 10),
               child: FloatingActionButton.extended(
-              icon: const Icon(Icons.picture_as_pdf),
-              label: const Text('Generate PDF'),
-              onPressed: () {
-                _generatePdf();
-              }),
+                  icon: const Icon(Icons.picture_as_pdf),
+                  label: const Text('Generate PDF'),
+                  onPressed: () {
+                    _generatePdf();
+                  }),
             ),
           ],
-          
         ),
       ),
-      floatingActionButton: 
-          FloatingActionButton.extended(
-              icon: const Icon(Icons.save),
-              label: const Text('Save data'),
-              onPressed: () {
-                _saveData();
-              }),
+      floatingActionButton: FloatingActionButton.extended(
+          icon: const Icon(Icons.save),
+          label: const Text('Save data'),
+          onPressed: () {
+            _saveData();
+          }),
     );
   }
 
