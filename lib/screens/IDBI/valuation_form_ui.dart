@@ -442,49 +442,49 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16.0),
-          children: [
-            
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Search for Nearby Property",
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      'Latitude',
-                      _controllers['nearbyLatitude']!,
-                    ),
-                    _buildTextField(
-                      'Longitude',
-                      _controllers['nearbyLongitude']!,
-                    ),
-                    const SizedBox(height: 8),
-                    Center(
-                        child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: _getNearbyLocation, // Call our new method
-                              icon: const Icon(Icons.my_location),
-                              label: const Text('Get Current Location'),
-                            ),
-                            const SizedBox(width: 50,),
-                            ElevatedButton.icon(onPressed: (){}, label: const Text('Search'),icon: const Icon(Icons.search),)
-                          ],
-                        ),
-                      ],
-                    )),
-                  ],
+            children: [
+              
+              Card(
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Search for Nearby Property",
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        'Latitude',
+                        _controllers['nearbyLatitude']!,
+                      ),
+                      _buildTextField(
+                        'Longitude',
+                        _controllers['nearbyLongitude']!,
+                      ),
+                      const SizedBox(height: 8),
+                      Center(
+                          child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: _getNearbyLocation, // Call our new method
+                                icon: const Icon(Icons.my_location),
+                                label: const Text('Get Current Location'),
+                              ),
+                              const SizedBox(width: 50,),
+                              ElevatedButton.icon(onPressed: (){}, label: const Text('Search'),icon: const Icon(Icons.search),)
+                            ],
+                          ),
+                        ],
+                      )),
+                    ],
+                  ),
                 ),
               ),
-            ),
             _buildSection(
               title: 'Valuer Header Info',
               initiallyExpanded: true,
