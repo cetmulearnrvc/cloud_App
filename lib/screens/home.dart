@@ -35,6 +35,10 @@ class _HomeScreenState extends State<HomeScreen>
       'name': 'South Indian Bank',
       'icon': 'assets/images/south indian.jpeg',
     },
+    {
+      'name': 'State Bank of India',
+      'icon': 'assets/images/sbi.png',
+    },
   ];
 
   late AnimationController _controller;
@@ -92,15 +96,17 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         ),
                         child: const Icon(Icons.home,
-                            color: Colors.white, size: 32),
+                            color: Colors.black, size: 32),
                       ),
                       const SizedBox(width: 12),
                       const Text(
-                        '             HOME SCREEN',
+                        'HOME SCREEN',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
+                          
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ),
                     ],
@@ -160,35 +166,30 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ],
                     ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'PLEASE SELECT YOUR BANK',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            fontFamily: 'Montserrat',
-                            color: Colors.black,
-                            letterSpacing: 1.8,
-                            shadows: [
-                              Shadow(
-                                blurRadius: 10.0,
-                                color: Colors.black54,
-                                offset: Offset(2, 2),
-                              ),
-                              Shadow(
-                                blurRadius: 20.0,
-                                color: Colors.white24,
-                                offset: Offset(-2, -2),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                    child: const Text(
+  'CHOOSE YOUR BANK',
+  textAlign: TextAlign.center,
+  style: TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'Poppins',
+    color: Colors.black,
+    letterSpacing: 1.2,
+    shadows: [
+      Shadow(
+        blurRadius: 8,
+        color: Colors.black45,
+        offset: Offset(2, 2),
+      ),
+      Shadow(
+        blurRadius: 12,
+        color: Colors.white24,
+        offset: Offset(-2, -2),
+      ),
+    ],
+  ),
+),
+
                   ),
 
                   const SizedBox(height: 20),
@@ -206,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen>
                       crossAxisCount: 2,
                       mainAxisSpacing: 6,
                       crossAxisSpacing: 6,
-                      childAspectRatio: 3 / 2,
+                      childAspectRatio: 3/2,
                     ),
                     itemBuilder: (context, index) {
                       final bank = banks[index];

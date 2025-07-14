@@ -24,7 +24,11 @@ class LoanType extends StatelessWidget {
       bankName = LIC(context);
     } else if (selectedBank['name'] == 'South Indian Bank') {
       bankName = SIB(context);
-    } else {
+    }
+    else if (selectedBank['name'] == 'State Bank of India') {
+      bankName = SBI(context);
+    }
+     else {
       bankName = Federal(context);
     }
 
@@ -50,7 +54,7 @@ class LoanType extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(24),
@@ -67,15 +71,15 @@ class LoanType extends StatelessWidget {
                   children: [
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      icon: const Icon(Icons.arrow_back, color: Colors.black),
                     ),
                     const SizedBox(width: 12),
                     const Text(
-                      '                 LOAN TYPE',
+                      'LOAN TYPE',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                     ),
                   ],
@@ -350,4 +354,60 @@ class LoanType extends StatelessWidget {
       ],
     );
   }
+
+  Widget SBI(BuildContext ctx) {
+    final List<String> loanTypes = [
+      '---SELECT---',
+      'VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)',
+      'VALUATION REPORT (IN RESPECT OF FLATS)',
+      'VALUATION REPORT (IN RESPECT OF VACANT LAND / SITE)',
+    ];
+
+    String? selectedValue = loanTypes[0];
+
+    return Column(
+      children: [
+        const SizedBox(height: 20,),
+        const Text('STATE BANK OF INDIA',
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 28,)),
+        const SizedBox(height: 10),
+        Image.asset('assets/images/sbi.png'),
+        const SizedBox(height: 50),
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return DropdownButtonFormField<String>(
+                value: selectedValue,
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                hint: const Text('Select the valuation type'),
+                isExpanded: true,
+                items: loanTypes.map((e) {
+                  return DropdownMenuItem<String>(
+                    value: e,
+                    child: Text(e),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedValue = value;
+                  });
+                  if (value == 'VALUATION REPORT (IN RESPECT OF FLATS)') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => SIBValuationFormScreen()));
+                  } else if (value == 'VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => ValuationFormPage()));
+                  } else if (value == 'VALUATION REPORT (IN RESPECT OF VACANT LAND / SITE)') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => VacantLandFormPage()));
+                  }
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
 }
+
