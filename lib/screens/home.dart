@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:login_screen/screens/loanType.dart';
@@ -207,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen>
                       crossAxisCount: 2,
                       mainAxisSpacing: 6,
                       crossAxisSpacing: 6,
-                      childAspectRatio: 3/2,
+                      childAspectRatio: 1.14,
                     ),
                     itemBuilder: (context, index) {
                       final bank = banks[index];
@@ -239,14 +238,16 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                           child: Column(
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.4),
-                                  borderRadius: BorderRadius.circular(12),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.4),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Image.asset(bank['icon'],
+                                      height: 50, width: 60),
                                 ),
-                                child: Image.asset(bank['icon'],
-                                    height: 60, width: 60),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -290,5 +291,6 @@ class _HomeScreenState extends State<HomeScreen>
       MaterialPageRoute(builder: (ctx1) => const SplashScreen()),
       (route) => false,
     );
+    
   }
 }

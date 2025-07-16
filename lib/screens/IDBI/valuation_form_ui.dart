@@ -485,6 +485,14 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
                 ),
               ),
             ),
+             Padding(
+               padding: const EdgeInsets.only(top: 10,right: 50,left: 50,bottom: 10),
+               child: FloatingActionButton.extended(icon: const Icon(Icons.search),label: const Text('Search Saved Drafts'),onPressed: (){
+                       Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
+                         return const SavedDrafts();
+                       }));
+                     },),
+             ),
             _buildSection(
               title: 'Valuer Header Info',
               initiallyExpanded: true,
@@ -958,23 +966,23 @@ class _ValuationFormScreenState extends State<ValuationFormScreenIDBI> {
                   ),
               ],
             ),
+            Padding(
+              padding: const EdgeInsets.only(top: 10,right: 50,left: 50),
+              child: FloatingActionButton.extended(
+              icon: const Icon(Icons.picture_as_pdf),
+              label: const Text('Generate PDF'),
+              onPressed: _generatePdf,
+                        ),
+            ),
           ],
+          
         ),
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          FloatingActionButton.extended(icon: const Icon(Icons.search),label: const Text('Search Saved Drafts'),onPressed: (){
-        Navigator.of(context).push(MaterialPageRoute(builder: (ctx){
-          return const SavedDrafts();
-        }));
-      },),
-      const SizedBox(height: 10,),
-          FloatingActionButton.extended(
-            icon: const Icon(Icons.picture_as_pdf),
-            label: const Text('Generate PDF'),
-            onPressed: _generatePdf,
-          ),
+          FloatingActionButton.extended(icon: const Icon(Icons.save),label: const Text('Save'),onPressed: (){},),
+      
         ],
       ),
     );

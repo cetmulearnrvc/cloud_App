@@ -1,7 +1,6 @@
 // lib/valuation_form_screen_pvr1.dart
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart'; // Import for location
@@ -9,7 +8,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:login_screen/screens/nearbyDetails.dart';
 import 'package:login_screen/screens/savedDrafts.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'valuation_data_model_pvr1.dart';
@@ -17,7 +15,6 @@ import 'pdf_generator_pvr1.dart';
 import 'package:http/http.dart' as http;
 import 'config.dart';
 // ignore: depend_on_referenced_packages
-import 'package:path/path.dart' as path;
 
 class ValuationFormScreenPVR1 extends StatefulWidget {
   final Map<String, dynamic>? propertyData;

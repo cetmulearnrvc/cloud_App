@@ -119,7 +119,7 @@ class _SavedDraftsFederalState extends State<SavedDraftsFederal> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                                 'Bank: Federal Bank'), // Always shows Federal Bank
                             const SizedBox(height: 4),
                             Text(
@@ -131,7 +131,7 @@ class _SavedDraftsFederalState extends State<SavedDraftsFederal> {
 
                             Text(
                               'Inspection Date: ${DateFormat('dd-MM-yyyy').format(DateTime.parse(property['createdAt']).toLocal()) ?? 'N/A'}',
-                              style: TextStyle(fontSize: 12),
+                              style: const TextStyle(fontSize: 12),
                             ),
                           ],
                         ),

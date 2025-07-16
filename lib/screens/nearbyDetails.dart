@@ -75,7 +75,7 @@ class _NearbydetailsState extends State<Nearbydetails> {
     //   ),
     //   body: 
     // );
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -106,7 +106,7 @@ class _NearbydetailsState extends State<Nearbydetails> {
                               const Icon(Icons.tag),
                               const SizedBox(width: 4),
                               Text(
-                                '${item.refNo}',
+                                item.refNo,
                               ),
                             ],
                           ),
@@ -134,7 +134,7 @@ class _NearbydetailsState extends State<Nearbydetails> {
                             children: [
                               const Icon(Icons.person),
                               const SizedBox(width: 2,),
-                              Text('${item.nameOfOwner}',style: TextStyle(fontWeight: FontWeight.bold),),
+                              Text(item.nameOfOwner,style: const TextStyle(fontWeight: FontWeight.bold),),
                             ],
                           ),
                           const SizedBox(height: 4),
@@ -142,7 +142,7 @@ class _NearbydetailsState extends State<Nearbydetails> {
                              children: [
                              Image.asset('assets/images/bank.png', height: 25,width: 25,),
                              const SizedBox(width: 2,),
-                            Text('${item.bankName}',style: TextStyle(fontWeight: FontWeight.bold),),
+                            Text(item.bankName,style: const TextStyle(fontWeight: FontWeight.bold),),
                             ],
                           ),
                         ],

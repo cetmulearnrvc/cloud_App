@@ -136,9 +136,9 @@ class LoanType extends StatelessWidget {
                     selectedValue = value;
                   });
                   if (value == 'HOUSE RENOVATION (PVR - 3)') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => ValuationFormScreen()));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const ValuationFormScreen()));
                   } else if (value == 'HOUSE CONSTRUCTION (PVR - 1)') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => ValuationFormScreenPVR1()));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const ValuationFormScreenPVR1()));
                   }
                 },
               );
@@ -187,7 +187,7 @@ class LoanType extends StatelessWidget {
                     selectedValue = value;
                   });
                   if (value == 'VALUATION REPORT') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => ValuationFormScreenIDBI()));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const ValuationFormScreenIDBI()));
                   }
                 },
               );
@@ -236,7 +236,7 @@ class LoanType extends StatelessWidget {
                     selectedValue = value;
                   });
                   if (value == 'LAND AND BUILDING') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => PdfGeneratorScreen()));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const PdfGeneratorScreen()));
                   }
                 },
               );
@@ -290,7 +290,7 @@ class LoanType extends StatelessWidget {
                   setState(() {
                     selectedValue = value;
                   });
-                  Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => LocationScreen()));
+                  Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const LocationScreen()));
                 },
               );
             },
@@ -340,11 +340,11 @@ class LoanType extends StatelessWidget {
                     selectedValue = value;
                   });
                   if (value == 'VALUATION REPORT (IN RESPECT OF FLATS)') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => SIBValuationFormScreen()));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const SIBValuationFormScreen()));
                   } else if (value == 'VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => ValuationFormPage()));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const ValuationFormPage()));
                   } else if (value == 'VALUATION REPORT (IN RESPECT OF VACANT LAND / SITE)') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => VacantLandFormPage()));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const VacantLandFormPage()));
                   }
                 },
               );
@@ -395,11 +395,11 @@ class LoanType extends StatelessWidget {
                     selectedValue = value;
                   });
                   if (value == 'VALUATION REPORT (IN RESPECT OF FLATS)') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => SIBValuationFormScreen()));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const SIBValuationFormScreen()));
                   } else if (value == 'VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => ValuationFormPage()));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const ValuationFormPage()));
                   } else if (value == 'VALUATION REPORT (IN RESPECT OF VACANT LAND / SITE)') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => VacantLandFormPage()));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const VacantLandFormPage()));
                   }
                 },
               );

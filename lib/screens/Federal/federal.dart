@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:login_screen/screens/Federal/savedDraftsFederal.dart';
 import 'package:login_screen/screens/nearbyDetails.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart' as pdfLib;
 import 'package:printing/printing.dart';

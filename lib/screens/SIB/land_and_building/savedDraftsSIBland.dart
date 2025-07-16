@@ -26,7 +26,7 @@ class _SavedDraftsSIBLandState extends State<SavedDraftsSIBLand> {
     try {
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
       final response = await http.post(
-        Uri.parse('$url3'), // Adjust endpoint for SIB Land
+        Uri.parse(url3), // Adjust endpoint for SIB Land
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'date': formattedDate}),
       );
@@ -117,7 +117,7 @@ class _SavedDraftsSIBLandState extends State<SavedDraftsSIBLand> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                                 'Bank: State Bank Of India-Land'), // Always shows Federal Bank
                             const SizedBox(height: 4),
                             Text('Owner: ${property['ownerName'] ?? 'N/A'}'),
