@@ -15,6 +15,8 @@ import 'dart:io'; // For File class (used conditionally for non-web)
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'config.dart';
+import 'package:login_screen/screens/driveAPIconfig.dart';
+import 'package:path/path.dart' as path;
 
 void main() {
   runApp(const MyApp());
@@ -603,26 +605,60 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
     }
   }
 
-  Future<Uint8List> fetchImage(String imageUrl) async {
-    try {
-      debugPrint("Attempting to fetch image from: $imageUrl");
-      final response = await http.get(Uri.parse(imageUrl));
+  Future<String> _getAccessToken() async {
+    final response = await http.post(
+      Uri.parse('https://oauth2.googleapis.com/token'),
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: {
+        'client_id': clientId,
+        'client_secret': clientSecret,
+        'refresh_token': refreshToken,
+        'grant_type': 'refresh_token',
+      },
+    );
 
-      debugPrint("Response status: ${response.statusCode}");
-      debugPrint("Response headers: ${response.headers}");
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)['access_token'] as String;
+    } else {
+      throw Exception('Failed to refresh access token');
+    }
+}
 
-      if (response.statusCode == 200) {
-        debugPrint(
-            "Successfully fetched image (bytes length: ${response.bodyBytes.length})");
-        return response.bodyBytes;
-      } else {
-        throw Exception('Failed to load image: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint("Error details: $e");
-      throw Exception('Error fetching image: $e');
+String _getMimeTypeFromExtension(String extension) {
+    switch (extension) {
+      case '.jpg':
+      case '.jpeg':
+        return 'image/jpeg';
+      case '.png':
+        return 'image/png';
+      case '.gif':
+        return 'image/gif';
+      case '.webp':
+        return 'image/webp';
+      default:
+        return 'application/octet-stream';
     }
   }
+
+  Future<Uint8List> fetchImageFromDrive(String fileId) async {
+  try {
+    // Get access token using refresh token
+    final accessToken = await _getAccessToken();
+    
+    final response = await http.get(
+      Uri.parse('https://www.googleapis.com/drive/v3/files/$fileId?alt=media'),
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+
+    if (response.statusCode == 200) {
+      return response.bodyBytes;
+    } else {
+      throw Exception('Failed to load image: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error fetching image from Drive: $e');
+  }
+}
 
   void _initializeFormWithPropertyData() async {
     if (widget.propertyData != null) {
@@ -900,8 +936,39 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
       _vcCaveatsLimitationsController.text =
           data['vcCaveatsLimitations']?.toString() ?? '';
 
-      // Load images if available
+      
       try {
+        if (data['images'] != null && data['images'] is List) {
+          final List<dynamic> imagesData = data['images'];
+
+          for (var imgData in imagesData) {
+            try {
+              // Get the file ID from your data (assuming it's stored as 'fileId')
+              String fileID = imgData['fileID'];
+              String fileName = imgData['fileName'];
+              debugPrint("Fetching image from Drive with ID: $fileID");
+
+              // Fetch image bytes from Google Drive
+              Uint8List imageBytes = await fetchImageFromDrive(fileID);
+
+              // Get file extension from original filename
+              String extension = path.extension(fileName).toLowerCase();
+              if (extension.isEmpty) extension = '.jpg'; // default fallback
+
+              _images.add(imageBytes);
+
+            } catch (e) {
+              debugPrint('Error loading image from Drive: $e');
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Error in fetchImages: $e');
+      }
+
+
+      // Load images if available
+      /* try {
         if (data['images'] != null && data['images'] is List) {
           final List<dynamic> imagesData = data['images'];
           _images.clear(); // Clear any existing images
@@ -935,7 +1002,7 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
         }
       } catch (e) {
         debugPrint('Error initializing images: $e');
-      }
+      } */
 
       if (mounted) setState(() {});
 
@@ -1184,8 +1251,8 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
 
   // Helper function to get table rows for Page 1 (Items 1-9)
   List<pw.TableRow> _getPage1TableRows(List<String> selectedDocuments) {
-    final pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 8);
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 8);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -1369,9 +1436,9 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   }
 
   List<pw.TableRow> _getPage2Table1Rows() {
-    final pw.TextStyle contentTextStyle =
+    const pw.TextStyle contentTextStyle =
         pw.TextStyle(fontSize: 10); // Increased font size to 10
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -1462,9 +1529,9 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   }
 
   List<pw.TableRow> _getPage2Table2RowsHeading() {
-    final pw.TextStyle contentTextStyle =
+    const pw.TextStyle contentTextStyle =
         pw.TextStyle(fontSize: 10); // Increased font size to 10
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -1482,9 +1549,9 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
 
   // Helper function to get table rows for Page 2 - Table 2 (Item 15)
   List<pw.TableRow> _getPage2Table2Rows() {
-    final pw.TextStyle contentTextStyle =
+    const pw.TextStyle contentTextStyle =
         pw.TextStyle(fontSize: 10); // Increased font size to 10
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
     rows.add(pw.TableRow(
@@ -1596,9 +1663,9 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   }
 
   List<pw.TableRow> _getPage2Table2RowsPart2Heading() {
-    final pw.TextStyle contentTextStyle =
+    const pw.TextStyle contentTextStyle =
         pw.TextStyle(fontSize: 10); // Increased font size to 10
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -1615,9 +1682,9 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   }
 
   List<pw.TableRow> _getPage2Table2RowsPart2() {
-    final pw.TextStyle contentTextStyle =
+    const pw.TextStyle contentTextStyle =
         pw.TextStyle(fontSize: 10); // Increased font size to 10
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -1742,9 +1809,9 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
 
   // Helper function to get table rows for Page 2 - Table 3 (Items 16-17)
   List<pw.TableRow> _getPage2Table3Rows() {
-    final pw.TextStyle contentTextStyle =
+    const pw.TextStyle contentTextStyle =
         pw.TextStyle(fontSize: 10); // Increased font size to 10
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -1788,9 +1855,9 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
 
   // Helper function to get table rows for new section 18
   List<pw.TableRow> _getPage2Table4Rows() {
-    final pw.TextStyle contentTextStyle =
+    const pw.TextStyle contentTextStyle =
         pw.TextStyle(fontSize: 10); // Increased font size to 10
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -1898,9 +1965,9 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
 
   // Helper function to get table rows for new section (Items 19-20)
   List<pw.TableRow> _getPage2Table5Rows() {
-    final pw.TextStyle contentTextStyle =
+    const pw.TextStyle contentTextStyle =
         pw.TextStyle(fontSize: 10); // Increased font size to 10
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -1936,8 +2003,8 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
 
   // Helper function to get table rows for Page 3 (Item 21)
   List<pw.TableRow> _getPage3TableRows() {
-    final pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -1960,7 +2027,7 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   }
 
   List<pw.TableRow> _getLandValuationTableRowsHeading() {
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
     List<pw.TableRow> rows = [];
 
     rows.add(pw.TableRow(
@@ -1982,8 +2049,8 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   List<pw.TableRow> _getLandValuationTableRows() {
     final pw.TextStyle headerTextStyle =
         pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10);
-    final pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -2068,7 +2135,7 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   // NEW: Helper function to get table rows for "Part - B (Valuation of Building)"
 
   List<pw.TableRow> _getBuildingValuationTableRowsHeading() {
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -2089,10 +2156,10 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   }
 
   List<pw.TableRow> _getBuildingValuationTableRowsSubHeading() {
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
     final pw.TextStyle headerTextStyle =
         pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10);
-    final pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
+    const pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
 
     List<pw.TableRow> rows = [];
 
@@ -2112,8 +2179,8 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   }
 
   List<pw.TableRow> _getBuildingValuationTableRows() {
-    final pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -2234,8 +2301,8 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   List<pw.TableRow> _getBuildUpAreaTableRows() {
     final pw.TextStyle headerTextStyle =
         pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10);
-    final pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -2416,8 +2483,8 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   List<pw.TableRow> _getAmenitiesTableRows() {
     final pw.TextStyle headerTextStyle =
         pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10);
-    final pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -2515,8 +2582,8 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   List<pw.TableRow> _getTotalAbstractTableRows() {
     final pw.TextStyle headerTextStyle =
         pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10);
-    final pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -2604,8 +2671,8 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
 
   // NEW: Helper function to get table rows for the final valuation table
   List<pw.TableRow> _getFinalValuationTableRows() {
-    final pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.TextStyle contentTextStyle = pw.TextStyle(fontSize: 10);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<pw.TableRow> rows = [];
 
@@ -2665,9 +2732,9 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
   List<pw.TableRow> _getValuerCommentsTableRows() {
     final pw.TextStyle headerTextStyle =
         pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10);
-    final pw.TextStyle contentTextStyle =
+    const pw.TextStyle contentTextStyle =
         pw.TextStyle(fontSize: 9); // Slightly smaller font for content
-    final pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
+    const pw.EdgeInsets cellPadding = pw.EdgeInsets.all(3);
 
     List<Map<String, dynamic>> data = [
       {
@@ -2859,28 +2926,28 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                             color: pdfLib.PdfColors.indigo)),
                     pw.SizedBox(height: 4),
                     pw.Text('Chartered Engineer (AM1920793)',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                             fontSize: 12, color: pdfLib.PdfColors.indigo)),
                     pw.Text(
                         'Registered valuer under section 247 of Companies Act, 2013',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                             fontSize: 12, color: pdfLib.PdfColors.indigo)),
                     pw.Text('(IBBI/RV/01/2020/13411)',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                             fontSize: 12, color: pdfLib.PdfColors.indigo)),
                     pw.Text(
                         'Registered valuer under section 34AB of Wealth Tax Act, 1957',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                             fontSize: 12, color: pdfLib.PdfColors.indigo)),
                     pw.Text('(I-9AV/CC-TVM/2020-21)',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                             fontSize: 12, color: pdfLib.PdfColors.indigo)),
                     pw.Text(
                         'Registered valuer under section 77(1) of Black Money Act, 2015',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                             fontSize: 12, color: pdfLib.PdfColors.indigo)),
                     pw.Text('(I-3/AV-BM/PCIT-TVM/2023-24)',
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                             fontSize: 12, color: pdfLib.PdfColors.indigo)),
                   ],
                 ),
@@ -2917,13 +2984,13 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     // Empty space or backtick (`) placeholder
-                    pw.Text('`', style: pw.TextStyle(fontSize: 14)),
+                    pw.Text('`', style: const pw.TextStyle(fontSize: 14)),
 
                     // Phone
                     pw.Row(
                       children: [
                         pw.Text('Phone: +91 89030 42635',
-                            style: pw.TextStyle(fontSize: 12)),
+                            style: const pw.TextStyle(fontSize: 12)),
                       ],
                     ),
 
@@ -2931,7 +2998,7 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                     pw.Row(
                       children: [
                         pw.Text('Email: subramonyvignesh@gmail.com',
-                            style: pw.TextStyle(fontSize: 12)),
+                            style: const pw.TextStyle(fontSize: 12)),
                       ],
                     ),
                   ],
@@ -2951,11 +3018,11 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                             style: pw.TextStyle(
                                 fontSize: 12, fontWeight: pw.FontWeight.bold)),
                         pw.Text('The South Indian Bank',
-                            style: pw.TextStyle(fontSize: 12)),
+                            style: const pw.TextStyle(fontSize: 12)),
                         pw.Text('Chakai Branch',
-                            style: pw.TextStyle(fontSize: 12)),
+                            style: const pw.TextStyle(fontSize: 12)),
                         pw.Text('Thiruvananthapuram',
-                            style: pw.TextStyle(fontSize: 12)),
+                            style: const pw.TextStyle(fontSize: 12)),
                       ],
                     ),
                     pw.Text('Ref No.: ${_refId.text}',
@@ -3379,13 +3446,13 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
             ),
             pw.SizedBox(height: 30),
             pw.Text('1. ${_remark1Controller.text}',
-                style: pw.TextStyle(fontSize: 10)),
+                style: const pw.TextStyle(fontSize: 10)),
             pw.Text('2. ${_remark2Controller.text}',
-                style: pw.TextStyle(fontSize: 10)),
+                style: const pw.TextStyle(fontSize: 10)),
             pw.Text('3. ${_remark3Controller.text}',
-                style: pw.TextStyle(fontSize: 10)),
+                style: const pw.TextStyle(fontSize: 10)),
             pw.Text('4. ${_remark4Controller.text}',
-                style: pw.TextStyle(fontSize: 10)),
+                style: const pw.TextStyle(fontSize: 10)),
           ];
         },
       ),
@@ -3606,64 +3673,64 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
           ),
           pw.SizedBox(height: 30),
           pw.Text('I hereby declare that - ',
-              style: pw.TextStyle(fontSize: 12)),
+              style: const pw.TextStyle(fontSize: 12)),
           pw.SizedBox(height: 15),
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
                 'a. The information furnished in my valuation report dated ${_declarationDateAController.text} is true and correct to the best of my knowledge and belief and I have made an impartial and true valuation of the property.',
-                style: pw.TextStyle(fontSize: 12),
+                style: const pw.TextStyle(fontSize: 12),
               ),
               pw.SizedBox(height: 15),
               pw.Text(
                 'b. I have no direct or indirect interest in the property valued;',
-                style: pw.TextStyle(fontSize: 12),
+                style: const pw.TextStyle(fontSize: 12),
               ),
               pw.SizedBox(height: 15),
               pw.Text(
                 'c. I have personally inspected the property on ${_declarationDateCController.text} The work is not sub-contracted to any other valuer and carried out by myself.',
-                style: pw.TextStyle(fontSize: 12),
+                style: const pw.TextStyle(fontSize: 12),
               ),
               pw.SizedBox(height: 15),
               pw.Text(
                 'd. I have not been convicted of any offence and sentenced to a term of Imprisonment;',
-                style: pw.TextStyle(fontSize: 12),
+                style: const pw.TextStyle(fontSize: 12),
               ),
               pw.SizedBox(height: 15),
               pw.Text(
                 'e. I have not been found guilty of misconduct in my professional capacity.',
-                style: pw.TextStyle(fontSize: 12),
+                style: const pw.TextStyle(fontSize: 12),
               ),
               pw.SizedBox(height: 15),
               pw.Text(
                 'f. I have read the Handbook on Policy, Standards and procedure for Real Estate Valuation, 2011 of the IBA and this report is in conformity to the Standards enshrined for valuation in the Part-B of the above handbook to the best of my ability.',
-                style: pw.TextStyle(fontSize: 12),
+                style: const pw.TextStyle(fontSize: 12),
               ),
               pw.SizedBox(height: 15),
               pw.Text(
                 'g. I have read the International Valuation Standards (IVS) and the report submitted to the Bank for the respective asset class is in conformity to the Standards as enshrined for valuation in the IVS in General Standards and Asset Standards as applicable.',
-                style: pw.TextStyle(fontSize: 12),
+                style: const pw.TextStyle(fontSize: 12),
               ),
               pw.SizedBox(height: 15),
               pw.Text(
                 'h. I abide by the Model Code of Conduct for empanelment of valuer in the Bank. (Annexure III- A signed copy of same to be taken and kept along with this declaration)',
-                style: pw.TextStyle(fontSize: 12),
+                style: const pw.TextStyle(fontSize: 12),
               ),
               pw.SizedBox(height: 15),
               pw.Text(
                 'i. I am registered under Section 34 AB of the Wealth Tax Act, 1957.',
-                style: pw.TextStyle(fontSize: 12),
+                style: const pw.TextStyle(fontSize: 12),
               ),
               pw.SizedBox(height: 15),
               pw.Text(
                 'j. I am the proprietor / partner / authorized official of the firm / company, who is competent to sign this valuation report.',
-                style: pw.TextStyle(fontSize: 12),
+                style: const pw.TextStyle(fontSize: 12),
               ),
               pw.SizedBox(height: 15),
               pw.Text(
                 'k. Further, I hereby provide the following information.',
-                style: pw.TextStyle(fontSize: 12),
+                style: const pw.TextStyle(fontSize: 12),
               ),
             ],
           ),
@@ -3727,7 +3794,7 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                   padding: const EdgeInsets.all(20),
                   margin: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Color.fromARGB(
+                    color: const Color.fromARGB(
                         255, 244, 238, 238), // Light background color
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
@@ -3736,7 +3803,7 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                             .withOpacity(0.3),
                         spreadRadius: 4,
                         blurRadius: 8,
-                        offset: Offset(0, 4), // Shadow position
+                        offset: const Offset(0, 4), // Shadow position
                       ),
                     ],
                   ),
@@ -3770,13 +3837,13 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                         children: [
                           ElevatedButton.icon(
                             onPressed: _getCurrentLocation,
-                            icon: Icon(Icons.my_location),
-                            label: Text('Get Location',
+                            icon: const Icon(Icons.my_location),
+                            label: const Text('Get Location',
                                 style: TextStyle(fontSize: 15.5)),
                             style: ButtonStyle(
                               fixedSize:
-                                  MaterialStateProperty.all(Size(200, 40)),
-                              shape: MaterialStateProperty.all(
+                                  WidgetStateProperty.all(const Size(200, 40)),
+                              shape: WidgetStateProperty.all(
                                 RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
@@ -3788,13 +3855,13 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                             onPressed: () {
                               _getNearbyProperty();
                             },
-                            icon: Icon(Icons.search),
-                            label: Text('Search',
+                            icon: const Icon(Icons.search),
+                            label: const Text('Search',
                                 style: TextStyle(fontSize: 15.5)),
                             style: ButtonStyle(
                               fixedSize:
-                                  MaterialStateProperty.all(Size(150, 40)),
-                              shape: MaterialStateProperty.all(
+                                  WidgetStateProperty.all(const Size(150, 40)),
+                              shape: WidgetStateProperty.all(
                                 RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
@@ -3808,7 +3875,7 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 ),
               ),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               Center(
                 child: ElevatedButton.icon(
@@ -3820,17 +3887,17 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                       ),
                     );
                   },
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.search,
                     size: 30,
                   ),
-                  label: Text(
+                  label: const Text(
                     'Search Saved Drafts',
                     style: TextStyle(fontSize: 20),
                   ),
                   style: ButtonStyle(
-                    fixedSize: MaterialStateProperty.all(Size(300, 50)),
-                    shape: MaterialStateProperty.all(
+                    fixedSize: WidgetStateProperty.all(const Size(300, 50)),
+                    shape: WidgetStateProperty.all(
                       RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(20), // 👈 Small border radius
@@ -4060,13 +4127,13 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                     padding: const EdgeInsets.only(left: 16.0),
                     child: Column(
                       children: [
-                        Row(
+                        const Row(
                           children: [
-                            const Expanded(flex: 2, child: Text('Directions')),
-                            const Expanded(flex: 1, child: Text(':')),
-                            const Expanded(
+                            Expanded(flex: 2, child: Text('Directions')),
+                            Expanded(flex: 1, child: Text(':')),
+                            Expanded(
                                 flex: 3, child: Text('As per Title Deed')),
-                            const Expanded(
+                            Expanded(
                                 flex: 3, child: Text('As per Location Sketch')),
                           ],
                         ),
@@ -4104,14 +4171,14 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                     padding: const EdgeInsets.only(left: 16.0),
                     child: Column(
                       children: [
-                        Row(
+                        const Row(
                           children: [
-                            const Expanded(flex: 2, child: Text('Directions')),
-                            const Expanded(
+                            Expanded(flex: 2, child: Text('Directions')),
+                            Expanded(
                                 flex: 3, child: Text('As per Actuals')),
-                            const Expanded(
+                            Expanded(
                                 flex: 3, child: Text('As per Documents')),
-                            const Expanded(
+                            Expanded(
                                 flex: 3, child: Text('Adopted area in Sft')),
                           ],
                         ),
@@ -4234,36 +4301,36 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
                         child: Row(
                           children: [
-                            const Expanded(
+                            Expanded(
                                 flex: 2,
                                 child: Text('Details /Floors',
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold))),
-                            const Expanded(
+                            Expanded(
                                 flex: 2,
                                 child: Text('Occupancy\n(Self/Rented)',
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold))),
-                            const Expanded(
+                            Expanded(
                                 flex: 1,
                                 child: Text('No. Of Room',
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold))),
-                            const Expanded(
+                            Expanded(
                                 flex: 1,
                                 child: Text('No. Of Kitchen',
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold))),
-                            const Expanded(
+                            Expanded(
                                 flex: 1,
                                 child: Text('No. of Bathroom',
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold))),
-                            const Expanded(
+                            Expanded(
                                 flex: 2,
                                 child: Text('Usage Remarks\n(Resi/Comm)',
                                     style: TextStyle(
@@ -4531,39 +4598,39 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                 initiallyExpanded: false,
                 children: <Widget>[
                   const Divider(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
                     child: Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                             flex: 1,
                             child: Text('S n',
                                 style: TextStyle(fontWeight: FontWeight.bold))),
-                        const Expanded(
+                        Expanded(
                             flex: 2,
                             child: Text('Particular of item',
                                 style: TextStyle(fontWeight: FontWeight.bold))),
-                        const Expanded(
+                        Expanded(
                             flex: 2,
                             child: Text('As per approved\nPlan/FSI',
                                 style: TextStyle(fontWeight: FontWeight.bold))),
-                        const Expanded(
+                        Expanded(
                             flex: 2,
                             child: Text('As per Actual',
                                 style: TextStyle(fontWeight: FontWeight.bold))),
-                        const Expanded(
+                        Expanded(
                             flex: 2,
                             child: Text('Area Considered\nfor the Valuation',
                                 style: TextStyle(fontWeight: FontWeight.bold))),
-                        const Expanded(
+                        Expanded(
                             flex: 2,
                             child: Text('Replacement Cost\nin Rs.',
                                 style: TextStyle(fontWeight: FontWeight.bold))),
-                        const Expanded(
+                        Expanded(
                             flex: 2,
                             child: Text('Depreciation\nin Rs.',
                                 style: TextStyle(fontWeight: FontWeight.bold))),
-                        const Expanded(
+                        Expanded(
                             flex: 2,
                             child: Text('Net value after\nDepreciations Rs.',
                                 style: TextStyle(fontWeight: FontWeight.bold))),
@@ -5082,11 +5149,11 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
         onPressed: () {
           _saveData();
         },
-        icon: Icon(Icons.save),
-        label: Text('Save', style: TextStyle(fontSize: 15.5)),
+        icon: const Icon(Icons.save),
+        label: const Text('Save', style: TextStyle(fontSize: 15.5)),
         style: ButtonStyle(
-          fixedSize: MaterialStateProperty.all(Size(100, 50)),
-          shape: MaterialStateProperty.all(
+          fixedSize: WidgetStateProperty.all(const Size(100, 50)),
+          shape: WidgetStateProperty.all(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(3),
             ),

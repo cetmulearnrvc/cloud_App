@@ -12,8 +12,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
+    Future.delayed(const Duration(seconds: 3), () {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
     });
   }
 
@@ -24,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Center(
         child: TweenAnimationBuilder(
           tween: Tween<double>(begin: 0.0, end: 1.0),
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
           curve: Curves.easeOutBack,  // Smooth scaling effect
           builder: (context, scale, child) {
             return Transform.scale(
@@ -44,7 +44,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   fit: BoxFit.cover,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Text(
                 'Valuation App',
                 style: TextStyle(
@@ -53,13 +53,13 @@ class _SplashScreenState extends State<SplashScreen> {
                   color: Colors.blue.shade900,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 'Simplifying Property Valuations',
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
-              SizedBox(height: 30),
-              CircularProgressIndicator(color: Colors.blue),
+              const SizedBox(height: 30),
+              const CircularProgressIndicator(color: Colors.blue),
             ],
           ),
         ),
