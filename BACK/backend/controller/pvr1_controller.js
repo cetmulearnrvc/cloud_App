@@ -68,71 +68,71 @@ export const savePVR1Data = async(req,res)=>{
     }
 }
 
-export const getNearbyPVR1 = async(req,res)=>{
+// export const getNearbyPVR1 = async(req,res)=>{
 
-  console.log("A nearby Search received")
-  const {latitude,longitude} = req.body
-  const lat1=latitude;
-  const lon1=longitude;
+//   console.log("A nearby Search received")
+//   const {latitude,longitude} = req.body
+//   const lat1=latitude;
+//   const lon1=longitude;
 
-  console.log(lat1,lon1)
-  let dis=100000;
-  const responseData=[];
+//   console.log(lat1,lon1)
+//   let dis=100000;
+//   const responseData=[];
 
-  const cursor=pvr1.find()
+//   const cursor=pvr1.find()
 
-  for await(const doc of cursor)
-  {   
-      doc.images.forEach((img, index) => {
+//   for await(const doc of cursor)
+//   {   
+//       doc.images.forEach((img, index) => {
 
-  if (img.latitude && img.longitude) {
+//   if (img.latitude && img.longitude) {
 
-    const lat2=parseFloat(img.latitude);
-    const lon2=parseFloat(img.longitude);
+//     const lat2=parseFloat(img.latitude);
+//     const lon2=parseFloat(img.longitude);
     
-    dis=haversineDistance(lat1,lon1,lat2,lon2)
+//     dis=haversineDistance(lat1,lon1,lat2,lon2)
     
 
-    if (dis <= 1) {
-        responseData.push({
-          distance:dis,
-          latitude:lat2,
-          longitude:lon2,
-          marketValue:doc.landValueMarket || 0
-        });
-      }
+//     if (dis <= 1) {
+//         responseData.push({
+//           distance:dis,
+//           latitude:lat2,
+//           longitude:lon2,
+//           marketValue:doc.landValueMarket || 0
+//         });
+//       }
     
-  }
-  }); 
-  }
+//   }
+//   }); 
+//   }
 
-  console.log(responseData)
+//   console.log(responseData)
 
-  return res.status(200).json(responseData)
+//   return res.status(200).json(responseData)
   
-}
+// }
 
 
 
-function toRadians(degrees) {
-  return degrees * (Math.PI / 180);
-}
+// function toRadians(degrees) {
+//   return degrees * (Math.PI / 180);
+// }
 
-function haversineDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Earth's radius in kilometers
+// function haversineDistance(lat1, lon1, lat2, lon2) {
+//   const R = 6371; // Earth's radius in kilometers
 
-  const dLat = toRadians(lat2 - lat1);
-  const dLon = toRadians(lon2 - lon1);
+//   const dLat = toRadians(lat2 - lat1);
+//   const dLon = toRadians(lon2 - lon1);
 
-  const radLat1 = toRadians(lat1);
-  const radLat2 = toRadians(lat2);
+//   const radLat1 = toRadians(lat1);
+//   const radLat2 = toRadians(lat2);
 
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(radLat1) * Math.cos(radLat2) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+//   const a =
+//     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+//     Math.cos(radLat1) * Math.cos(radLat2) *
+//     Math.sin(dLon / 2) * Math.sin(dLon / 2);
 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+//   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-  return R * c; // distance in km
-}
+//   return R * c; // distance in km
+// }
