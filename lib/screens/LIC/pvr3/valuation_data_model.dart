@@ -30,6 +30,7 @@ class FloorData {
 
 // ADDED: New class to represent a row in the "Progress of Work" table
 class ProgressWorkItem {
+  
   String description;
   String applicantEstimate;
   String valuerOpinion;
@@ -40,6 +41,10 @@ class ProgressWorkItem {
 }
 
 class ValuationData {
+
+  String nearbyLatitude;
+  String nearbyLongitude;
+
   // Header
   final String fileNo,
       valuerName,
@@ -109,6 +114,8 @@ class ValuationData {
   final List<ValuationImage> images;
 
   ValuationData({
+    this.nearbyLatitude='',
+    this.nearbyLongitude='',
     required this.fileNo,
     required this.valuerName,
     required this.valuerCode,

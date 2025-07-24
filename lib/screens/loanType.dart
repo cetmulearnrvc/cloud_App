@@ -8,9 +8,8 @@ import 'package:login_screen/screens/location.dart';
 import 'package:login_screen/screens/SIB/land_and_building/land_and_building.dart';
 import 'package:login_screen/screens/SIB/vacant_land/vacant_land.dart';
 
-//ignore_for_file:prefer_const_constructors
 class LoanType extends StatelessWidget {
-  final selectedBank;
+  final Map<String, dynamic> selectedBank;
 
   const LoanType({super.key, required this.selectedBank});
 
@@ -25,25 +24,78 @@ class LoanType extends StatelessWidget {
       bankName = LIC(context);
     } else if (selectedBank['name'] == 'South Indian Bank') {
       bankName = SIB(context);
-    } else {
+    }
+    else if (selectedBank['name'] == 'State Bank of India') {
+      bankName = SBI(context);
+    }
+     else {
       bankName = Federal(context);
     }
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue,
-        title: Text('SELECT VALUATION TYPE',style: TextStyle(fontWeight: FontWeight.bold),),
-        leading: IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: Icon(Icons.arrow_back)),
+
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFB0D9F8),
+            Color(0xFF90C1F7),
+            Color(0xFFA1A4F8),
+            Color(0xFFC49CF7),
+            Color(0xFFE4A2F5),
+          ],
+        ),
       ),
-      body: SafeArea(
-          child: Center(
-        child: bankName,
-      )),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(100),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.white.withOpacity(0.2)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.arrow_back, color: Colors.black),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'LOAN TYPE',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        body: SafeArea(
+          child: Center(child: bankName),
+        ),
+      ),
     );
   }
+
+  // ========== BANK WIDGETS ==========
 
   Widget LIC(BuildContext ctx) {
     final List<String> loanTypes = [
@@ -56,22 +108,22 @@ class LoanType extends StatelessWidget {
 
     return Column(
       children: [
-        Text('LIC',
+        const SizedBox(height: 20,),
+        const Text('LIC',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 20,
-                decoration: TextDecoration.underline)),
-        SizedBox(height: 10,),
+                fontSize: 28,)),
+        const SizedBox(height: 10),
         Image.asset('assets/images/lic.jpeg'),
-        SizedBox(height: 50),
+        const SizedBox(height: 50),
         Padding(
           padding: const EdgeInsets.all(10.0),
           child: StatefulBuilder(
             builder: (context, setState) {
               return DropdownButtonFormField<String>(
                 value: selectedValue,
-                decoration: InputDecoration(border: OutlineInputBorder()),
-                hint: Text('Select the valuation type'),
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                hint: const Text('Select the valuation type'),
                 isExpanded: true,
                 items: loanTypes.map((e) {
                   return DropdownMenuItem<String>(
@@ -84,13 +136,9 @@ class LoanType extends StatelessWidget {
                     selectedValue = value;
                   });
                   if (value == 'HOUSE RENOVATION (PVR - 3)') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                      return ValuationFormScreen();
-                    }));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const ValuationFormScreen()));
                   } else if (value == 'HOUSE CONSTRUCTION (PVR - 1)') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                      return ValuationFormScreenPVR1();
-                    }));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const ValuationFormScreenPVR1()));
                   }
                 },
               );
@@ -111,22 +159,22 @@ class LoanType extends StatelessWidget {
 
     return Column(
       children: [
-        Text('IDBI Bank',
+        const SizedBox(height: 20,),
+        const Text('IDBI Bank',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 20,
-                decoration: TextDecoration.underline)),
-        SizedBox(height: 10,),
+                fontSize: 28,)),
+        const SizedBox(height: 10),
         Image.asset('assets/images/idbi.jpeg'),
-        SizedBox(height: 50),
+        const SizedBox(height: 50),
         Padding(
           padding: const EdgeInsets.all(10.0),
           child: StatefulBuilder(
             builder: (context, setState) {
               return DropdownButtonFormField<String>(
                 value: selectedValue,
-                decoration: InputDecoration(border: OutlineInputBorder()),
-                hint: Text('Select the valuation type'),
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                hint: const Text('Select the valuation type'),
                 isExpanded: true,
                 items: loanTypes.map((e) {
                   return DropdownMenuItem<String>(
@@ -139,9 +187,7 @@ class LoanType extends StatelessWidget {
                     selectedValue = value;
                   });
                   if (value == 'VALUATION REPORT') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                      return ValuationFormScreenIDBI();
-                    }));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const ValuationFormScreenIDBI()));
                   }
                 },
               );
@@ -162,22 +208,22 @@ class LoanType extends StatelessWidget {
 
     return Column(
       children: [
-        Text('FEDERAL BANK',
+        const SizedBox(height: 20,),
+        const Text('FEDERAL BANK',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 20,
-                decoration: TextDecoration.underline)),
-        SizedBox(height: 10,),
+                fontSize: 28,)),
+        const SizedBox(height: 10),
         Image.asset('assets/images/federal.jpeg'),
-        SizedBox(height: 50),
+        const SizedBox(height: 50),
         Padding(
           padding: const EdgeInsets.all(10.0),
           child: StatefulBuilder(
             builder: (context, setState) {
               return DropdownButtonFormField<String>(
                 value: selectedValue,
-                decoration: InputDecoration(border: OutlineInputBorder()),
-                hint: Text('Select the valuation type'),
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                hint: const Text('Select the valuation type'),
                 isExpanded: true,
                 items: loanTypes.map((e) {
                   return DropdownMenuItem<String>(
@@ -190,9 +236,7 @@ class LoanType extends StatelessWidget {
                     selectedValue = value;
                   });
                   if (value == 'LAND AND BUILDING') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                      return PdfGeneratorScreen();
-                    }));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const PdfGeneratorScreen()));
                   }
                 },
               );
@@ -219,22 +263,22 @@ class LoanType extends StatelessWidget {
 
     return Column(
       children: [
-        Text('CANARA BANK',
+        const SizedBox(height: 20,),
+        const Text('CANARA BANK',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 20,
-                decoration: TextDecoration.underline)),
-                const SizedBox(height: 15,),
+                fontSize: 28,)),
+        const SizedBox(height: 15),
         Image.asset('assets/images/canara.jpeg'),
-        SizedBox(height: 50),
+        const SizedBox(height: 50),
         Padding(
           padding: const EdgeInsets.all(10.0),
           child: StatefulBuilder(
             builder: (context, setState) {
               return DropdownButtonFormField<String>(
                 value: selectedValue,
-                decoration: InputDecoration(border: OutlineInputBorder()),
-                hint: Text('Select the valuation type'),
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                hint: const Text('Select the valuation type'),
                 isExpanded: true,
                 items: loanTypes.map((e) {
                   return DropdownMenuItem<String>(
@@ -246,9 +290,7 @@ class LoanType extends StatelessWidget {
                   setState(() {
                     selectedValue = value;
                   });
-                  Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                    return LocationScreen();
-                  }));
+                  Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const LocationScreen()));
                 },
               );
             },
@@ -270,22 +312,22 @@ class LoanType extends StatelessWidget {
 
     return Column(
       children: [
-        Text('SOUTH INDIAN BANK',
+        const SizedBox(height: 20,),
+        const Text('SOUTH INDIAN BANK',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 20,
-                decoration: TextDecoration.underline)),
-        SizedBox(height: 10,),
+                fontSize: 28,)),
+        const SizedBox(height: 10),
         Image.asset('assets/images/south indian.jpeg'),
-        SizedBox(height: 50),
+        const SizedBox(height: 50),
         Padding(
           padding: const EdgeInsets.all(10.0),
           child: StatefulBuilder(
             builder: (context, setState) {
               return DropdownButtonFormField<String>(
                 value: selectedValue,
-                decoration: InputDecoration(border: OutlineInputBorder()),
-                hint: Text('Select the valuation type'),
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                hint: const Text('Select the valuation type'),
                 isExpanded: true,
                 items: loanTypes.map((e) {
                   return DropdownMenuItem<String>(
@@ -298,19 +340,66 @@ class LoanType extends StatelessWidget {
                     selectedValue = value;
                   });
                   if (value == 'VALUATION REPORT (IN RESPECT OF FLATS)') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                      return SIBValuationFormScreen();
-                    }));
-                  } else if (value ==
-                      'VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                      return ValuationFormPage();
-                    }));
-                  } else if (value ==
-                      'VALUATION REPORT (IN RESPECT OF VACANT LAND / SITE)') {
-                    Navigator.of(ctx).push(MaterialPageRoute(builder: (ctx1) {
-                      return VacantLandFormPage();
-                    }));
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const SIBValuationFormScreen()));
+                  } else if (value == 'VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const ValuationFormPage()));
+                  } else if (value == 'VALUATION REPORT (IN RESPECT OF VACANT LAND / SITE)') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const VacantLandFormPage()));
+                  }
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget SBI(BuildContext ctx) {
+    final List<String> loanTypes = [
+      '---SELECT---',
+      'VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)',
+      'VALUATION REPORT (IN RESPECT OF FLATS)',
+      'VALUATION REPORT (IN RESPECT OF VACANT LAND / SITE)',
+    ];
+
+    String? selectedValue = loanTypes[0];
+
+    return Column(
+      children: [
+        const SizedBox(height: 20,),
+        const Text('STATE BANK OF INDIA',
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 28,)),
+        const SizedBox(height: 10),
+        Image.asset('assets/images/sbi.png'),
+        const SizedBox(height: 50),
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return DropdownButtonFormField<String>(
+                value: selectedValue,
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                hint: const Text('Select the valuation type'),
+                isExpanded: true,
+                items: loanTypes.map((e) {
+                  return DropdownMenuItem<String>(
+                    value: e,
+                    child: Text(e),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedValue = value;
+                  });
+                  if (value == 'VALUATION REPORT (IN RESPECT OF FLATS)') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const SIBValuationFormScreen()));
+                  } else if (value == 'VALUATION REPORT (IN RESPECT OF LAND / SITE AND BUILDING)') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const ValuationFormPage()));
+                  } else if (value == 'VALUATION REPORT (IN RESPECT OF VACANT LAND / SITE)') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const VacantLandFormPage()));
                   }
                 },
               );
@@ -321,3 +410,4 @@ class LoanType extends StatelessWidget {
     );
   }
 }
+

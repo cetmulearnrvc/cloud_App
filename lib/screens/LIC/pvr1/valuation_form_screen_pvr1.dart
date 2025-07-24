@@ -14,8 +14,11 @@ import 'valuation_data_model_pvr1.dart';
 import 'pdf_generator_pvr1.dart';
 import 'package:http/http.dart' as http;
 import 'config.dart';
+<<<<<<< HEAD
 import 'package:login_screen/screens/driveAPIconfig.dart';
 import 'package:path/path.dart' as path;
+=======
+>>>>>>> c4d31b49a23a8723e619e903aeb9061705fd6a3b
 // ignore: depend_on_referenced_packages
 
 class ValuationFormScreenPVR1 extends StatefulWidget {

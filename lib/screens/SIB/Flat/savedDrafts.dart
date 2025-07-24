@@ -14,7 +14,7 @@ class SavedDrafts extends StatefulWidget {
 }
 
 class _SavedDraftsState extends State<SavedDrafts> {
-  DateTime date = DateTime(2025, 06, 26);
+  DateTime date = DateTime.now();
   List<dynamic> searchResults = [];
   bool isLoading = false;
 

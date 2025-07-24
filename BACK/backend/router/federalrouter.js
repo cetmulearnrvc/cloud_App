@@ -1,6 +1,5 @@
 import express from "express";
 const federal_router=express.Router();
-import upload from "../multer/upload.js";
 import { getNearbyfederal, saveFederalData, searchByDate } from "../controller/federal_controller.js";
 import uploadMiddleware from "../multer/upload.js";
 
