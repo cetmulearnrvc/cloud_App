@@ -396,6 +396,67 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
 
   bool _isNotValidState = false;
 
+    Future<void> _saveToNearbyCollection() async {
+  try {
+    // --- STEP 1: Find the first image with valid coordinates ---
+    // ValuationImage? firstImageWithLocation;
+    // try {
+    //   // Use .firstWhere to find the first image that satisfies the condition.
+    //   firstImageWithLocation = _valuationImages.firstWhere(
+    //     (img) => img.latitude.isNotEmpty && img.longitude.isNotEmpty,
+    //   );
+    // } catch (e) {
+    //   // .firstWhere throws an error if no element is found. We catch it here.
+    //   firstImageWithLocation = null;
+    // }
+
+    var latitude = _latController.text!;
+    var longitude = _lonController.text!;
+
+    // --- STEP 2: Handle the case where no image has location data ---
+    if (latitude == null || longitude == null) {
+      debugPrint('Please enter location. Skipping save to nearby collection.');
+      return; // Exit the function early.
+    }
+
+    final ownerName = controllers['Owner of the Property']!.text;
+    final marketValue = controllers['Present Market Rate of the Property']!.text;
+
+    debugPrint('------------------------------------------');
+    debugPrint('DEBUGGING SAVE TO NEARBY COLLECTION:');
+    debugPrint('Owner Name from Controller: "$ownerName"');
+    debugPrint('Market Value from Controller: "$marketValue"');
+    debugPrint('------------------------------------------');
+
+    final dataToSave = {
+      //  'refNo': _fileNoCtrl.text ?? '',
+      'refNo': 111,
+      'latitude': latitude,
+      'longitude': longitude,
+      
+      'landValue': marketValue, // Use the variable we just created
+      'nameOfOwner': ownerName,
+      'bankName': 'Federal Bank',
+    };
+    
+    // --- STEP 4: Send the data to your dedicated server endpoint ---
+    final response = await http.post(
+      Uri.parse(url5), // Use your dedicated URL for saving this data
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(dataToSave),
+    );
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      debugPrint('Successfully saved data to nearby collection.');
+    } else {
+      debugPrint('Failed to save to nearby collection: ${response.statusCode}');
+      debugPrint('Response body: ${response.body}');
+    }
+  } catch (e) {
+    debugPrint('Error in _saveToNearbyCollection: $e');
+  }
+}
+
   Future<void> _saveData() async {
     try {
       // Validate required fields
@@ -880,11 +941,12 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
 
       if (context.mounted) Navigator.of(context).pop();
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Data saved successfully!')));
         }
+        await _saveToNearbyCollection();
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(

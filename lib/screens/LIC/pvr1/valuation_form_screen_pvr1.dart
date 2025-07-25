@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart'; // Import for location
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:login_screen/screens/LIC/pvr1/savedDrafts.dart';
 import 'package:login_screen/screens/nearbyDetails.dart';
-import 'package:login_screen/screens/savedDrafts.dart';
+
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'valuation_data_model_pvr1.dart';

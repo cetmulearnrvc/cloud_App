@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'package:login_screen/screens/Federal/federal.dart';
+import 'package:login_screen/screens/LIC/pvr1/config.dart';
+import 'package:login_screen/screens/LIC/pvr1/valuation_form_screen_pvr1.dart';
 import 'dart:convert';
-import 'config.dart';
 
-class SavedDraftsFederal extends StatefulWidget {
-  const SavedDraftsFederal({super.key});
+class SavedDrafts extends StatefulWidget {
+  const SavedDrafts({super.key});
 
   @override
-  State<SavedDraftsFederal> createState() => _SavedDraftsFederalState();
+  State<SavedDrafts> createState() => _SavedDraftsState();
 }
 
-class _SavedDraftsFederalState extends State<SavedDraftsFederal> {
+class _SavedDraftsState extends State<SavedDrafts> {
   DateTime date = DateTime.now();
   List<dynamic> searchResults = [];
   bool isLoading = false;
@@ -31,23 +31,16 @@ class _SavedDraftsFederalState extends State<SavedDraftsFederal> {
         body: json.encode({'date': formattedDate}),
       );
 
-      debugPrint("send req to back");
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
           searchResults = data;
         });
       } else {
-        debugPrint("some err");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.statusCode}')),
-        );
+        showErrorSnackBar('Error: ${response.statusCode}');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      showErrorSnackBar('Error: $e');
     } finally {
       setState(() {
         isLoading = false;
@@ -55,11 +48,21 @@ class _SavedDraftsFederalState extends State<SavedDraftsFederal> {
     }
   }
 
+  void showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.redAccent,
+        content: Text(message),
+      ),
+    );
+  }
+
   void navigateToValuationForm(Map<String, dynamic> propertyData) {
+    final detail = jsonEncode(propertyData);
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PdfGeneratorScreen(
+        builder: (context) => ValuationFormScreenPVR1(
           propertyData: propertyData,
         ),
       ),
@@ -74,7 +77,7 @@ class _SavedDraftsFederalState extends State<SavedDraftsFederal> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          'Federal Bank Drafts',
+          'PVR1 Drafts',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w500,
@@ -102,7 +105,7 @@ class _SavedDraftsFederalState extends State<SavedDraftsFederal> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                // Gradient date picker container
+                // Date Picker Styled
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -182,14 +185,14 @@ class _SavedDraftsFederalState extends State<SavedDraftsFederal> {
                 ),
                 const SizedBox(height: 20),
 
-                // Search Results
+                // Result Area
                 Expanded(
                   child: isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : searchResults.isEmpty
                           ? const Center(
                               child: Text(
-                                'No Federal Bank drafts found',
+                                'No results found',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w500,
@@ -233,7 +236,7 @@ class _SavedDraftsFederalState extends State<SavedDraftsFederal> {
                                   child: ListTile(
                                     contentPadding: const EdgeInsets.all(16),
                                     title: Text(
-                                      'Owner: ${property['ownerOfTheProperty']}',
+                                      'File No: ${property['fileNo']}',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
@@ -247,28 +250,20 @@ class _SavedDraftsFederalState extends State<SavedDraftsFederal> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          const Text(
-                                            'Bank: Federal Bank',
-                                            style: TextStyle(
+                                          Text(
+                                            'Owner: ${property['ownerName']}',
+                                            style: const TextStyle(
                                               fontSize: 15,
                                               fontFamily: 'Poppins',
                                             ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            'Location: ${property['propertyAddressAsPerSiteVisit']}',
+                                            'Location: ${property['propertyLocation']}',
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
                                               fontSize: 14,
-                                              fontFamily: 'Poppins',
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            'Inspection Date: ${DateFormat('dd-MM-yyyy').format(DateTime.parse(property['createdAt']).toLocal())}',
-                                            style: const TextStyle(
-                                              fontSize: 12,
                                               fontFamily: 'Poppins',
                                             ),
                                           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:login_screen/screens/Canara/main.dart';
 import 'package:login_screen/screens/Federal/federal.dart';
 import 'package:login_screen/screens/IDBI/valuation_form_ui.dart';
 import 'package:login_screen/screens/LIC/pvr1/valuation_form_screen_pvr1.dart';
@@ -250,13 +251,13 @@ class LoanType extends StatelessWidget {
   Widget Canara(BuildContext ctx) {
     final List<String> loanTypes = [
       '---SELECT---',
-      'Plant And Machinery',
+      // 'Plant And Machinery',
       'Property (Land & BUILDING)',
-      'VALUATION OF COMMERCIAL BUILDING BY RENT CAPITALISATION METHOD',
-      'VALUATION OF FLAT BY COMPOSITE RATE METHOD',
-      'GENERAL FORMAT VALUATION REPORT OTHER PROPERTIES',
-      'VALUATION OF VACANT SITES/ RESIDENTIAL PLOT / COMMERCIAL SITE / LAND',
-      'VALUATION REPORT (IN RESPECT OF AGRICULTURAL LANDS)',
+      // 'VALUATION OF COMMERCIAL BUILDING BY RENT CAPITALISATION METHOD',
+      // 'VALUATION OF FLAT BY COMPOSITE RATE METHOD',
+      // 'GENERAL FORMAT VALUATION REPORT OTHER PROPERTIES',
+      // 'VALUATION OF VACANT SITES/ RESIDENTIAL PLOT / COMMERCIAL SITE / LAND',
+      // 'VALUATION REPORT (IN RESPECT OF AGRICULTURAL LANDS)',
     ];
 
     String? selectedValue = loanTypes[0];
@@ -290,7 +291,9 @@ class LoanType extends StatelessWidget {
                   setState(() {
                     selectedValue = value;
                   });
-                  Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const LocationScreen()));
+                  if (value == 'Property (Land & BUILDING)') {
+                    Navigator.of(ctx).push(MaterialPageRoute(builder: (_) => const PropertyValuationReportPage()));
+                  }
                 },
               );
             },

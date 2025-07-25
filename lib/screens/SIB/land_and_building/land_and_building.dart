@@ -354,6 +354,69 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
 
   final _formKey = GlobalKey<FormState>(); // Global key for form validation
 
+  Future<void> _saveToNearbyCollection() async {
+  try {
+    
+    String fullCoordinates = _latitudeLongitudeController.text;
+    String latitude='';
+    String longitude='';
+
+    if (fullCoordinates.isNotEmpty && fullCoordinates.contains(',')) {
+        final parts = fullCoordinates.split(',');
+        // Ensure the split resulted in exactly two parts
+        if (parts.length == 2) {
+          latitude = parts[0].trim();  // Get the first part and remove whitespace
+          longitude = parts[1].trim(); // Get the second part and remove whitespace
+        }
+      }
+
+       if (latitude.isEmpty || longitude.isEmpty) {
+        debugPrint('Latitude or Longitude is missing from the controller. Skipping save to nearby collection.');
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location data is missing, cannot save to nearby properties.')),
+        );
+        return; // Exit the function early if coordinates are not valid.
+      }
+
+    final ownerName =_ownerNameController.text ?? '[is null]';
+    final marketValue = _presentMarketValueController.text ?? '[is null]';
+
+    debugPrint('------------------------------------------');
+    debugPrint('DEBUGGING SAVE TO NEARBY COLLECTION:');
+    debugPrint('Owner Name from Controller: "$ownerName"');
+    debugPrint('Market Value from Controller: "$marketValue"');
+    debugPrint('------------------------------------------');
+    // --- STEP 3: Build the payload with the correct data ---
+    final dataToSave = {
+      // Use the coordinates from the image we found
+       'refNo': _refId.text ?? '',
+      'latitude': latitude,
+      'longitude': longitude,
+      
+      'landValue': marketValue, // Use the variable we just created
+      'nameOfOwner': ownerName,
+      'bankName': 'South Indian Bank (Land & Building)',
+    };
+    
+    // --- STEP 4: Send the data to your dedicated server endpoint ---
+    final response = await http.post(
+      Uri.parse(url5), // Use your dedicated URL for saving this data
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(dataToSave),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      debugPrint('Successfully saved data to nearby collection.');
+    } else {
+      debugPrint('Failed to save to nearby collection: ${response.statusCode}');
+      debugPrint('Response body: ${response.body}');
+    }
+  } catch (e) {
+    debugPrint('Error in _saveToNearbyCollection: $e');
+  }
+}
+
   //SaveData function
   Future<void> _saveData() async {
     try {
@@ -585,11 +648,12 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
 
       if (context.mounted) Navigator.of(context).pop();
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Data saved successfully!')));
         }
+        await _saveToNearbyCollection();
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
