@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -13,6 +16,7 @@ import 'package:universal_html/html.dart' as html;
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
+import 'config.dart'; // Ensure this imports your config file
 // Add this class definition inside your state class
 class ImageWithLocation {
   final Uint8List imageBytes;
@@ -404,6 +408,321 @@ final _industrialAreaController = TextEditingController();
   bool _isGenerating = false;
  final _nearByLat = TextEditingController();
  final _nearByLong = TextEditingController();
+ bool _isNotValidState = false;
+ 
+  get http => null;
+ 
+Future<void> _saveData() async {
+  try {
+    // Validate required fields (adjust as needed)
+    if (
+        _ownerNameController.text.isEmpty ||
+        _propertyAddressController.text.isEmpty
+    ) {
+      debugPrint("Not all required fields available");
+      setState(() => _isNotValidState = true);
+      return;
+    }
+
+    // Example: Image validation (adjust as needed)
+    if (_imagesWithLocation.isEmpty) {
+      debugPrint("not all imgs available");
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please add at least one image')));
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+
+    // Add text fields from controllers
+    request.fields.addAll({
+      "purpose": _purposeController.text,
+      "inspectionDate": _inspectionDateController.text,
+      "valuationDate": _valuationDateController.text,
+      "ownerName": _ownerNameController.text,
+      "ownerAddress": _ownerAddressController.text,
+      "documents": _documentsController.text,
+      "propertyDescription": _propertyDescriptionController.text,
+      "scope": _scopeController.text,
+      "bank": _bankController.text,
+      "propertyAddress": _propertyAddressController.text,
+      "cityTown": _cityTownController.text,
+      "residentialArea": _residentialAreaController.text,
+      "classification": _classificationController.text,
+      "urbanClassification": _urbanClassificationController.text,
+      "localAuthority": _localAuthorityController.text,
+      "govtActs": _govtActsController.text,
+      "agriculturalConversion": _agriculturalConversionController.text,
+      "blockNo": _blockNoController.text,
+      "resurveyNo": _resurveyNoController.text,
+      "surveyNo": _surveyNoController.text,
+      "thandapperNo": _thandapperNoController.text,
+      "wardNo": _wardNoController.text,
+      "doorNo": _doorNoController.text,
+      "tsNo": _tsNoController.text,
+      "taluk": _talukController.text,
+      "district": _districtController.text,
+      "northBoundary": _northBoundaryController.text,
+      "southBoundary": _southBoundaryController.text,
+      "eastBoundary": _eastBoundaryController.text,
+      "westBoundary": _westBoundaryController.text,
+      "northBoundaryActual": _northBoundaryActualController.text,
+      "southBoundaryActual": _southBoundaryActualController.text,
+      "eastBoundaryActual": _eastBoundaryActualController.text,
+      "westBoundaryActual": _westBoundaryActualController.text,
+      "latitudelongitude": _latitudelongitudeController.text,
+      "taxPeriod": _taxPeriodController.text,
+      "buildingId": _buildingIdController.text,
+      "assessmentNo": _assessmentNoController.text,
+      "taxAmount": _taxAmountController.text,
+      "taxReceiptName": _taxReceiptNameController.text,
+      "consumerNo": _consumerNoController.text,
+      "electricityName": _electricityNameController.text,
+      "otherDetails": _otherDetailsController.text,
+      "occupancyStatus": _occupancyStatusController.text,
+      "tenatedRent": _tenatedRentController.text,
+      "monthlyRent": _monthlyRentController.text,
+      "advanceAmount": _advanceAmountController.text,
+      "fsi": _fsiController.text,
+      "plotCoverage": _plotCoverageController.text,
+      "northDeed": _northDeedController.text,
+      "southDeed": _southDeedController.text,
+      "eastDeed": _eastDeedController.text,
+      "westDeed": _westDeedController.text,
+      "extentDeed": _extentDeedController.text,
+      "northActual": _northActualController.text,
+      "southActual": _southActualController.text,
+      "eastActual": _eastActualController.text,
+      "westActual": _westActualController.text,
+      "extentActual": _extentActualController.text,
+      "extentConsidered": _extentConsideredController.text,
+      "plotSizeNS": _plotSizeNSController.text,
+      "plotSizeEW": _plotSizeEWController.text,
+      "totalExtent": _totalExtentController.text,
+      "localityCharacter": _localityCharacterController.text,
+      "localityClassification": _localityClassificationController.text,
+      "surroundingDevelopment": _surroundingDevelopmentController.text,
+      "flooding": _floodingController.text,
+      "amenities": _amenitiesController.text,
+      "landLevel": _landLevelController.text,
+      "landShape": _landShapeController.text,
+      "landUse": _landUseController.text,
+      "usageRestriction": _usageRestrictionController.text,
+      "townPlanning": _townPlanningController.text,
+      "plotType": _plotTypeController.text,
+      "roadFacilities": _roadFacilitiesController.text,
+      "roadType": _roadTypeController.text,
+      "roadWidth": _roadWidthController.text,
+      "landLocked": _landLockedController.text,
+      "waterPotential": _waterPotentialController.text,
+      "sewerage": _sewerageController.text,
+      "powerSupply": _powerSupplyController.text,
+      "siteAdvantages": _siteAdvantagesController.text,
+      "specialRemarks": _specialRemarksController.text,
+      "glrRate": _glrRateController.text,
+      "glrValue": _glrValueController.text,
+      "pmrRate": _pmrRateController.text,
+      "pmrAdopted": _pmrAdoptedController.text,
+      "pmrAdoptedValue": _pmrAdoptedValueController.text,
+      "pmrValue": _pmrValueController.text,
+      "buildingType": _buildingTypeController.text,
+      "constructionType": _constructionTypeController.text,
+      "constructionQuality": _constructionQualityController.text,
+      "appearance": _appearanceController.text,
+      "exteriorCondition": _exteriorConditionController.text,
+      "interiorCondition": _interiorConditionController.text,
+      "plinthArea": _plinthAreaController.text,
+      "floors": _floorsController.text,
+      "gfYear": _gfYearController.text,
+      "gfRoof": _gfRoofController.text,
+      "gfArea": _gfAreaController.text,
+      "gfCantilever": _gfCantileverController.text,
+      "gfTotal": _gfTotalController.text,
+      "ffYear": _ffYearController.text,
+      "ffRoof": _ffRoofController.text,
+      "ffArea": _ffAreaController.text,
+      "ffCantilever": _ffCantileverController.text,
+      "ffTotal": _ffTotalController.text,
+      "terraceYear": _terraceYearController.text,
+      "terraceRoof": _terraceRoofController.text,
+      "terraceArea": _terraceAreaController.text,
+      "terraceTotal": _terraceTotalController.text,
+      "totalArea": _totalAreaController.text,
+      "approvedPlanNo": _approvedPlanNoController.text,
+      "approvedPlanAuthority": _approvedPlanAuthorityController.text,
+      "planVerified": _planVerifiedController.text,
+      "gfSpecification": _gfSpecificationController.text,
+      "gfFloorFinish": _gfFloorFinishController.text,
+      "gfSuperStructure": _gfSuperStructureController.text,
+      "gfRoofType": _gfRoofTypeController.text,
+      "gfDoors": _gfDoorsController.text,
+      "gfWindows": _gfWindowsController.text,
+      "gfWeathering": _gfWeatheringController.text,
+      "gfConstructionYear": _gfConstructionYearController.text,
+      "gfAge": _gfAgeController.text,
+      "gfRemainingLife": _gfRemainingLifeController.text,
+      "gfDepreciation": _gfDepreciationController.text,
+      "gfReplacementRate": _gfReplacementRateController.text,
+      "ffSpecification": _ffSpecificationController.text,
+      "ffFloorFinish": _ffFloorFinishController.text,
+      "ffSuperStructure": _ffSuperStructureController.text,
+      "ffRoofType": _ffRoofTypeController.text,
+      "ffDoors": _ffDoorsController.text,
+      "ffWindows": _ffWindowsController.text,
+      "ffWeathering": _ffWeatheringController.text,
+      "ffConstructionYear": _ffConstructionYearController.text,
+      "ffAge": _ffAgeController.text,
+      "ffRemainingLife": _ffRemainingLifeController.text,
+      "ffDepreciation": _ffDepreciationController.text,
+      "ffReplacementRate": _ffReplacementRateController.text,
+      "presentValue": _presentValueController.text,
+      // Valuer details
+      "valuerName": _valuerNameController.text,
+      "valuerAddress": _valuerAddressController.text,
+      "valuerPhone": _valuerPhoneController.text,
+      "valuerEmail": _valuerEmailController.text,
+      "valuerRegNo": _valuerRegNoController.text,
+      "valuerIBBIReg": _valuerIBBIRegController.text,
+      "valuerWealthTaxReg": _valuerWealthTaxRegController.text,
+      "valuerBlackMoneyReg": _valuerBlackMoneyRegController.text,
+      // Amenities (1-20)
+      "amenityPortico": _amenityPorticoController.text,
+      "amenityOrnamentalDoor": _amenityOrnamentalDoorController.text,
+      "amenitySitoutGrills": _amenitySitoutGrillsController.text,
+      "amenitySteelGates": _amenitySteelGatesController.text,
+      "amenityOpenStaircase": _amenityOpenStaircaseController.text,
+      "amenityWardrobes": _amenityWardrobesController.text,
+      "amenityGlazedTiles": _amenityGlazedTilesController.text,
+      "amenityExtraSinks": _amenityExtraSinksController.text,
+      "amenityMarbleTiles": _amenityMarbleTilesController.text,
+      "amenityInteriorDecor": _amenityInteriorDecorController.text,
+      "amenityElevationWorks": _amenityElevationWorksController.text,
+      "amenityFalseCeiling": _amenityFalseCeilingController.text,
+      "amenityPanelingWorks": _amenityPanelingWorksController.text,
+      "amenityAluminumWorks": _amenityAluminumWorksController.text,
+      "amenityAluminumHandrails": _amenityAluminumHandrailsController.text,
+      "amenityLumberRoom": _amenityLumberRoomController.text,
+      "amenityToiletRoom": _amenityToiletRoomController.text,
+      "amenityWaterTankSump": _amenityWaterTankSumpController.text,
+      "amenityGardening": _amenityGardeningController.text,
+      "amenityAnyOther": _amenityAnyOtherController.text,
+      // Water supply arrangements
+      "amenityOpenWell": _amenityOpenWellController.text,
+      "amenityDeepBore": _amenityDeepBoreController.text,
+      "amenityHandPump": _amenityHandPumpController.text,
+      "amenityCorporationTap": _amenityCorporationTapController.text,
+      "amenityUndergroundSump": _amenityUndergroundSumpController.text,
+      "amenityOverheadWaterTank": _amenityOverheadWaterTankController.text,
+      // Drainage arrangements
+      "amenitySepticTank": _amenitySepticTankController.text,
+      "amenityUndergroundSewerage": _amenityUndergroundSewerageController.text,
+      // Compound wall etc
+      "amenityCompoundWall": _amenityCompoundWallController.text,
+      "amenityCompoundWallHeight": _amenityCompoundWallHeightController.text,
+      "amenityCompoundWallLength": _amenityCompoundWallLengthController.text,
+      "amenityCompoundWallType": _amenityCompoundWallTypeController.text,
+      "amenityPavements": _amenityPavementsController.text,
+      "amenitySteelGateRm": _amenitySteelGateRmController.text,
+      // Deposits
+      "amenityEBDeposits": _amenityEBDepositsController.text,
+      "amenityWaterDeposits": _amenityWaterDepositsController.text,
+      "amenityDrainageDeposits": _amenityDrainageDepositsController.text,
+      // Electrical fittings
+      "amenityWiringType": _amenityWiringTypeController.text,
+      "amenityFittingsClass": _amenityFittingsClassController.text,
+      "amenityLightPoints": _amenityLightPointsController.text,
+      "amenityFanPoints": _amenityFanPointsController.text,
+      "amenityPlugPoints": _amenityPlugPointsController.text,
+      "amenityElectricalOther": _amenityElectricalOtherController.text,
+      // Plumbing installation
+      "amenityNoOfClosets": _amenityNoOfClosetsController.text,
+      "amenityClosetsType": _amenityClosetsTypeController.text,
+      "amenityNoOfWashBasins": _amenityNoOfWashBasinsController.text,
+      "amenityNoOfBathTubs": _amenityNoOfBathTubsController.text,
+      "amenityWaterMeterTaps": _amenityWaterMeterTapsController.text,
+      "amenityPlumbingOtherFixtures": _amenityPlumbingOtherFixturesController.text,
+      // Any other & Total
+      "amenityAnyOtherItem": _amenityAnyOtherItemController.text,
+      "amenityTotal": _amenityTotalController.text,
+      // Abstract fields
+      "absLandGlr": absLandGlrController.text,
+      "absLandPmr": absLandPmrController.text,
+      "absBuildingGlr": absBuildingGlrController.text,
+      "absBuildingPmr": absBuildingPmrController.text,
+      "absExtraGlr": absExtraGlrController.text,
+      "absExtraPmr": absExtraPmrController.text,
+      "absAmenitiesGlr": absAmenitiesGlrController.text,
+      "absAmenitiesPmr": absAmenitiesPmrController.text,
+      "absTotalGlr": absTotalGlrController.text,
+      "absTotalPmr": absTotalPmrController.text,
+      "absSayGlr": absSayGlrController.text,
+      "absSayPmr": absSayPmrController.text,
+      // Commercial/Industrial
+      "commercialArea": _commercialAreaController.text,
+      "industrialArea": _industrialAreaController.text,
+      // Lat/Long
+      "nearByLat": _nearByLat.text,
+      "nearByLong": _nearByLong.text,
+    });
+
+    // Handle images
+    List<Map<String, String>> imageMetadata = [];
+    for (int i = 0; i < _imagesWithLocation.length; i++) {
+      final image = _imagesWithLocation[i];
+      final imageBytes = image.imageBytes is File
+          ? await (image.imageBytes as File).readAsBytes()
+          : image.imageBytes;
+
+      request.files.add(http.MultipartFile.fromBytes(
+        'images',
+        imageBytes,
+        filename: 'property_${_ownerNameController.text}_$i.jpg',
+      ));
+
+      imageMetadata.add({
+        "latitude": image.latitude.toString(),
+        "longitude": image.longitude.toString(),
+      });
+
+      request.fields['images'] = jsonEncode(imageMetadata);
+    }
+
+    final response = await request.send();
+    debugPrint("send req to back");
+
+    if (context.mounted) Navigator.of(context).pop();
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Data saved successfully!')));
+      }
+      // Add any additional save actions here if needed
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Upload failed: ${response.reasonPhrase}')));
+      }
+    }
+  } catch (e) {
+    if (context.mounted) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+    }
+  }
+}
+
+
+
+
+
   @override
   void dispose() {
     // Dispose all controllers
@@ -2818,6 +3137,7 @@ if (_imagesWithLocation.isNotEmpty) ...[
     );
   }).toList(),
 ],
+        
    
               // REMOVED old image and location widgets as they are now replaced by the new section above
               
@@ -2854,15 +3174,25 @@ if (_imagesWithLocation.isNotEmpty) ...[
                       const Positioned(
                         child: CircularProgressIndicator(),
                       ),
+                    
                   ],
                 ),
               ),
               const SizedBox(height: 24),
+              
             ],
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+                  icon: const Icon(Icons.save),
+                  label: const Text('Save data'),
+                  onPressed: () {
+                    _saveData();
+                  }
+            ),
     );
+    
   }
   
 Future<void> pickImages() async {
