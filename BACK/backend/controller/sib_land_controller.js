@@ -24,8 +24,8 @@ export const savelandData = async(req,res)=>{
         
 
         const imageData = {
-          fileName: file.filename,
-          filePath: file.path
+          fileName: req.uploadedFiles[i].fileName,
+          fileID:req.uploadedFiles[i].driveId
         };
 
         landData.images.push(imageData);
@@ -40,8 +40,7 @@ export const savelandData = async(req,res)=>{
         const newlandData = await SIBValuationLand.findOneAndUpdate(
           { refId: landData.refId },
           { 
-              $set: { ...landData, images: undefined }, // Set all other fields except images
-              $push: { images: { $each: landData.images } } // Append new images to array
+              $set: landData
           },
           {
               upsert: true,

@@ -9,7 +9,7 @@ import {
   findNearbyValuations,
   getValuationsByDate,
   getValuationsByPropertyType
-} from '../controllers/sib_vacantland_controller.js';
+} from '../controller/sib_vacantland_controller.js';
 import multer from 'multer';
 
 const router = express.Router();
