@@ -392,6 +392,62 @@ class _ValuationFormScreenState extends State<ValuationFormScreen> {
     }
   }
 
+  Future<String> _getAccessToken() async {
+    final response = await http.post(
+      Uri.parse('https://oauth2.googleapis.com/token'),
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: {
+        'client_id': clientId,
+        'client_secret': clientSecret,
+        'refresh_token': refreshToken,
+        'grant_type': 'refresh_token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)['access_token'] as String;
+    } else {
+      throw Exception('Failed to refresh access token');
+    }
+  }
+
+  String _getMimeTypeFromExtension(String extension) {
+    switch (extension) {
+      case '.jpg':
+      case '.jpeg':
+        return 'image/jpeg';
+      case '.png':
+        return 'image/png';
+      case '.gif':
+        return 'image/gif';
+      case '.webp':
+        return 'image/webp';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
+  Future<Uint8List> fetchImageFromDrive(String fileId) async {
+    try {
+      // Get access token using refresh token
+      final accessToken = await _getAccessToken();
+
+      final response = await http.get(
+        Uri.parse(
+            'https://www.googleapis.com/drive/v3/files/$fileId?alt=media'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
+      } else {
+        throw Exception('Failed to load image: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching image from Drive: $e');
+    }
+  }
+
   OccupantStatus _parseOccupantStatus(String? status) {
     if (status == null) return OccupantStatus.Occupied;
     switch (status.toLowerCase()) {

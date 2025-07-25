@@ -52,6 +52,10 @@ export const savePVR1Data = async(req,res)=>{
           { fileNo: pvr1Data.fileNo },
           { 
               $set: pvr1Data
+<<<<<<< HEAD
+=======
+              
+>>>>>>> ddf1111d69185a50a56bde3a891e828c23c4dc86
           },
           {
               upsert: true,

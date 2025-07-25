@@ -13,9 +13,13 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
+<<<<<<< HEAD
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
+=======
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
+>>>>>>> c4d31b49a23a8723e619e903aeb9061705fd6a3b
     });
   }
 
@@ -27,7 +31,11 @@ class _SplashScreenState extends State<SplashScreen> {
         child: TweenAnimationBuilder(
           tween: Tween<double>(begin: 0.0, end: 1.0),
           duration: const Duration(seconds: 2),
+<<<<<<< HEAD
+          curve: Curves.easeOutBack,  // Smooth scaling effect
+=======
           curve: Curves.easeOutBack,
+>>>>>>> c4d31b49a23a8723e619e903aeb9061705fd6a3b
           builder: (context, scale, child) {
             return Transform.scale(
               scale: scale,
@@ -48,10 +56,29 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 ),
               ),
+<<<<<<< HEAD
+              const SizedBox(height: 20),
+              Text(
+                'Valuation App',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue.shade900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Simplifying Property Valuations',
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 30),
+              const CircularProgressIndicator(color: Colors.blue),
+=======
               const SizedBox(height: 30),
               const CircularProgressIndicator(
                 color: Color(0xFFFFD700), // Gold color
               ),
+>>>>>>> c4d31b49a23a8723e619e903aeb9061705fd6a3b
             ],
           ),
         ),

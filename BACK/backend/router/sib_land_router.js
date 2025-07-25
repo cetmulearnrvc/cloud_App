@@ -2,6 +2,7 @@ import express from "express";
 const land_router=express.Router();
 import uploadMiddleware from "../multer/upload.js";
 import { getNearbySIB, savelandData, searchByDate } from "../controller/sib_land_controller.js";
+import uploadMiddleware from "../multer/upload.js";
 
 // import { searchByDate, searchByFileNo } from "../controller/search.controller.js";
 
