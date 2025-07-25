@@ -14,6 +14,16 @@ import 'package:geolocator/geolocator.dart'; // Import geolocator package
 // Import geolocator package
 import 'package:http/http.dart' as http;
 import 'config.dart';
+<<<<<<< HEAD
+import 'package:login_screen/screens/driveAPIconfig.dart';
+import 'package:path/path.dart' as path;
+=======
+import 'package:path/path.dart' as path;
+
+const String _clientId = '603661160338-m2ciia3c0rugg3pt70gk3to7ju2dtmh8.apps.googleusercontent.com';
+const String _clientSecret = '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';
+const String _refreshToken = '1//0goJabaIcbqcPCgYIARAAGBASNwF-L9IrFO5bNvkEQ0t38TqwuQdhL636eX6AnaiNUkbjeruIMQ38Wl26UXcI6gZR7qHG6I-GcSA';
+>>>>>>> ddf1111d69185a50a56bde3a891e828c23c4dc86
 
 void main() {
   runApp(const MyApp());
@@ -51,7 +61,8 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
     super.initState();
     if (widget.propertyData != null) {
       // Use the passed data to initialize your form only if it exists
-      debugPrint('Received property data: ${widget.propertyData}');
+      /* debugPrint('Received property data: ${widget.propertyData}'); */
+      debugPrint('Received property data');
       // Example:
       // _fileNoController.text = widget.propertyData!['fileNo'].toString();
     } else {
@@ -951,26 +962,123 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
     }
   }
 
-  Future<Uint8List> fetchImage(String imageUrl) async {
-    try {
-      debugPrint("Attempting to fetch image from: $imageUrl");
-      final response = await http.get(Uri.parse(imageUrl));
+<<<<<<< HEAD
+  Future<String> _getAccessToken() async {
+    final response = await http.post(
+      Uri.parse('https://oauth2.googleapis.com/token'),
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: {
+        'client_id': clientId,
+        'client_secret': clientSecret,
+        'refresh_token': refreshToken,
+        'grant_type': 'refresh_token',
+      },
+    );
 
-      debugPrint("Response status: ${response.statusCode}");
-      debugPrint("Response headers: ${response.headers}");
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)['access_token'] as String;
+    } else {
+      throw Exception('Failed to refresh access token');
+    }
+  }
+
+  String _getMimeTypeFromExtension(String extension) {
+    switch (extension) {
+      case '.jpg':
+      case '.jpeg':
+        return 'image/jpeg';
+      case '.png':
+        return 'image/png';
+      case '.gif':
+        return 'image/gif';
+      case '.webp':
+        return 'image/webp';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
+  Future<Uint8List> fetchImageFromDrive(String fileId) async {
+    try {
+      // Get access token using refresh token
+      final accessToken = await _getAccessToken();
+
+      final response = await http.get(
+        Uri.parse(
+            'https://www.googleapis.com/drive/v3/files/$fileId?alt=media'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
 
       if (response.statusCode == 200) {
-        debugPrint(
-            "Successfully fetched image (bytes length: ${response.bodyBytes.length})");
         return response.bodyBytes;
       } else {
         throw Exception('Failed to load image: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint("Error details: $e");
-      throw Exception('Error fetching image: $e');
+      throw Exception('Error fetching image from Drive: $e');
     }
+=======
+  
+
+  Future<String> _getAccessToken() async {
+  final response = await http.post(
+    Uri.parse('https://oauth2.googleapis.com/token'),
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: {
+      'client_id': _clientId,
+      'client_secret': _clientSecret,
+      'refresh_token': _refreshToken,
+      'grant_type': 'refresh_token',
+    },
+  );
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body)['access_token'] as String;
+  } else {
+    throw Exception('Failed to refresh access token');
+>>>>>>> ddf1111d69185a50a56bde3a891e828c23c4dc86
   }
+}
+
+
+// Helper function to determine MIME type from extension
+String _getMimeTypeFromExtension(String extension) {
+  switch (extension) {
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.png':
+      return 'image/png';
+    case '.gif':
+      return 'image/gif';
+    case '.webp':
+      return 'image/webp';
+    default:
+      return 'application/octet-stream';
+  }
+}
+
+  Future<Uint8List> fetchImageFromDrive(String fileId) async {
+  try {
+    // Get access token using refresh token
+    final accessToken = await _getAccessToken();
+    
+    final response = await http.get(
+      Uri.parse('https://www.googleapis.com/drive/v3/files/$fileId?alt=media'),
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+
+    if (response.statusCode == 200) {
+      return response.bodyBytes;
+    } else {
+      throw Exception('Failed to load image: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error fetching image from Drive: $e');
+  }
+}
+
+
 
   void _initializeFormWithPropertyData() async {
     if (widget.propertyData != null) {
@@ -1500,25 +1608,37 @@ class _PdfGeneratorScreenState extends State<PdfGeneratorScreen> {
 
           for (var imgData in imagesData) {
             try {
-              String imageUrl = '$url4${imgData['fileName']}';
-              debugPrint("Fetching image from: $imageUrl");
+              // Get the file ID from your data (assuming it's stored as 'fileId')
+              String fileID = imgData['fileID'];
+              String fileName = imgData['fileName'];
+              debugPrint("Fetching image from Drive with ID: $fileID");
 
-              Uint8List imageBytes = await fetchImage(imageUrl);
+              // Fetch image bytes from Google Drive
+              Uint8List imageBytes = await fetchImageFromDrive(fileID);
+
+              // Get file extension from original filename
+              String extension = path.extension(fileName).toLowerCase();
+              if (extension.isEmpty) extension = '.jpg'; // default fallback
 
               _images.add(
                 XFile.fromData(
                   imageBytes,
-                  name: '$url4${imgData['fileName']}.jpg', // Optional filename
-                  mimeType: 'image/jpeg', // Optional MIME type
+                  name: fileName, // Use the original filename
+<<<<<<< HEAD
+                  mimeType:
+                      _getMimeTypeFromExtension(extension), // Detect MIME type
+=======
+                  mimeType: _getMimeTypeFromExtension(extension), // Detect MIME type
+>>>>>>> ddf1111d69185a50a56bde3a891e828c23c4dc86
                 ),
               );
             } catch (e) {
-              debugPrint('Error loading image: $e');
+              debugPrint('Error loading image from Drive: $e');
             }
           }
         }
       } catch (e) {
-        debugPrint('Error initializing images: $e');
+        debugPrint('Error in fetchImages: $e');
       }
 
       if (mounted) setState(() {});

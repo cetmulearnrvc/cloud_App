@@ -15,6 +15,16 @@ import 'valuation_data_model_pvr1.dart';
 import 'pdf_generator_pvr1.dart';
 import 'package:http/http.dart' as http;
 import 'config.dart';
+<<<<<<< HEAD
+import 'package:login_screen/screens/driveAPIconfig.dart';
+import 'package:path/path.dart' as path;
+=======
+<<<<<<< HEAD
+import 'package:login_screen/screens/driveAPIconfig.dart';
+import 'package:path/path.dart' as path;
+=======
+>>>>>>> c4d31b49a23a8723e619e903aeb9061705fd6a3b
+>>>>>>> ddf1111d69185a50a56bde3a891e828c23c4dc86
 // ignore: depend_on_referenced_packages
 
 class ValuationFormScreenPVR1 extends StatefulWidget {
@@ -166,63 +176,64 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
   bool _isNotValidState = false;
 
   Future<void> _saveToNearbyCollection() async {
-  try {
-    // --- STEP 1: Find the first image with valid coordinates ---
-    ValuationImage? firstImageWithLocation;
     try {
-      // Use .firstWhere to find the first image that satisfies the condition.
-      firstImageWithLocation = _valuationImages.firstWhere(
-        (img) => img.latitude.isNotEmpty && img.longitude.isNotEmpty,
+      // --- STEP 1: Find the first image with valid coordinates ---
+      ValuationImage? firstImageWithLocation;
+      try {
+        // Use .firstWhere to find the first image that satisfies the condition.
+        firstImageWithLocation = _valuationImages.firstWhere(
+          (img) => img.latitude.isNotEmpty && img.longitude.isNotEmpty,
+        );
+      } catch (e) {
+        // .firstWhere throws an error if no element is found. We catch it here.
+        firstImageWithLocation = null;
+      }
+
+      // --- STEP 2: Handle the case where no image has location data ---
+      if (firstImageWithLocation == null) {
+        debugPrint(
+            'No image with location data found. Skipping save to nearby collection.');
+        return; // Exit the function early.
+      }
+
+      final ownerName = _ownerNameCtrl.text ?? '[is null]';
+      final marketValue = _landValueMarketCtrl.text ?? '[is null]';
+
+      debugPrint('------------------------------------------');
+      debugPrint('DEBUGGING SAVE TO NEARBY COLLECTION:');
+      debugPrint('Owner Name from Controller: "$ownerName"');
+      debugPrint('Market Value from Controller: "$marketValue"');
+      debugPrint('------------------------------------------');
+      // --- STEP 3: Build the payload with the correct data ---
+      final dataToSave = {
+        // Use the coordinates from the image we found
+        'refNo': _fileNoCtrl.text ?? '',
+        'latitude': firstImageWithLocation.latitude,
+        'longitude': firstImageWithLocation.longitude,
+
+        'landValue': marketValue, // Use the variable we just created
+        'nameOfOwner': ownerName,
+        'bankName': 'LIC (PVR - 1)',
+      };
+
+      // --- STEP 4: Send the data to your dedicated server endpoint ---
+      final response = await http.post(
+        Uri.parse(url5), // Use your dedicated URL for saving this data
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(dataToSave),
       );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        debugPrint('Successfully saved data to nearby collection.');
+      } else {
+        debugPrint(
+            'Failed to save to nearby collection: ${response.statusCode}');
+        debugPrint('Response body: ${response.body}');
+      }
     } catch (e) {
-      // .firstWhere throws an error if no element is found. We catch it here.
-      firstImageWithLocation = null;
+      debugPrint('Error in _saveToNearbyCollection: $e');
     }
-
-    // --- STEP 2: Handle the case where no image has location data ---
-    if (firstImageWithLocation == null) {
-      debugPrint('No image with location data found. Skipping save to nearby collection.');
-      return; // Exit the function early.
-    }
-
-    final ownerName = _ownerNameCtrl.text ?? '[is null]';
-    final marketValue = _landValueMarketCtrl.text ?? '[is null]';
-
-    debugPrint('------------------------------------------');
-    debugPrint('DEBUGGING SAVE TO NEARBY COLLECTION:');
-    debugPrint('Owner Name from Controller: "$ownerName"');
-    debugPrint('Market Value from Controller: "$marketValue"');
-    debugPrint('------------------------------------------');
-    // --- STEP 3: Build the payload with the correct data ---
-    final dataToSave = {
-      // Use the coordinates from the image we found
-       'refNo': _fileNoCtrl.text ?? '',
-      'latitude': firstImageWithLocation.latitude,
-      'longitude': firstImageWithLocation.longitude,
-      
-      'landValue': marketValue, // Use the variable we just created
-      'nameOfOwner': ownerName,
-      'bankName': 'LIC (PVR - 1)',
-    };
-    
-    // --- STEP 4: Send the data to your dedicated server endpoint ---
-    final response = await http.post(
-      Uri.parse(url5), // Use your dedicated URL for saving this data
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(dataToSave),
-    );
-
-    if (response.statusCode == 201 || response.statusCode == 200) {
-      debugPrint('Successfully saved data to nearby collection.');
-    } else {
-      debugPrint('Failed to save to nearby collection: ${response.statusCode}');
-      debugPrint('Response body: ${response.body}');
-    }
-  } catch (e) {
-    debugPrint('Error in _saveToNearbyCollection: $e');
   }
-}
-
 
   Future<void> _saveData() async {
     try {
@@ -251,8 +262,6 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
         barrierDismissible: false,
         builder: (context) => const Center(child: CircularProgressIndicator()),
       );
-
-      
 
       var request = http.MultipartRequest('POST', Uri.parse(url));
 
@@ -480,26 +489,116 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
     }
   }
 
-  Future<Uint8List> fetchImage(String imageUrl) async {
-    try {
-      debugPrint("Attempting to fetch image from: $imageUrl");
-      final response = await http.get(Uri.parse(imageUrl));
-
-      debugPrint("Response status: ${response.statusCode}");
-      debugPrint("Response headers: ${response.headers}");
+  Future<String> _getAccessToken() async {
+<<<<<<< HEAD
+      final response = await http.post(
+        Uri.parse('https://oauth2.googleapis.com/token'),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {
+          'client_id': clientId,
+          'client_secret': clientSecret,
+          'refresh_token': refreshToken,
+          'grant_type': 'refresh_token',
+        },
+      );
 
       if (response.statusCode == 200) {
-        debugPrint(
-            "Successfully fetched image (bytes length: ${response.bodyBytes.length})");
-        return response.bodyBytes;
-      } else {
-        throw Exception('Failed to load image: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint("Error details: $e");
-      throw Exception('Error fetching image: $e');
+        return jsonDecode(response.body)['access_token'] as String;
+=======
+    final response = await http.post(
+      Uri.parse('https://oauth2.googleapis.com/token'),
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: {
+        'client_id': clientId,
+        'client_secret': clientSecret,
+        'refresh_token': refreshToken,
+        'grant_type': 'refresh_token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)['access_token'] as String;
+    } else {
+      throw Exception('Failed to refresh access token');
     }
   }
+
+  String _getMimeTypeFromExtension(String extension) {
+    switch (extension) {
+      case '.jpg':
+      case '.jpeg':
+        return 'image/jpeg';
+      case '.png':
+        return 'image/png';
+      case '.gif':
+        return 'image/gif';
+      case '.webp':
+        return 'image/webp';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
+  Future<Uint8List> fetchImageFromDrive(String fileId) async {
+    try {
+      // Get access token using refresh token
+      final accessToken = await _getAccessToken();
+
+      final response = await http.get(
+        Uri.parse(
+            'https://www.googleapis.com/drive/v3/files/$fileId?alt=media'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
+>>>>>>> ddf1111d69185a50a56bde3a891e828c23c4dc86
+      } else {
+        throw Exception('Failed to refresh access token');
+      }
+    }
+
+    String _getMimeTypeFromExtension(String extension) {
+      switch (extension) {
+        case '.jpg':
+        case '.jpeg':
+          return 'image/jpeg';
+        case '.png':
+          return 'image/png';
+        case '.gif':
+          return 'image/gif';
+        case '.webp':
+          return 'image/webp';
+        default:
+          return 'application/octet-stream';
+      }
+    }
+
+    Future<Uint8List> fetchImageFromDrive(String fileId) async {
+      try {
+        // Get access token using refresh token
+        final accessToken = await _getAccessToken();
+
+        final response = await http.get(
+          Uri.parse(
+              'https://www.googleapis.com/drive/v3/files/$fileId?alt=media'),
+          headers: {'Authorization': 'Bearer $accessToken'},
+        );
+
+        if (response.statusCode == 200) {
+          return response.bodyBytes;
+        } else {
+          throw Exception('Failed to load image: ${response.statusCode}');
+        }
+      } catch (e) {
+        throw Exception('Error fetching image from Drive: $e');
+      }
+<<<<<<< HEAD
+=======
+    } catch (e) {
+      throw Exception('Error fetching image from Drive: $e');
+>>>>>>> ddf1111d69185a50a56bde3a891e828c23c4dc86
+    }
 
   void _initializeFormWithPropertyData() async {
     if (widget.propertyData != null) {
@@ -708,17 +807,22 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
           data['annexBuildingAge']?.toString() ?? _annexBuildingAgeCtrl.text;
 
       try {
-        // Check if the property data contains image information
         if (data['images'] != null && data['images'] is List) {
           final List<dynamic> imagesData = data['images'];
 
           for (var imgData in imagesData) {
             try {
-              // Construct the image URL based on your server configuration
-              String imageUrl = '$url4${imgData['fileName']}';
-              debugPrint("Fetching image from: $imageUrl");
+              // Get the file ID from your data (assuming it's stored as 'fileId')
+              String fileID = imgData['fileID'];
+              String fileName = imgData['fileName'];
+              debugPrint("Fetching image from Drive with ID: $fileID");
 
-              Uint8List imageBytes = await fetchImage(imageUrl);
+              // Fetch image bytes from Google Drive
+              Uint8List imageBytes = await fetchImageFromDrive(fileID);
+
+              // Get file extension from original filename
+              String extension = path.extension(fileName).toLowerCase();
+              if (extension.isEmpty) extension = '.jpg'; // default fallback
 
               _valuationImages.add(ValuationImage(
                 imageFile: imageBytes,
@@ -726,14 +830,13 @@ class _ValuationFormScreenPVR1State extends State<ValuationFormScreenPVR1> {
                 longitude: imgData['longitude']?.toString() ?? '',
               ));
             } catch (e) {
-              debugPrint('Error loading image: $e');
+              debugPrint('Error loading image from Drive: $e');
             }
           }
         }
       } catch (e) {
-        debugPrint('Error initializing images: $e');
+        debugPrint('Error in fetchImages: $e');
       }
-
       if (mounted) setState(() {});
 
       // Date fields

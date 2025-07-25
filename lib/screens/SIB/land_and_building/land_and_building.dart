@@ -15,6 +15,8 @@ import 'dart:io'; // For File class (used conditionally for non-web)
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'config.dart';
+import 'package:login_screen/screens/driveAPIconfig.dart';
+import 'package:path/path.dart' as path;
 
 void main() {
   runApp(const MyApp());
@@ -667,26 +669,118 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
     }
   }
 
-  Future<Uint8List> fetchImage(String imageUrl) async {
-    try {
-      debugPrint("Attempting to fetch image from: $imageUrl");
-      final response = await http.get(Uri.parse(imageUrl));
+  Future<String> _getAccessToken() async {
+    final response = await http.post(
+      Uri.parse('https://oauth2.googleapis.com/token'),
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: {
+        'client_id': clientId,
+        'client_secret': clientSecret,
+        'refresh_token': refreshToken,
+        'grant_type': 'refresh_token',
+      },
+    );
 
-      debugPrint("Response status: ${response.statusCode}");
-      debugPrint("Response headers: ${response.headers}");
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)['access_token'] as String;
+    } else {
+      throw Exception('Failed to refresh access token');
+    }
+}
+
+String _getMimeTypeFromExtension(String extension) {
+    switch (extension) {
+      case '.jpg':
+      case '.jpeg':
+        return 'image/jpeg';
+      case '.png':
+        return 'image/png';
+      case '.gif':
+        return 'image/gif';
+      case '.webp':
+        return 'image/webp';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
+<<<<<<< HEAD
+  Future<String> _getAccessToken() async {
+    final response = await http.post(
+      Uri.parse('https://oauth2.googleapis.com/token'),
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: {
+        'client_id': clientId,
+        'client_secret': clientSecret,
+        'refresh_token': refreshToken,
+        'grant_type': 'refresh_token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)['access_token'] as String;
+    } else {
+      throw Exception('Failed to refresh access token');
+    }
+  }
+
+  String _getMimeTypeFromExtension(String extension) {
+    switch (extension) {
+      case '.jpg':
+      case '.jpeg':
+        return 'image/jpeg';
+      case '.png':
+        return 'image/png';
+      case '.gif':
+        return 'image/gif';
+      case '.webp':
+        return 'image/webp';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
+  Future<Uint8List> fetchImageFromDrive(String fileId) async {
+    try {
+      // Get access token using refresh token
+      final accessToken = await _getAccessToken();
+
+      final response = await http.get(
+        Uri.parse(
+            'https://www.googleapis.com/drive/v3/files/$fileId?alt=media'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
 
       if (response.statusCode == 200) {
-        debugPrint(
-            "Successfully fetched image (bytes length: ${response.bodyBytes.length})");
         return response.bodyBytes;
       } else {
         throw Exception('Failed to load image: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint("Error details: $e");
-      throw Exception('Error fetching image: $e');
+      throw Exception('Error fetching image from Drive: $e');
     }
   }
+=======
+  Future<Uint8List> fetchImageFromDrive(String fileId) async {
+  try {
+    // Get access token using refresh token
+    final accessToken = await _getAccessToken();
+    
+    final response = await http.get(
+      Uri.parse('https://www.googleapis.com/drive/v3/files/$fileId?alt=media'),
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+
+    if (response.statusCode == 200) {
+      return response.bodyBytes;
+    } else {
+      throw Exception('Failed to load image: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error fetching image from Drive: $e');
+  }
+}
+>>>>>>> ddf1111d69185a50a56bde3a891e828c23c4dc86
 
   void _initializeFormWithPropertyData() async {
     if (widget.propertyData != null) {
@@ -964,42 +1058,74 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
       _vcCaveatsLimitationsController.text =
           data['vcCaveatsLimitations']?.toString() ?? '';
 
-      // Load images if available
+      
       try {
         if (data['images'] != null && data['images'] is List) {
           final List<dynamic> imagesData = data['images'];
-          _images.clear(); // Clear any existing images
+<<<<<<< HEAD
+=======
 
           for (var imgData in imagesData) {
             try {
-              String imageUrl = '$url4${imgData['fileName']}';
-              debugPrint("Fetching image from: $imageUrl");
+              // Get the file ID from your data (assuming it's stored as 'fileId')
+              String fileID = imgData['fileID'];
+              String fileName = imgData['fileName'];
+              debugPrint("Fetching image from Drive with ID: $fileID");
 
-              dynamic imageData = await fetchImage(imageUrl);
+              // Fetch image bytes from Google Drive
+              Uint8List imageBytes = await fetchImageFromDrive(fileID);
 
-              // Handle different types of image data
-              if (imageData is Uint8List) {
-                // If we get raw bytes, store them directly
-                _images.add(imageData);
-              } else if (imageData is File) {
-                // If we get a File, read its bytes
-                final bytes = await imageData.readAsBytes();
-                _images.add(bytes);
-              } else if (imageData is XFile) {
-                // If we get an XFile, read its bytes
-                final bytes = await imageData.readAsBytes();
-                _images.add(bytes);
-              } else {
-                debugPrint('Unsupported image type: ${imageData.runtimeType}');
-              }
+              // Get file extension from original filename
+              String extension = path.extension(fileName).toLowerCase();
+              if (extension.isEmpty) extension = '.jpg'; // default fallback
+
+              _images.add(imageBytes);
+
             } catch (e) {
-              debugPrint('Error loading image: $e');
+              debugPrint('Error loading image from Drive: $e');
             }
           }
         }
       } catch (e) {
-        debugPrint('Error initializing images: $e');
+        debugPrint('Error in fetchImages: $e');
       }
+
+
+      // Load images if available
+      /* try {
+        if (data['images'] != null && data['images'] is List) {
+          final List<dynamic> imagesData = data['images'];
+          _images.clear(); // Clear any existing images
+>>>>>>> ddf1111d69185a50a56bde3a891e828c23c4dc86
+
+          for (var imgData in imagesData) {
+            try {
+              // Get the file ID from your data (assuming it's stored as 'fileId')
+              String fileID = imgData['fileID'];
+              String fileName = imgData['fileName'];
+              debugPrint("Fetching image from Drive with ID: $fileID");
+
+              // Fetch image bytes from Google Drive
+              Uint8List imageBytes = await fetchImageFromDrive(fileID);
+
+              // Get file extension from original filename
+              String extension = path.extension(fileName).toLowerCase();
+              if (extension.isEmpty) extension = '.jpg'; // default fallback
+
+              _images.add(imageBytes);
+            } catch (e) {
+              debugPrint('Error loading image from Drive: $e');
+            }
+          }
+        }
+      } catch (e) {
+<<<<<<< HEAD
+        debugPrint('Error in fetchImages: $e');
+      }
+=======
+        debugPrint('Error initializing images: $e');
+      } */
+>>>>>>> ddf1111d69185a50a56bde3a891e828c23c4dc86
 
       if (mounted) setState(() {});
 
@@ -4128,8 +4254,7 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                           children: [
                             Expanded(flex: 2, child: Text('Directions')),
                             Expanded(flex: 1, child: Text(':')),
-                            Expanded(
-                                flex: 3, child: Text('As per Title Deed')),
+                            Expanded(flex: 3, child: Text('As per Title Deed')),
                             Expanded(
                                 flex: 3, child: Text('As per Location Sketch')),
                           ],
@@ -4171,10 +4296,8 @@ class _ValuationFormPageState extends State<ValuationFormPage> {
                         const Row(
                           children: [
                             Expanded(flex: 2, child: Text('Directions')),
-                            Expanded(
-                                flex: 3, child: Text('As per Actuals')),
-                            Expanded(
-                                flex: 3, child: Text('As per Documents')),
+                            Expanded(flex: 3, child: Text('As per Actuals')),
+                            Expanded(flex: 3, child: Text('As per Documents')),
                             Expanded(
                                 flex: 3, child: Text('Adopted area in Sft')),
                           ],
