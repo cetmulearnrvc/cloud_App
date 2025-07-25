@@ -66,7 +66,7 @@ class LoginScreen extends StatelessWidget {
       final value= sharedPrefs.setBool(key_value, true);
 
       Navigator.of(ctx).pushReplacement(MaterialPageRoute(builder: (ctx1){
-        return HomeScreen();
+        return const HomeScreen();
       }));
     } 
     
